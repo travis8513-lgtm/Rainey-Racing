@@ -290,13 +290,16 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
     text-transform: uppercase; font-size: .8rem; padding: 6px 18px; border-radius: 40px; margin-bottom: 16px;
 }
 .performance-tier h3 { color: #fff; font-size: 2.6rem; text-transform: uppercase; letter-spacing: 1px; line-height: 1; }
-.perf-price { font-family: 'Bahnschrift','Arial Narrow','Segoe UI',sans-serif; font-size: 2.4rem; font-weight: 800; color: var(--yellow); margin: 8px 0 16px; line-height: 1; }
-.perf-desc { color: var(--muted); max-width: 660px; margin: 0 auto 24px; font-size: 1.1rem; }
-.perf-features { list-style: none; max-width: 620px; margin: 0 auto 28px; text-align: left; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 10px 28px; }
-.perf-features li { color: var(--text); padding: 4px 0 4px 26px; position: relative; }
-.perf-features li::before { content: '✓'; position: absolute; left: 0; color: var(--yellow); font-weight: 800; }
-.perf-features li.perf-lead { grid-column: 1 / -1; color: var(--yellow); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding-left: 0; }
-.perf-features li.perf-lead::before { content: ''; }
+.perf-desc { color: var(--muted); max-width: 700px; margin: 0 auto 30px; font-size: 1.1rem; }
+.perf-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 18px; margin: 0 auto 30px; text-align: left; }
+.perf-card { background: var(--carbon); border: 1px solid var(--line); border-radius: 12px; padding: 24px 22px; transition: transform .3s, border-color .3s; }
+.perf-card:hover { transform: translateY(-6px); border-color: var(--yellow); }
+.perf-icon { font-size: 2rem; margin-bottom: 8px; }
+.perf-card h4 { color: #fff; text-transform: uppercase; letter-spacing: 1px; font-size: 1.2rem; margin-bottom: 8px; }
+.perf-amt { font-family: 'Bahnschrift','Arial Narrow','Segoe UI',sans-serif; font-size: 2.1rem; font-weight: 800; color: var(--yellow); line-height: 1; margin-bottom: 10px; }
+.perf-amt span { display: block; font-size: .72rem; color: var(--muted); font-weight: 500; letter-spacing: 1px; text-transform: uppercase; margin-top: 3px; }
+.perf-card p { color: var(--muted); font-size: .95rem; }
+.perf-note { color: var(--muted); font-size: .9rem; margin: -12px auto 26px; max-width: 640px; }
 
 /* Support cards */
 .support-card { background: var(--carbon-2); border: 1px solid var(--line); border-left: 4px solid var(--gold); border-radius: 10px; padding: 28px 26px; transition: transform .3s; }
