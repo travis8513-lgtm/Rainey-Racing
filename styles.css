@@ -113,10 +113,10 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
     position: relative; min-height: 92vh; display: flex; flex-direction: column;
     align-items: center; justify-content: center; text-align: center; padding: 90px 20px;
     background:
-        radial-gradient(circle at 72% 18%, rgba(124,58,237,.40), transparent 46%),
-        radial-gradient(circle at 20% 78%, rgba(37,99,235,.32), transparent 46%),
-        radial-gradient(circle at 50% 55%, rgba(255,212,0,.08), transparent 60%),
-        linear-gradient(180deg, #07050f 0%, #17142a 100%);
+        radial-gradient(circle at 72% 18%, rgba(124,58,237,.38), transparent 50%),
+        radial-gradient(circle at 20% 82%, rgba(37,99,235,.30), transparent 50%),
+        linear-gradient(180deg, rgba(7,5,15,.80) 0%, rgba(10,8,20,.90) 100%),
+        url('images/race/rr-17.jpg') center center / cover no-repeat;
     overflow: hidden;
 }
 /* checkered flag strip along the bottom */
@@ -191,6 +191,8 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
 .about-icon { font-size: 2.4rem; margin-bottom: 12px; }
 .about-card h3 { color: var(--gold); font-size: 1.5rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
 .about-card p { color: var(--muted); }
+.about-logo { text-align: center; margin-bottom: 46px; }
+.about-logo img { max-width: 360px; width: 100%; height: auto; border-radius: 14px; box-shadow: 0 12px 34px rgba(0,0,0,.55); border: 1px solid var(--line); }
 
 /* Benefits */
 .benefit-item {
@@ -205,10 +207,12 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
 /* Team */
 .driver-card { background: var(--carbon-2); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; transition: transform .3s, box-shadow .3s; }
 .driver-card:hover { transform: translateY(-8px); box-shadow: 0 18px 40px rgba(0,0,0,.55); }
-.driver-photo { position: relative; height: 260px; display: flex; align-items: flex-end; justify-content: flex-start; }
+.driver-photo { position: relative; height: 280px; display: flex; align-items: flex-end; justify-content: flex-start; overflow: hidden; }
+.driver-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .driver-num {
+    position: relative; z-index: 2;
     font-family: 'Bahnschrift', 'Arial Narrow', 'Segoe UI', sans-serif; font-size: 2.6rem; color: #fff;
-    background: var(--red); padding: 4px 16px; margin: 14px; border-radius: 4px; box-shadow: 0 4px 14px rgba(0,0,0,.4);
+    background: var(--red); padding: 4px 16px; margin: 14px; border-radius: 4px; box-shadow: 0 4px 14px rgba(0,0,0,.5);
 }
 .driver-info { padding: 22px 24px; }
 .driver-info h3 { color: var(--white); font-size: 1.5rem; text-transform: uppercase; }
