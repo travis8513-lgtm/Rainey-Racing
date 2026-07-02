@@ -118,7 +118,43 @@ if (bioClose) bioClose.addEventListener('click', closeBio);
 if (bioModal) bioModal.addEventListener('click', (e) => { if (e.target === bioModal) closeBio(); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeBio(); });
 
-// --- Contact form ---
+// --- Forms (delivered via Formspree) ---
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function showFormMsg(el, message, type) {
+    if (!el) return;
+    el.textContent = message;
+    el.className = 'form-message ' + type;
+    el.style.display = 'block';
+}
+
+async function submitFormspree(form, msgEl, btn, successText) {
+    const original = btn ? btn.textContent : '';
+    if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+    try {
+        const resp = await fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: { 'Accept': 'application/json' }
+        });
+        if (resp.ok) {
+            showFormMsg(msgEl, successText, 'success');
+            form.reset();
+            setTimeout(() => { if (msgEl) msgEl.style.display = 'none'; }, 9000);
+        } else {
+            const j = await resp.json().catch(() => ({}));
+            const err = (j.errors && j.errors.map(e => e.message).join(', ')) ||
+                'Sorry, something went wrong. Please try again, or email us directly.';
+            showFormMsg(msgEl, err, 'error');
+        }
+    } catch (e) {
+        showFormMsg(msgEl, 'Network error — please check your connection and try again.', 'error');
+    } finally {
+        if (btn) { btn.disabled = false; btn.textContent = original; }
+    }
+}
+
+// Sponsor inquiry form
 const sponsorshipForm = document.getElementById('sponsorshipForm');
 const formMessage = document.getElementById('form-message');
 if (sponsorshipForm) {
@@ -126,22 +162,30 @@ if (sponsorshipForm) {
         e.preventDefault();
         const data = Object.fromEntries(new FormData(sponsorshipForm));
         if (!data.name || !data.email || !data['contact-person'] || !data['sponsorship-type'] || !data.message) {
-            showMessage('Please fill in all required fields.', 'error');
-            return;
+            showFormMsg(formMessage, 'Please fill in all required fields.', 'error'); return;
         }
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(data.email)) {
-            showMessage('Please enter a valid email address.', 'error');
-            return;
+            showFormMsg(formMessage, 'Please enter a valid email address.', 'error'); return;
         }
-        console.log('Sponsorship Inquiry:', data);
-        showMessage('🏁 Thank you! Your inquiry is in. We\'ll be in touch soon to talk partnership.', 'success');
-        sponsorshipForm.reset();
-        setTimeout(() => { formMessage.style.display = 'none'; }, 6000);
+        submitFormspree(sponsorshipForm, formMessage, sponsorshipForm.querySelector('button[type="submit"]'),
+            '🏁 Thank you! Your inquiry is in — we\'ll be in touch soon to talk partnership.');
     });
 }
-function showMessage(message, type) {
-    formMessage.textContent = message;
-    formMessage.className = 'form-message ' + type;
-    formMessage.style.display = 'block';
+
+// Merch order form
+const orderForm = document.getElementById('orderForm');
+const orderMessage = document.getElementById('order-message');
+if (orderForm) {
+    orderForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const data = Object.fromEntries(new FormData(orderForm));
+        if (!data.name || !data.email || !data.item || !data.size || !data.quantity) {
+            showFormMsg(orderMessage, 'Please fill in all required fields.', 'error'); return;
+        }
+        if (!emailRegex.test(data.email)) {
+            showFormMsg(orderMessage, 'Please enter a valid email address.', 'error'); return;
+        }
+        submitFormspree(orderForm, orderMessage, orderForm.querySelector('button[type="submit"]'),
+            '🏁 Order received! We\'ll get it made and reach out about payment & pickup or shipping.');
+    });
 }

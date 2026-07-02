@@ -31,6 +31,7 @@
                 <li><a href="#videos">Videos</a></li>
                 <li><a href="#schedule">Schedule</a></li>
                 <li><a href="#gallery">Gallery</a></li>
+                <li><a href="#merch">Merch</a></li>
                 <li><a href="#sponsorship">Packages</a></li>
                 <li><a href="#contact" class="nav-cta">Sponsor Us</a></li>
             </ul>
@@ -409,6 +410,80 @@
         </div>
     </section>
 
+    <!-- Merch / Team Store Section -->
+    <section id="merch" class="section merch">
+        <div class="container">
+            <div class="section-head">
+                <span class="section-kicker">Team Store</span>
+                <h2 class="section-title">Rainey Racing Merch</h2>
+                <p class="section-intro">Rep the team! Everything is <strong>made to order</strong> — we don't keep stock, so your gear is printed fresh just for you. The <strong>Rainey Racing logo is on the back</strong> of every shirt.</p>
+            </div>
+            <div class="merch-grid">
+                <div class="merch-card">
+                    <div class="merch-img photo-slot" data-label="Front Design Coming Soon"></div>
+                    <div class="merch-info">
+                        <h3>Team T-Shirt</h3>
+                        <p class="merch-desc">Front: 10X Travis &amp; 3 Ronnie with the Bubba's Hot Dogs logo. Back: the Rainey Racing logo.</p>
+                        <div class="merch-price">$25 <span>Sizes S–XL · $35 for 2XL &amp; up</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="order-title">Place Your Order</h3>
+            <p class="order-sub">Made to order — fill this out and we'll get your gear made, then reach back out to set up payment and pickup or shipping.</p>
+            <form class="contact-form" id="orderForm" action="https://formspree.io/f/mykqbbvg" method="POST">
+                <input type="hidden" name="_subject" value="New Rainey Racing Merch Order">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="order-name">Your Name *</label>
+                        <input type="text" id="order-name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="order-email">Email *</label>
+                        <input type="email" id="order-email" name="email" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="order-phone">Phone</label>
+                        <input type="tel" id="order-phone" name="phone">
+                    </div>
+                    <div class="form-group">
+                        <label for="order-item">Item *</label>
+                        <select id="order-item" name="item" required>
+                            <option value="">Select item</option>
+                            <option value="Team T-Shirt">Team T-Shirt</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="order-size">Size *</label>
+                        <select id="order-size" name="size" required>
+                            <option value="">Select size</option>
+                            <option value="Small">Small — $25</option>
+                            <option value="Medium">Medium — $25</option>
+                            <option value="Large">Large — $25</option>
+                            <option value="X-Large">X-Large — $25</option>
+                            <option value="2X-Large">2X-Large — $35</option>
+                            <option value="3X-Large">3X-Large — $35</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="order-qty">Quantity *</label>
+                        <input type="number" id="order-qty" name="quantity" min="1" value="1" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="order-notes">Notes / Special Requests</label>
+                    <textarea id="order-notes" name="message" rows="4"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Place Order</button>
+            </form>
+            <div id="order-message" class="form-message"></div>
+        </div>
+    </section>
+
     <!-- Contact Section -->
     <section id="contact" class="section contact">
         <div class="container">
@@ -417,7 +492,8 @@
                 <h2 class="section-title">Get In Touch</h2>
                 <p class="section-intro">Interested in sponsoring Rainey Racing? We'd love to hear from you.</p>
             </div>
-            <form class="contact-form" id="sponsorshipForm">
+            <form class="contact-form" id="sponsorshipForm" action="https://formspree.io/f/mykqbbvg" method="POST">
+                <input type="hidden" name="_subject" value="New Rainey Racing Sponsor Inquiry">
                 <div class="form-row">
                     <div class="form-group">
                         <label for="name">Business Name *</label>
