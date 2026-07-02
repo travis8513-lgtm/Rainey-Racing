@@ -2,15 +2,24 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-    --red: #E10600;          /* racing red */
-    --red-dark: #B00500;
-    --gold: #FFC400;         /* trophy gold */
-    --carbon: #0d0d0f;       /* deep carbon black */
-    --carbon-2: #16161a;     /* panel */
-    --carbon-3: #1f1f26;     /* raised panel */
-    --line: #2a2a33;
-    --text: #f2f2f4;
-    --muted: #a2a2ad;
+    /* Rainey Racing team colors */
+    --purple: #7C3AED;
+    --purple-dark: #6D28D9;
+    --blue: #2563EB;
+    --blue-dark: #1D4ED8;
+    --yellow: #FFD400;
+    --yellow-dark: #E6BE00;
+
+    /* semantic roles (names kept so the rest of the styles just work) */
+    --red: #7C3AED;          /* primary accent  -> purple */
+    --red-dark: #6D28D9;
+    --gold: #FFD400;         /* highlight color -> yellow */
+    --carbon: #0d0b18;       /* deep purple-black background */
+    --carbon-2: #17142a;     /* panel */
+    --carbon-3: #221c3c;     /* raised panel */
+    --line: #2b2547;
+    --text: #f4f2fa;
+    --muted: #a9a3c4;
     --white: #ffffff;
 }
 
@@ -30,11 +39,11 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
 
 /* Dark sections — flat fill, kept lightweight so scrolling stays smooth */
 .section, .stats, .footer { background-color: var(--carbon); }
-.section:nth-of-type(even) { background-color: #101014; }
+.section:nth-of-type(even) { background-color: #120f24; }
 
 /* ===== Top bar ===== */
 .topbar {
-    background: var(--red);
+    background: linear-gradient(90deg, var(--purple), var(--blue));
     color: #fff;
     font-family: 'Bahnschrift', 'Arial Narrow', 'Segoe UI', sans-serif;
     font-weight: 600;
@@ -59,7 +68,7 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
     font-size: 1.6rem; font-weight: 800; letter-spacing: 1px;
     color: var(--white); text-decoration: none; text-transform: uppercase;
 }
-.nav-brand span { color: var(--red); }
+.nav-brand span { color: var(--yellow); }
 .nav-links { display: flex; list-style: none; gap: 1.8rem; align-items: center; }
 .nav-links a {
     color: var(--text); text-decoration: none; font-weight: 600;
@@ -90,8 +99,8 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
     text-decoration: none; padding: 15px 34px; border-radius: 4px;
     transition: transform .2s, box-shadow .2s, background .2s; text-align: center;
 }
-.btn-primary { background: var(--red); color: #fff; box-shadow: 0 6px 18px rgba(225,6,0,.35); }
-.btn-primary:hover { background: var(--red-dark); transform: translateY(-3px); box-shadow: 0 10px 26px rgba(225,6,0,.5); }
+.btn-primary { background: linear-gradient(135deg, var(--blue), var(--purple)); color: #fff; box-shadow: 0 6px 18px rgba(124,58,237,.4); }
+.btn-primary:hover { filter: brightness(1.12); transform: translateY(-3px); box-shadow: 0 10px 26px rgba(124,58,237,.55); }
 .btn-ghost { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,.35); }
 .btn-ghost:hover { border-color: var(--gold); color: var(--gold); transform: translateY(-3px); }
 .btn-outline { background: transparent; color: var(--text); border: 2px solid var(--line); }
@@ -103,9 +112,10 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
     position: relative; min-height: 92vh; display: flex; flex-direction: column;
     align-items: center; justify-content: center; text-align: center; padding: 90px 20px;
     background:
-        radial-gradient(circle at 70% 20%, rgba(225,6,0,.28), transparent 45%),
-        radial-gradient(circle at 20% 80%, rgba(255,196,0,.12), transparent 45%),
-        linear-gradient(180deg, #000 0%, #141419 100%);
+        radial-gradient(circle at 72% 18%, rgba(124,58,237,.40), transparent 46%),
+        radial-gradient(circle at 20% 78%, rgba(37,99,235,.32), transparent 46%),
+        radial-gradient(circle at 50% 55%, rgba(255,212,0,.08), transparent 60%),
+        linear-gradient(180deg, #07050f 0%, #17142a 100%);
     overflow: hidden;
 }
 /* checkered flag strip along the bottom */
@@ -133,7 +143,7 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
     text-transform: uppercase; letter-spacing: 2px;
     text-shadow: 0 6px 30px rgba(0,0,0,.6);
 }
-.hero-title-accent { display: block; color: var(--red); -webkit-text-stroke: 1px rgba(255,255,255,.15); }
+.hero-title-accent { display: block; color: var(--yellow); -webkit-text-stroke: 1px rgba(0,0,0,.14); }
 .hero-sub { font-size: 1.25rem; color: var(--muted); max-width: 620px; margin: 22px auto 34px; }
 .hero-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
 .hero-scroll {
@@ -292,7 +302,7 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
     font-family: inherit; font-size: 1rem; background: var(--carbon); color: var(--text); transition: border-color .25s, box-shadow .25s;
 }
 .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-    outline: none; border-color: var(--red); box-shadow: 0 0 0 3px rgba(225,6,0,.18);
+    outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.25);
 }
 .form-group option { color: #000; }
 .form-message { text-align: center; margin-top: 22px; padding: 15px; border-radius: 6px; display: none; font-weight: 700; }
