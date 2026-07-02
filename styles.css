@@ -54,6 +54,7 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
     text-transform: uppercase;
 }
 .topbar-sep { opacity: 0.55; margin: 0 6px; }
+.topbar-faith { color: var(--yellow); font-weight: 700; }
 
 /* ===== Navigation ===== */
 .navbar {
