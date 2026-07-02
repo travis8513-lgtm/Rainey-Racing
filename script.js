@@ -48,7 +48,7 @@ function animateCount(el) {
 
 // --- Scroll reveal + trigger counters ---
 const revealEls = document.querySelectorAll(
-    '.about-card, .benefit-item, .driver-card, .video-card, .gallery-item, .package-card, .support-card, .sponsor-logo-slot, .section-head'
+    '.about-card, .benefit-item, .driver-card, .video-card, .gallery-item, .package-card, .support-card, .section-head'
 );
 revealEls.forEach(el => el.classList.add('reveal'));
 
