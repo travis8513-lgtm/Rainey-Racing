@@ -3,203 +3,368 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rainey Racing - Driven to Win. Built to Represent.</title>
+    <meta name="description" content="Rainey Racing — championship dirt go-kart racing team. Partner with us for high-visibility sponsorship at the track and across our racing community.">
+    <title>Rainey Racing | Dirt Go-Kart Racing Team — Sponsorship Partnerships</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- Top speed bar -->
+    <div class="topbar">
+        <span class="topbar-item">🏁 2026 DIRT KART SEASON</span>
+        <span class="topbar-sep">•</span>
+        <span class="topbar-item">NOW ACCEPTING SPONSORS</span>
+        <span class="topbar-sep">•</span>
+        <span class="topbar-item">📍 RACING ALL SEASON LONG</span>
+    </div>
+
     <!-- Navigation -->
-    <nav class="navbar">
-        <div class="container">
-            <div class="nav-brand">🏁 RAINEY RACING</div>
-            <ul class="nav-links">
+    <nav class="navbar" id="navbar">
+        <div class="container nav-inner">
+            <a href="#home" class="nav-brand">🏁 RAINEY<span>RACING</span></a>
+            <button class="nav-toggle" id="navToggle" aria-label="Menu">
+                <span></span><span></span><span></span>
+            </button>
+            <ul class="nav-links" id="navLinks">
                 <li><a href="#home">Home</a></li>
                 <li><a href="#about">About</a></li>
-                <li><a href="#sponsorship">Sponsor</a></li>
+                <li><a href="#team">Team</a></li>
+                <li><a href="#videos">Videos</a></li>
                 <li><a href="#gallery">Gallery</a></li>
-                <li><a href="#contact">Contact</a></li>
+                <li><a href="#sponsorship">Packages</a></li>
+                <li><a href="#contact" class="nav-cta">Sponsor Us</a></li>
             </ul>
         </div>
     </nav>
 
     <!-- Hero Section -->
     <section id="home" class="hero">
+        <div class="hero-speedlines"></div>
         <div class="hero-content">
-            <h1>RAINEY RACING</h1>
-            <p class="tagline">Driven to Win. Built to Represent.</p>
-            <p class="subtitle">Family-driven dirt go-kart racing built on hard work, determination, and competitive spirit</p>
-            <a href="#sponsorship" class="cta-button">Become a Sponsor</a>
+            <div class="hero-badge">DRIVEN TO WIN • BUILT TO REPRESENT</div>
+            <h1 class="hero-title">RAINEY<span class="hero-title-accent">RACING</span></h1>
+            <p class="hero-sub">Family-driven dirt go-kart racing built on hard work, determination, and pure competitive fire. Put your brand on a team that races to win.</p>
+            <div class="hero-actions">
+                <a href="#sponsorship" class="btn btn-primary">Become a Sponsor</a>
+                <a href="#videos" class="btn btn-ghost">▶ Watch Us Race</a>
+            </div>
+        </div>
+        <div class="hero-scroll">SCROLL <span>▾</span></div>
+    </section>
+
+    <!-- Stats Bar -->
+    <section class="stats">
+        <div class="container stats-grid">
+            <div class="stat">
+                <div class="stat-number" data-target="100" data-suffix="%">0</div>
+                <div class="stat-label">Heart Every Race</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" data-target="2" data-prefix="">0</div>
+                <div class="stat-label">Brother Drivers</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" data-target="20" data-suffix="+">0</div>
+                <div class="stat-label">Races A Season</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" data-target="1000" data-suffix="s">0</div>
+                <div class="stat-label">Fans Reached</div>
+            </div>
         </div>
     </section>
 
     <!-- About Section -->
-    <section id="about" class="about">
+    <section id="about" class="section about">
         <div class="container">
-            <h2>About Rainey Racing</h2>
+            <div class="section-head">
+                <span class="section-kicker">Who We Are</span>
+                <h2 class="section-title">About Rainey Racing</h2>
+            </div>
             <div class="about-grid">
                 <div class="about-card">
+                    <div class="about-icon">🎯</div>
                     <h3>Our Mission</h3>
-                    <p>To compete at a high level in dirt go-kart racing while building lasting partnerships with sponsors who want their brand seen, respected, and promoted both at the track and through our racing community.</p>
+                    <p>To compete at a high level in dirt go-kart racing while building lasting partnerships with sponsors who want their brand seen, respected, and promoted — at the track and throughout our racing community.</p>
                 </div>
                 <div class="about-card">
+                    <div class="about-icon">🔥</div>
                     <h3>Our Values</h3>
-                    <p>We race as a brother team, representing dedication, sportsmanship, and the competitive spirit of grassroots motorsports. Every race is an opportunity to grow, perform, and proudly represent the businesses that support us.</p>
+                    <p>We race as a brother team, representing dedication, sportsmanship, and the competitive spirit of grassroots motorsports. Every race is a chance to grow, perform, and proudly represent the businesses behind us.</p>
                 </div>
                 <div class="about-card">
+                    <div class="about-icon">🤝</div>
                     <h3>Our Commitment</h3>
-                    <p>We are committed to racing with integrity, sportsmanship, and determination while giving our sponsors strong visibility and appreciation all season long.</p>
+                    <p>We race with integrity and determination, and we give our sponsors strong visibility and genuine appreciation all season long. Your support never goes unnoticed.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team / Drivers Section -->
+    <section id="team" class="section team">
+        <div class="container">
+            <div class="section-head">
+                <span class="section-kicker">Meet The Drivers</span>
+                <h2 class="section-title">The Rainey Racing Team</h2>
+                <p class="section-intro">A brother team chasing checkered flags together. <em>(Add each driver's real name, number, and photo — instructions are in the README.)</em></p>
+            </div>
+            <div class="team-grid">
+                <div class="driver-card">
+                    <div class="driver-photo photo-slot" data-label="Add Driver Photo">
+                        <span class="driver-num">#1</span>
+                    </div>
+                    <div class="driver-info">
+                        <h3>Driver Name</h3>
+                        <p class="driver-role">Lead Driver</p>
+                        <p class="driver-bio">Add a short bio here — years racing, favorite track, what drives them to win.</p>
+                    </div>
+                </div>
+                <div class="driver-card">
+                    <div class="driver-photo photo-slot" data-label="Add Driver Photo">
+                        <span class="driver-num">#2</span>
+                    </div>
+                    <div class="driver-info">
+                        <h3>Driver Name</h3>
+                        <p class="driver-role">Driver</p>
+                        <p class="driver-bio">Add a short bio here — years racing, favorite track, what drives them to win.</p>
+                    </div>
+                </div>
+                <div class="driver-card">
+                    <div class="driver-photo photo-slot" data-label="Add Crew Photo">
+                        <span class="driver-num">🔧</span>
+                    </div>
+                    <div class="driver-info">
+                        <h3>Crew / Team</h3>
+                        <p class="driver-role">Pit & Support</p>
+                        <p class="driver-bio">The family and crew who keep the karts fast and the team rolling every race day.</p>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Why Partner Section -->
-    <section class="why-partner">
+    <section class="section why-partner">
         <div class="container">
-            <h2>Why Partner With Rainey Racing?</h2>
-            <p class="section-intro">By sponsoring Rainey Racing, your business gains visibility in front of race fans, families, teams, and local communities throughout the racing season.</p>
+            <div class="section-head">
+                <span class="section-kicker">The Opportunity</span>
+                <h2 class="section-title">Why Partner With Rainey Racing?</h2>
+                <p class="section-intro">By sponsoring Rainey Racing, your business gains visibility in front of race fans, families, teams, and local communities all season long.</p>
+            </div>
             <div class="benefits-grid">
                 <div class="benefit-item">
-                    <div class="benefit-icon">🎨</div>
-                    <h4>Logo Placement</h4>
-                    <p>Your logo on race karts, trailer, and equipment</p>
+                    <div class="benefit-icon">🏎️</div>
+                    <h4>Logo On The Kart</h4>
+                    <p>Your logo on race karts, trailer, and equipment — seen at every race.</p>
                 </div>
                 <div class="benefit-item">
                     <div class="benefit-icon">📱</div>
                     <h4>Social Media</h4>
-                    <p>Mentions and race-day updates across platforms</p>
+                    <p>Mentions and race-day updates across our social platforms.</p>
                 </div>
                 <div class="benefit-item">
                     <div class="benefit-icon">📸</div>
                     <h4>Media Coverage</h4>
-                    <p>Photos and videos shared online and at events</p>
+                    <p>Photos and videos shared online and at events, featuring your brand.</p>
                 </div>
                 <div class="benefit-item">
                     <div class="benefit-icon">🤝</div>
                     <h4>Community Connection</h4>
-                    <p>Word-of-mouth promotion at tracks and events</p>
+                    <p>Real word-of-mouth promotion at tracks and in our community.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Sponsorship Section -->
-    <section id="sponsorship" class="sponsorship">
+    <!-- Videos Section -->
+    <section id="videos" class="section videos">
         <div class="container">
-            <h2>Sponsorship Opportunities</h2>
-            <div class="sponsorship-grid">
-                <div class="sponsor-card">
-                    <h3>Safety Equipment</h3>
-                    <ul>
-                        <li>Helmets</li>
-                        <li>Race Suits</li>
-                        <li>Gloves & Restraints</li>
-                        <li>Protective Gear</li>
-                    </ul>
+            <div class="section-head">
+                <span class="section-kicker">On The Track</span>
+                <h2 class="section-title">Race Videos</h2>
+                <p class="section-intro">See the speed for yourself. <em>(Replace these with your real race videos — README shows how, it's just pasting a YouTube link.)</em></p>
+            </div>
+            <div class="video-grid">
+                <div class="video-card video-slot" data-label="Add Race Video">
+                    <div class="video-play">▶</div>
+                    <div class="video-caption">Feature Race Highlights</div>
                 </div>
-                <div class="sponsor-card">
-                    <h3>Racing Components</h3>
-                    <ul>
-                        <li>Tires & Wheels</li>
-                        <li>Kart Parts</li>
-                        <li>Engines</li>
-                        <li>Maintenance Items</li>
-                    </ul>
+                <div class="video-card video-slot" data-label="Add Race Video">
+                    <div class="video-play">▶</div>
+                    <div class="video-caption">Onboard Camera Lap</div>
                 </div>
-                <div class="sponsor-card">
-                    <h3>Event Support</h3>
-                    <ul>
-                        <li>Race Entries</li>
-                        <li>Pit Passes</li>
-                        <li>Fuel & Lubricants</li>
-                        <li>Travel Expenses</li>
-                    </ul>
-                </div>
-                <div class="sponsor-card">
-                    <h3>Equipment & Tools</h3>
-                    <ul>
-                        <li>Trackside Tools</li>
-                        <li>Trailer Support</li>
-                        <li>Equipment Storage</li>
-                        <li>Maintenance Supplies</li>
-                    </ul>
+                <div class="video-card video-slot" data-label="Add Race Video">
+                    <div class="video-play">▶</div>
+                    <div class="video-caption">Season Recap</div>
                 </div>
             </div>
-        </div>
-    </section>
-
-    <!-- What Sponsors Receive -->
-    <section class="sponsor-benefits">
-        <div class="container">
-            <h2>What Sponsors Receive</h2>
-            <p class="section-intro">We value every sponsor and work hard to represent each partner professionally.</p>
-            <ul class="benefits-list">
-                <li>✓ Business logo displayed on kart body panels</li>
-                <li>✓ Recognition on team apparel and trailer</li>
-                <li>✓ Social media shoutouts and sponsor spotlights</li>
-                <li>✓ Team photos for business use</li>
-                <li>✓ Appreciation posts after events and milestones</li>
-                <li>✓ Professional partnership representation</li>
-            </ul>
         </div>
     </section>
 
     <!-- Gallery Section -->
-    <section id="gallery" class="gallery">
+    <section id="gallery" class="section gallery">
         <div class="container">
-            <h2>Racing Photos</h2>
+            <div class="section-head">
+                <span class="section-kicker">The Highlights</span>
+                <h2 class="section-title">Race Gallery</h2>
+                <p class="section-intro">Click any photo to view it full-size. <em>(Drop your real race photos into the "images" folder — README shows exactly how.)</em></p>
+            </div>
             <div class="gallery-grid">
-                <div class="gallery-item">
-                    <img src="https://via.placeholder.com/300x200?text=Rainey+Racing+1" alt="Race Action">
+                <figure class="gallery-item photo-slot" data-label="Race Action"><figcaption>Race Action</figcaption></figure>
+                <figure class="gallery-item photo-slot" data-label="Team Photo"><figcaption>Team Photo</figcaption></figure>
+                <figure class="gallery-item photo-slot" data-label="Race Day"><figcaption>Race Day</figcaption></figure>
+                <figure class="gallery-item photo-slot" data-label="Victory Lane"><figcaption>Victory Lane</figcaption></figure>
+                <figure class="gallery-item photo-slot" data-label="Kart Setup"><figcaption>Kart Setup</figcaption></figure>
+                <figure class="gallery-item photo-slot" data-label="Team Spirit"><figcaption>Team Spirit</figcaption></figure>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sponsorship Packages Section -->
+    <section id="sponsorship" class="section sponsorship">
+        <div class="container">
+            <div class="section-head">
+                <span class="section-kicker">Partner With Us</span>
+                <h2 class="section-title">Sponsorship Packages</h2>
+                <p class="section-intro">Flexible partnerships for every budget. Support us with product, services, or funds — every level gets real visibility. <em>(Adjust the amounts to fit your team.)</em></p>
+            </div>
+            <div class="packages-grid">
+                <div class="package-card">
+                    <div class="package-tier">Bronze</div>
+                    <div class="package-price">$100<span>+ or in-kind</span></div>
+                    <ul class="package-features">
+                        <li>Name listed on our sponsor wall</li>
+                        <li>Social media thank-you shoutout</li>
+                        <li>Season-long appreciation</li>
+                    </ul>
+                    <a href="#contact" class="btn btn-outline">Choose Bronze</a>
                 </div>
-                <div class="gallery-item">
-                    <img src="https://via.placeholder.com/300x200?text=Rainey+Racing+2" alt="Team Photo">
+                <div class="package-card">
+                    <div class="package-tier">Silver</div>
+                    <div class="package-price">$250<span>+ or in-kind</span></div>
+                    <ul class="package-features">
+                        <li>Small logo on kart panel</li>
+                        <li>Logo on team trailer</li>
+                        <li>Social media shoutouts</li>
+                        <li>Everything in Bronze</li>
+                    </ul>
+                    <a href="#contact" class="btn btn-outline">Choose Silver</a>
                 </div>
-                <div class="gallery-item">
-                    <img src="https://via.placeholder.com/300x200?text=Rainey+Racing+3" alt="Race Day">
+                <div class="package-card package-featured">
+                    <div class="package-flag">MOST POPULAR</div>
+                    <div class="package-tier">Gold</div>
+                    <div class="package-price">$500<span>+ or in-kind</span></div>
+                    <ul class="package-features">
+                        <li>Large logo on kart body</li>
+                        <li>Logo on trailer & team apparel</li>
+                        <li>Dedicated sponsor spotlight posts</li>
+                        <li>Team photos for your business use</li>
+                        <li>Everything in Silver</li>
+                    </ul>
+                    <a href="#contact" class="btn btn-primary">Choose Gold</a>
                 </div>
-                <div class="gallery-item">
-                    <img src="https://via.placeholder.com/300x200?text=Rainey+Racing+4" alt="Victory">
+                <div class="package-card">
+                    <div class="package-tier">Title Partner</div>
+                    <div class="package-price">Let's Talk<span>premium spot</span></div>
+                    <ul class="package-features">
+                        <li>Primary logo — best kart real estate</li>
+                        <li>"Powered by [Your Brand]" billing</li>
+                        <li>Featured across all our media</li>
+                        <li>Everything in Gold</li>
+                    </ul>
+                    <a href="#contact" class="btn btn-outline">Let's Talk</a>
                 </div>
-                <div class="gallery-item">
-                    <img src="https://via.placeholder.com/300x200?text=Rainey+Racing+5" alt="Kart Setup">
+            </div>
+        </div>
+    </section>
+
+    <!-- What we need / Support types -->
+    <section class="section support">
+        <div class="container">
+            <div class="section-head">
+                <span class="section-kicker">Ways To Help</span>
+                <h2 class="section-title">What We Need</h2>
+                <p class="section-intro">Not just cash — product and services help just as much. Here's where support goes:</p>
+            </div>
+            <div class="support-grid">
+                <div class="support-card">
+                    <h3>🛡️ Safety Equipment</h3>
+                    <ul><li>Helmets</li><li>Race Suits</li><li>Gloves &amp; Restraints</li><li>Protective Gear</li></ul>
                 </div>
-                <div class="gallery-item">
-                    <img src="https://via.placeholder.com/300x200?text=Rainey+Racing+6" alt="Team Spirit">
+                <div class="support-card">
+                    <h3>⚙️ Racing Components</h3>
+                    <ul><li>Tires &amp; Wheels</li><li>Kart Parts</li><li>Engines</li><li>Maintenance Items</li></ul>
                 </div>
+                <div class="support-card">
+                    <h3>🏁 Event Support</h3>
+                    <ul><li>Race Entries</li><li>Pit Passes</li><li>Fuel &amp; Lubricants</li><li>Travel Expenses</li></ul>
+                </div>
+                <div class="support-card">
+                    <h3>🧰 Equipment &amp; Tools</h3>
+                    <ul><li>Trackside Tools</li><li>Trailer Support</li><li>Equipment Storage</li><li>Maintenance Supplies</li></ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sponsor logos -->
+    <section class="section sponsors-wall">
+        <div class="container">
+            <div class="section-head">
+                <span class="section-kicker">Proud To Represent</span>
+                <h2 class="section-title">Our Sponsors</h2>
+                <p class="section-intro">The businesses that power Rainey Racing. <em>(Your logo could be here — add sponsor logos as they come on board.)</em></p>
+            </div>
+            <div class="sponsors-grid">
+                <div class="sponsor-logo-slot">Your Logo Here</div>
+                <div class="sponsor-logo-slot">Your Logo Here</div>
+                <div class="sponsor-logo-slot">Your Logo Here</div>
+                <div class="sponsor-logo-slot">Your Logo Here</div>
             </div>
         </div>
     </section>
 
     <!-- Contact Section -->
-    <section id="contact" class="contact">
+    <section id="contact" class="section contact">
         <div class="container">
-            <h2>Get In Touch</h2>
-            <p class="section-intro">Interested in sponsoring Rainey Racing? We'd love to hear from you!</p>
+            <div class="section-head">
+                <span class="section-kicker">Let's Race Together</span>
+                <h2 class="section-title">Get In Touch</h2>
+                <p class="section-intro">Interested in sponsoring Rainey Racing? We'd love to hear from you.</p>
+            </div>
             <form class="contact-form" id="sponsorshipForm">
-                <div class="form-group">
-                    <label for="name">Business Name *</label>
-                    <input type="text" id="name" name="name" required>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="name">Business Name *</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contact-person">Contact Person *</label>
+                        <input type="text" id="contact-person" name="contact-person" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone</label>
+                        <input type="tel" id="phone" name="phone">
+                    </div>
                 </div>
                 <div class="form-group">
-                    <label for="contact-person">Contact Person *</label>
-                    <input type="text" id="contact-person" name="contact-person" required>
-                </div>
-                <div class="form-group">
-                    <label for="email">Email *</label>
-                    <input type="email" id="email" name="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="phone">Phone</label>
-                    <input type="tel" id="phone" name="phone">
-                </div>
-                <div class="form-group">
-                    <label for="sponsorship-type">Type of Support Interested In *</label>
+                    <label for="sponsorship-type">Package / Support Interested In *</label>
                     <select id="sponsorship-type" name="sponsorship-type" required>
                         <option value="">Select an option</option>
+                        <option value="bronze">Bronze Package</option>
+                        <option value="silver">Silver Package</option>
+                        <option value="gold">Gold Package</option>
+                        <option value="title">Title Partner</option>
                         <option value="safety">Safety Equipment</option>
                         <option value="racing">Racing Components</option>
                         <option value="event">Event Support</option>
-                        <option value="equipment">Tools & Equipment</option>
+                        <option value="equipment">Tools &amp; Equipment</option>
                         <option value="other">Other</option>
                     </select>
                 </div>
@@ -207,7 +372,7 @@
                     <label for="message">Message *</label>
                     <textarea id="message" name="message" rows="5" required></textarea>
                 </div>
-                <button type="submit" class="submit-button">Send Inquiry</button>
+                <button type="submit" class="btn btn-primary btn-block">Send Sponsorship Inquiry</button>
             </form>
             <div id="form-message" class="form-message"></div>
         </div>
@@ -215,11 +380,27 @@
 
     <!-- Footer -->
     <footer class="footer">
-        <div class="container">
-            <p>&copy; 2024 Rainey Racing. All rights reserved.</p>
-            <p class="footer-tagline">Driven to Win. Built to Represent. 🏁</p>
+        <div class="container footer-inner">
+            <div class="footer-brand">🏁 RAINEY RACING</div>
+            <p class="footer-tagline">Driven to Win. Built to Represent.</p>
+            <div class="footer-social">
+                <a href="#" aria-label="Facebook">Facebook</a>
+                <a href="#" aria-label="Instagram">Instagram</a>
+                <a href="#" aria-label="YouTube">YouTube</a>
+                <a href="#" aria-label="TikTok">TikTok</a>
+            </div>
+            <p class="footer-copy">&copy; 2026 Rainey Racing. All rights reserved.</p>
         </div>
     </footer>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox">
+        <span class="lightbox-close" id="lightboxClose">&times;</span>
+        <div class="lightbox-content" id="lightboxContent"></div>
+    </div>
+
+    <!-- Back to top -->
+    <button class="back-to-top" id="backToTop" aria-label="Back to top">▲</button>
 
     <script src="script.js"></script>
 </body>
