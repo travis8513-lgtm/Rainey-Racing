@@ -115,8 +115,9 @@
                     </div>
                     <div class="driver-info">
                         <h3>Travis Rainey</h3>
-                        <p class="driver-role">Driver · #10X</p>
-                        <p class="driver-bio">Piloting the #10X for Rainey Racing.</p>
+                        <p class="driver-role">Driver · #10X · Predator Box Stock</p>
+                        <p class="driver-bio">Second-generation dirt racer carrying on the family's yellow-and-purple 10X legacy — racing alongside his brother Ronnie.</p>
+                        <button class="bio-btn" data-bio="bio-travis">Read Full Bio ▸</button>
                     </div>
                 </div>
                 <div class="driver-card">
@@ -134,9 +135,9 @@
                         <span class="driver-num">🔧</span>
                     </div>
                     <div class="driver-info">
-                        <h3>Crew / Team</h3>
-                        <p class="driver-role">Pit & Support</p>
-                        <p class="driver-bio">The family and crew who keep the karts fast and the team rolling every race day.</p>
+                        <h3>Ronnie Rainey Sr.</h3>
+                        <p class="driver-role">Mechanic · Crew Chief</p>
+                        <p class="driver-bio">The man who started it all — Travis &amp; Ronnie's dad keeps both karts race-ready and dials in every chassis. His yellow-and-purple 10X Mini Stock inspired the team's colors.</p>
                     </div>
                 </div>
             </div>
@@ -392,6 +393,29 @@
             <p class="footer-copy">&copy; 2026 Rainey Racing. All rights reserved.</p>
         </div>
     </footer>
+
+    <!-- Full driver bios (hidden; shown in the bio pop-up) -->
+    <div class="bio-data" hidden>
+        <div id="bio-travis" data-name="Travis Rainey" data-sub="Driver · #10X · Predator Box Stock">
+            <p>Born and raised in West Tennessee, Travis Rainey's passion for racing started long before he ever climbed behind the wheel of a dirt kart. Growing up, he spent countless hours riding dirt bikes, four-wheelers, and go-karts, developing a love for speed and competition at an early age.</p>
+            <p>In the early 2000s, Travis's father, Ronnie Rainey Sr., built and raced a Mini Stock dirt car. The car stood out with its bright yellow paint, bold purple 10X numbers, and unmistakable presence on the track. That race car left a lasting impression on Travis and inspired the yellow-and-purple color scheme and the iconic 10X that he proudly carries on his own kart today.</p>
+            <p>Some of Travis's greatest childhood memories were made at the dirt track. Nearly every Saturday night was spent with his dad, whether they were racing or sitting together in the grandstands watching the action. Those nights taught him that racing isn't just about winning—it's about family, dedication, and the friendships built around the sport. They sparked a lifelong passion for motorsports that still fuels him every time he unloads his kart.</p>
+            <p>Today, the same father who inspired Travis's love for racing plays one of the most important roles in Rainey Racing. Ronnie Rainey Sr. serves as the team's mechanic, crew chief, and trusted advisor. Behind the scenes, he spends countless hours in the shop inspecting every nut and bolt, maintaining the engines, dialing in the chassis, and making sure both karts are race-ready for the next green flag. His years of racing experience, mechanical knowledge, and attention to detail are a huge part of the team's success. For Travis, having his dad beside him in the pits is more than an advantage—it's a reminder of where the journey began and what family racing is all about.</p>
+            <p>Travis proudly pilots the 10X kart for Rainey Racing in the Predator Box Stock class, racing alongside his brother Ronnie. Together, the Rainey family has built more than a race team—they've built a tradition founded on hard work, perseverance, sportsmanship, and a shared love for dirt track racing.</p>
+            <p>When he's not racing, Travis enjoys spending time with his wife and three daughters, camping, fishing, and making memories outdoors. His family is the foundation of everything he does, and they are the motivation behind every lap he races.</p>
+            <p>For Travis, racing has never been just a hobby—it's a way of life. From the little boy watching his father race under the Saturday night lights to chasing checkered flags in the same yellow-and-purple colors that started it all, every race is an opportunity to honor his family's legacy while building one of his own. As Rainey Racing continues to grow, Travis remains committed to representing his sponsors, supporters, and community with pride while pursuing victories and inspiring the next generation to fall in love with dirt track racing, just as he did.</p>
+        </div>
+    </div>
+
+    <!-- Bio pop-up -->
+    <div class="bio-modal" id="bioModal">
+        <div class="bio-panel">
+            <button class="bio-close" id="bioClose" aria-label="Close">&times;</button>
+            <h3 id="bioName"></h3>
+            <div class="bio-sub" id="bioSub"></div>
+            <div id="bioBody"></div>
+        </div>
+    </div>
 
     <!-- Lightbox -->
     <div class="lightbox" id="lightbox">

@@ -96,6 +96,28 @@ if (lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
 if (lightbox) lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
 
+// --- Driver bio pop-up ---
+const bioModal = document.getElementById('bioModal');
+const bioName = document.getElementById('bioName');
+const bioSub = document.getElementById('bioSub');
+const bioBody = document.getElementById('bioBody');
+const bioClose = document.getElementById('bioClose');
+document.querySelectorAll('.bio-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const src = document.getElementById(btn.dataset.bio);
+        if (!src) return;
+        bioName.textContent = src.dataset.name || '';
+        bioSub.textContent = src.dataset.sub || '';
+        bioBody.innerHTML = src.innerHTML;
+        bioModal.classList.add('open');
+        if (bioModal.querySelector('.bio-panel')) bioModal.querySelector('.bio-panel').scrollTop = 0;
+    });
+});
+function closeBio() { if (bioModal) bioModal.classList.remove('open'); }
+if (bioClose) bioClose.addEventListener('click', closeBio);
+if (bioModal) bioModal.addEventListener('click', (e) => { if (e.target === bioModal) closeBio(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeBio(); });
+
 // --- Contact form ---
 const sponsorshipForm = document.getElementById('sponsorshipForm');
 const formMessage = document.getElementById('form-message');
