@@ -252,6 +252,19 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
     color: #fff; padding: 26px 16px 12px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; font-size: .9rem;
 }
 
+/* Race Schedule */
+.schedule-list { max-width: 780px; margin: 0 auto; display: grid; gap: 10px; }
+.sched-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; background: var(--carbon-2); border: 1px solid var(--line); border-left: 4px solid var(--yellow); border-radius: 8px; padding: 14px 20px; transition: transform .2s, border-color .2s; }
+.sched-row:hover { transform: translateX(5px); border-left-color: var(--red); }
+.sched-date { font-family: 'Bahnschrift','Arial Narrow','Segoe UI',sans-serif; font-weight: 700; letter-spacing: .5px; color: #fff; font-size: 1.2rem; white-space: nowrap; }
+.sched-note { color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-size: .82rem; text-align: right; }
+.sched-row.sched-special { border-left-color: var(--yellow); background: linear-gradient(135deg, rgba(255,212,0,.10), transparent 60%), var(--carbon-2); }
+.sched-row.sched-special .sched-note { color: var(--yellow); font-weight: 700; }
+.sched-row.sched-tt { opacity: .72; border-left-color: #3a3550; }
+.sched-foot { text-align: center; color: var(--muted); font-size: .92rem; margin-top: 26px; line-height: 1.8; }
+.sched-foot a { color: var(--yellow); text-decoration: none; font-weight: 600; }
+.sched-foot a:hover { text-decoration: underline; }
+
 /* Sponsorship packages */
 .packages-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px,1fr)); gap: 24px; align-items: stretch; }
 .package-card {
