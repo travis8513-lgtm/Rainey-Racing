@@ -329,10 +329,20 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
 .sponsor-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
 /* ===== Merch / Team Store ===== */
-.merch-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 340px)); justify-content: center; gap: 26px; margin-bottom: 50px; }
+.merch-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 520px)); justify-content: center; gap: 26px; margin-bottom: 50px; }
 .merch-card { background: var(--carbon-2); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; transition: transform .3s, border-color .3s; }
 .merch-card:hover { transform: translateY(-6px); border-color: var(--yellow); }
 .merch-img { aspect-ratio: 1 / 1; width: 100%; display: block; object-fit: cover; background: #000; }
+.merch-imgs { display: grid; grid-template-columns: 1fr 1fr; }
+.merch-side { position: relative; margin: 0; }
+.merch-side img { width: 100%; aspect-ratio: 3 / 4; display: block; object-fit: cover; background: #000; }
+.merch-side:first-child img { object-fit: contain; } /* front art is square; contain keeps the names uncropped (its own bg is black) */
+.merch-side figcaption {
+    position: absolute; top: 10px; left: 10px;
+    background: var(--yellow); color: #000; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 1px; font-size: .72rem;
+    padding: 3px 10px; border-radius: 4px; box-shadow: 0 3px 10px rgba(0,0,0,.45);
+}
 .merch-info { padding: 22px 24px; }
 .merch-info h3 { color: #fff; text-transform: uppercase; letter-spacing: 1px; font-size: 1.4rem; margin-bottom: 8px; }
 .merch-desc { color: var(--muted); font-size: .95rem; margin-bottom: 16px; line-height: 1.6; }
