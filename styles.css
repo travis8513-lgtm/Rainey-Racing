@@ -339,6 +339,11 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
 .bio-panel h3 { color: var(--yellow); font-size: 2.2rem; text-transform: uppercase; letter-spacing: 1px; line-height: 1; }
 .bio-panel .bio-sub { color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; font-size: .85rem; margin: 6px 0 22px; }
 .bio-panel #bioBody p { color: var(--text); margin-bottom: 16px; line-height: 1.85; }
+.bio-panel #bioBody .bio-tagline {
+    margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line);
+    color: var(--yellow); font-family: 'Bahnschrift', 'Arial Narrow', 'Segoe UI', sans-serif;
+    font-weight: 700; letter-spacing: 1px; text-transform: uppercase; text-align: center; font-size: 1.15rem;
+}
 .bio-close {
     position: absolute; top: 14px; right: 20px; background: none; border: 0; cursor: pointer;
     color: #fff; font-size: 2.4rem; line-height: 1;
