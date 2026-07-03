@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://travis8513-lgtm.github.io/Rainey-Racing/sitemap.xml
