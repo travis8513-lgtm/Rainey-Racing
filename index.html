@@ -11,7 +11,7 @@
     <meta property="og:description" content="Championship dirt go-kart racing — brothers Travis 10X and Ronnie 3. Sponsor us, follow the season, and grab team merch.">
     <meta property="og:url" content="https://travis8513-lgtm.github.io/Rainey-Racing/">
     <meta property="og:image" content="https://travis8513-lgtm.github.io/Rainey-Racing/images/race/rr-42.jpg">
-    <link rel="stylesheet" href="styles.css?v=2">
+    <link rel="stylesheet" href="styles.css?v=3">
 </head>
 <body>
     <!-- Top speed bar -->
@@ -36,6 +36,7 @@
                 <li><a href="#team">Team</a></li>
                 <li><a href="#videos">Videos</a></li>
                 <li><a href="#schedule">Schedule</a></li>
+                <li><a href="#results">Results</a></li>
                 <li><a href="#gallery">Gallery</a></li>
                 <li><a href="#merch">Merch</a></li>
                 <li><a href="#sponsorship">Packages</a></li>
@@ -57,6 +58,19 @@
             </div>
         </div>
         <div class="hero-scroll">SCROLL <span>▾</span></div>
+    </section>
+
+    <!-- Next race countdown -->
+    <section class="countdown">
+        <div class="container countdown-inner">
+            <div class="countdown-label">⏱ <span id="cdTitle">Next Race</span> <span class="cd-when" id="cdWhen"></span></div>
+            <div class="countdown-clock" id="cdClock">
+                <div class="cd-unit"><span id="cdDays">--</span><small>Days</small></div>
+                <div class="cd-unit"><span id="cdHours">--</span><small>Hours</small></div>
+                <div class="cd-unit"><span id="cdMins">--</span><small>Min</small></div>
+                <div class="cd-unit"><span id="cdSecs">--</span><small>Sec</small></div>
+            </div>
+        </div>
     </section>
 
     <!-- Stats Bar -->
@@ -243,6 +257,38 @@
                 <div class="sched-row sched-special"><span class="sched-date">Sun · Oct 25</span><span class="sched-note">Season Finale &amp; Awards</span></div>
             </div>
             <p class="sched-foot">📍 Camden Speedway Kart Racing · 500 US-70 Business, Camden, TN — <a href="https://www.google.com/maps/search/?api=1&amp;query=Camden%20Speedway%20500%20US%2070%20Business%20Camden%20TN" target="_blank" rel="noopener">Get Directions</a><br>Dates follow Camden Speedway's schedule and are tentative — subject to change.</p>
+
+            <!-- Come watch us race -->
+            <div class="visit-grid">
+                <div class="visit-card">
+                    <h3>👋 Come Watch Us Race!</h3>
+                    <p>Race day at Camden Speedway is family fun — grab the kids, pick a spot, and cheer on the karts. And don't be a stranger: <strong>come find the Rainey Racing trailer</strong>, meet Travis, Ronnie, and Ronnie Sr., and get a picture with the karts.</p>
+                    <ul class="visit-list">
+                        <li>🕛 Gates open at <strong>12:00 PM</strong> — racing starts around <strong>2:00 PM</strong></li>
+                        <li>📍 Camden Speedway Kart Racing · 500 US-70 Business, Camden, TN</li>
+                        <li>💛 Look for the <strong>yellow &amp; purple</strong> karts — the 10X and the 3</li>
+                    </ul>
+                </div>
+                <div class="visit-map">
+                    <iframe src="https://www.google.com/maps/embed?origin=mfe&amp;pb=!1m2!2m1!1sCamden+Speedway+500+US-70+Business+Camden+TN" loading="lazy" title="Map to Camden Speedway Kart Racing, Camden TN" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Race Results / From the Track -->
+    <section id="results" class="section results">
+        <div class="container">
+            <div class="section-head">
+                <span class="section-kicker">From The Track</span>
+                <h2 class="section-title">Race Results &amp; Recaps</h2>
+                <p class="section-intro">How the 10X and the 3 are running this season — updated after every race Sunday.</p>
+            </div>
+            <div class="results-feed" id="resultsFeed">
+                <div class="results-empty">
+                    🏁 The 2026 season is underway! Fresh results and race recaps land here after each Sunday at Camden Speedway — check back after the checkered flag.
+                </div>
+            </div>
         </div>
     </section>
 
@@ -407,6 +453,16 @@
                 <h2 class="section-title">Our Sponsors</h2>
                 <p class="section-intro">The businesses that power Rainey Racing. <em>(Your logo could be here — add sponsor logos as they come on board.)</em></p>
             </div>
+            <div class="spotlight">
+                <div class="spotlight-flag">⭐ Sponsor Spotlight</div>
+                <div class="spotlight-body">
+                    <div class="spotlight-logo"><img src="images/sponsors/bubbas.jpg" alt="Bubba's Hot Dogs logo"></div>
+                    <div class="spotlight-text">
+                        <h3>Bubba's Hot Dogs</h3>
+                        <p>Our very first sponsor — Bubba's Hot Dogs believed in this team from the start, and their name rides on both karts every time the 10X and the 3 hit the dirt. Thank you, Bubba's, for backing the Rainey Racing family! Hungry? Go see 'em and tell 'em Rainey Racing sent you. 🌭</p>
+                    </div>
+                </div>
+            </div>
             <div class="sponsors-grid">
                 <div class="sponsor-logo"><img src="images/sponsors/bubbas.jpg" alt="Bubba's Hot Dogs — proud sponsor of Rainey Racing"></div>
                 <div class="sponsor-logo-slot">Your Logo Here</div>
@@ -440,6 +496,38 @@
                         <h3>Team T-Shirt</h3>
                         <p class="merch-desc">Front: the Rainey Racing logo on the upper-left chest. Back: the full Rainey Racing design with both karts.</p>
                         <div class="merch-price">$25 <span>Sizes S–XL · $35 for 2XL &amp; up</span></div>
+                    </div>
+                </div>
+                <div class="merch-card merch-soon">
+                    <div class="merch-img photo-slot" data-label="Hoodie Photo Coming Soon"></div>
+                    <div class="merch-info">
+                        <h3>Team Hoodie</h3>
+                        <p class="merch-desc">Stay warm in the stands — Rainey Racing logo on the front chest, full team design on the back.</p>
+                        <div class="merch-price merch-price-soon">Coming Soon <span>price being finalized</span></div>
+                    </div>
+                </div>
+                <div class="merch-card merch-soon">
+                    <div class="merch-img photo-slot" data-label="Hat Photo Coming Soon"></div>
+                    <div class="merch-info">
+                        <h3>Team Hat</h3>
+                        <p class="merch-desc">Rainey Racing colors for race day and every day.</p>
+                        <div class="merch-price merch-price-soon">Coming Soon <span>price being finalized</span></div>
+                    </div>
+                </div>
+                <div class="merch-card merch-soon">
+                    <div class="merch-img photo-slot" data-label="Koozie Photo Coming Soon"></div>
+                    <div class="merch-info">
+                        <h3>Drink Koozie</h3>
+                        <p class="merch-desc">Keep your drink cold while the racing heats up.</p>
+                        <div class="merch-price merch-price-soon">Coming Soon <span>price being finalized</span></div>
+                    </div>
+                </div>
+                <div class="merch-card merch-soon">
+                    <div class="merch-img photo-slot" data-label="Decal Photo Coming Soon"></div>
+                    <div class="merch-info">
+                        <h3>Team Decal</h3>
+                        <p class="merch-desc">Rainey Racing logo sticker for your truck, trailer, or toolbox.</p>
+                        <div class="merch-price merch-price-soon">Coming Soon <span>price being finalized</span></div>
                     </div>
                 </div>
             </div>
@@ -614,6 +702,6 @@
     <!-- Back to top -->
     <button class="back-to-top" id="backToTop" aria-label="Back to top">▲</button>
 
-    <script src="script.js?v=2"></script>
+    <script src="script.js?v=3"></script>
 </body>
 </html>
