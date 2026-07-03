@@ -366,7 +366,7 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
 .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
     outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.25);
 }
-.form-group option { color: #000; }
+.form-group option { color: #ffffff; background-color: var(--carbon-2); }
 .form-message { text-align: center; margin-top: 22px; padding: 15px; border-radius: 6px; display: none; font-weight: 700; }
 .form-message.success { background: rgba(40,180,90,.15); color: #4ade80; border: 1px solid rgba(40,180,90,.4); display: block; }
 .form-message.error { background: rgba(225,6,0,.15); color: #ff6b66; border: 1px solid rgba(225,6,0,.4); display: block; }
