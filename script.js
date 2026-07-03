@@ -244,3 +244,30 @@ function updateCountdown() {
 }
 updateCountdown();
 setInterval(updateCountdown, 1000);
+
+// --- Order form: size/option choices depend on the item picked ---
+const ITEM_OPTIONS = {
+    'Team T-Shirt': ['Small - $25', 'Medium - $25', 'Large - $25', 'X-Large - $25', '2X-Large - $35', '3X-Large - $35'],
+    'Team Hoodie': ['Small - $55', 'Medium - $55', 'Large - $55', 'X-Large - $55', '2X-Large - $55', '3X-Large - $55'],
+    'Team Hat': ['One Size Fits Most - $35'],
+    'Drink Koozie': ['Black - $8 (2 for $15)', 'Purple - $8 (2 for $15)'],
+    'Team Decal': ['6 inch - $10', '8 inch - $15']
+};
+const orderItemSel = document.getElementById('order-item');
+const orderSizeSel = document.getElementById('order-size');
+if (orderItemSel && orderSizeSel) {
+    orderItemSel.addEventListener('change', () => {
+        const opts = ITEM_OPTIONS[orderItemSel.value] || [];
+        orderSizeSel.innerHTML = '';
+        const first = document.createElement('option');
+        first.value = '';
+        first.textContent = opts.length ? 'Select size / option' : 'Select an item first';
+        orderSizeSel.appendChild(first);
+        opts.forEach(o => {
+            const el = document.createElement('option');
+            el.value = o;
+            el.textContent = o;
+            orderSizeSel.appendChild(el);
+        });
+    });
+}

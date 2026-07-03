@@ -547,3 +547,4 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
     background: repeating-linear-gradient(45deg, #17142a 0 14px, #1c1834 14px 28px);
 }
 .merch-price-soon { font-size: 1.35rem !important; padding-top: 6px; }
+.merch-img-contain { object-fit: contain; } /* for wide art on black bg (hat 4-view) */
