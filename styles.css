@@ -263,6 +263,8 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
 .sched-row.sched-special { border-left-color: var(--yellow); background: linear-gradient(135deg, rgba(255,212,0,.10), transparent 60%), var(--carbon-2); }
 .sched-row.sched-special .sched-note { color: var(--yellow); font-weight: 700; }
 .sched-row.sched-tt { opacity: .72; border-left-color: #3a3550; }
+.sched-row.sched-raced .sched-note { color: var(--yellow); font-weight: 700; }
+.sched-row.sched-missed { opacity: .55; border-left-color: #3a3550; }
 .sched-foot { text-align: center; color: var(--muted); font-size: .92rem; margin-top: 26px; line-height: 1.8; }
 .sched-foot a { color: var(--yellow); text-decoration: none; font-weight: 600; }
 .sched-foot a:hover { text-decoration: underline; }
