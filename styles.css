@@ -522,6 +522,37 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
 .result-recap { color: var(--muted); }
 .result-card img { width: 100%; border-radius: 10px; margin-top: 16px; display: block; }
 
+/* ===== Meet the karts ===== */
+.karts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; max-width: 1000px; margin: 0 auto; }
+.kart-card { background: var(--carbon-2); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.kart-10x { border-top: 4px solid var(--yellow); }
+.kart-3 { border-top: 4px solid var(--blue); }
+.kart-card img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
+.kart-info { padding: 20px 24px; }
+.kart-info h3 { color: #fff; text-transform: uppercase; letter-spacing: 1px; font-size: 1.25rem; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+.kart-badge { font-size: 1rem; padding: 3px 10px; border-radius: 8px; background: var(--carbon-3); border: 1px solid var(--line); }
+.kart-badge-10x { color: var(--yellow); }
+.kart-badge-3 { color: var(--blue); }
+.kart-specs { list-style: none; }
+.kart-specs li { color: var(--text); padding: 7px 0; border-top: 1px solid var(--line); font-size: .95rem; }
+.kart-specs li:first-child { border-top: 0; }
+.kart-specs strong { color: var(--gold); }
+.kart-logo-cta {
+    max-width: 1000px; margin: 26px auto 0; text-align: center;
+    background: linear-gradient(135deg, rgba(255,212,0,.08), transparent 60%), var(--carbon-2);
+    border: 1px solid var(--line); border-radius: 12px; padding: 28px 26px;
+}
+.kart-logo-cta h3 { color: var(--yellow); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+.kart-logo-cta p { color: var(--text); max-width: 640px; margin: 0 auto 18px; }
+@media (max-width: 760px) { .karts-grid { grid-template-columns: 1fr; } }
+
+/* ===== Season by the numbers (why partner) ===== */
+.season-numbers { margin-top: 46px; text-align: center; }
+.season-numbers-title { color: #fff; text-transform: uppercase; letter-spacing: 2px; font-size: 1.15rem; margin-bottom: 22px; }
+.season-numbers-note { color: var(--muted); margin-top: 18px; }
+.benefit-item a { color: var(--yellow); text-decoration: none; font-weight: 600; }
+.benefit-item a:hover { text-decoration: underline; }
+
 /* ===== 2026 season scoreboard ===== */
 .scoreboard { max-width: 860px; margin: 0 auto 34px; }
 .scoreboard-title {
