@@ -520,6 +520,41 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
 .result-recap { color: var(--muted); }
 .result-card img { width: 100%; border-radius: 10px; margin-top: 16px; display: block; }
 
+/* ===== 2026 season scoreboard ===== */
+.scoreboard { max-width: 860px; margin: 0 auto 34px; }
+.scoreboard-title {
+    text-align: center; color: var(--gold); font-family: 'Bahnschrift','Arial Narrow','Segoe UI',sans-serif;
+    font-weight: 800; text-transform: uppercase; letter-spacing: 2px; font-size: 1.15rem; margin-bottom: 16px;
+}
+.scoreboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.score-card {
+    background: var(--carbon-2); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px;
+}
+.score-travis { border-top: 4px solid var(--yellow); }
+.score-ronnie { border-top: 4px solid var(--blue); }
+.score-head { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+.score-num {
+    font-family: 'Bahnschrift','Arial Narrow','Segoe UI',sans-serif; font-weight: 800; font-size: 1.5rem;
+    background: var(--carbon-3); border: 1px solid var(--line); border-radius: 10px; padding: 8px 14px;
+}
+.score-travis .score-num { color: var(--yellow); }
+.score-ronnie .score-num { color: var(--blue); }
+.score-head h3 { color: #fff; text-transform: uppercase; letter-spacing: 1px; font-size: 1.15rem; }
+.score-head p { color: var(--muted); font-size: .85rem; }
+.score-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; text-align: center; }
+.score-stat { background: var(--carbon-3); border-radius: 10px; padding: 12px 4px 10px; }
+.score-stat span {
+    display: block; font-family: 'Bahnschrift','Arial Narrow','Segoe UI',sans-serif;
+    font-weight: 800; font-size: 2rem; line-height: 1; color: var(--gold);
+}
+.score-stat small { color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-size: .68rem; }
+.scoreboard-note { text-align: center; color: var(--muted); font-size: .85rem; margin-top: 12px; }
+@media (max-width: 640px) {
+    .scoreboard-grid { grid-template-columns: 1fr; }
+    .score-stats { grid-template-columns: repeat(4,1fr); gap: 8px; }
+    .score-stat span { font-size: 1.6rem; }
+}
+
 /* ===== Sponsor spotlight ===== */
 .spotlight {
     max-width: 860px; margin: 0 auto 46px; background: linear-gradient(135deg, var(--carbon-2), var(--carbon-3));
