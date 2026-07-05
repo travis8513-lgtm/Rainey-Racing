@@ -550,6 +550,8 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
 .season-numbers { margin-top: 46px; text-align: center; }
 .season-numbers-title { color: #fff; text-transform: uppercase; letter-spacing: 2px; font-size: 1.15rem; margin-bottom: 22px; }
 .season-numbers-note { color: var(--muted); margin-top: 18px; }
+.season-numbers .stats-grid { grid-template-columns: repeat(3,1fr); row-gap: 30px; }
+@media (max-width: 640px) { .season-numbers .stats-grid { grid-template-columns: repeat(2,1fr); } }
 .benefit-item a { color: var(--yellow); text-decoration: none; font-weight: 600; }
 .benefit-item a:hover { text-decoration: underline; }
 
