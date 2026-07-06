@@ -84,12 +84,19 @@ canvas {
 /* ---- touch controls ---- */
 #touch { display:none; width:100%; max-width:1000px; justify-content:space-between; padding:8px max(18px, env(safe-area-inset-right)) 14px max(18px, env(safe-area-inset-left)); gap:10px; user-select:none; -webkit-user-select:none; touch-action:none; }
 #touch .tgroup { display:flex; gap:10px; }
+/* the control BAR never eats taps — only its buttons do — so it can't block
+   a menu/results button sitting underneath it */
+#touch { pointer-events:none; }
+#touch .tgroup { pointer-events:none; }
 #touch button {
     width:76px; height:76px; border-radius:50%; border:2px solid var(--line);
     background:var(--carbon-3); color:var(--text); font-size:1.7rem; touch-action:none;
+    pointer-events:auto;
 }
 #touch button:active { background:var(--purple); }
 @media (pointer:coarse) { #touch { display:flex; } }
+/* while any menu/results overlay is up, hide the driving controls entirely */
+body:has(.overlay:not(.hidden)) #touch { display:none; }
 #muteBtn {
     position:absolute; left:10px; bottom:10px; z-index:60;
     width:44px; height:44px; border-radius:50%;
@@ -181,7 +188,7 @@ footer a { color:var(--yellow); text-decoration:none; }
         <p class="keys">Press <b>C</b> to switch camera: In-Kart → Behind Kart → TV View &nbsp;·&nbsp; 🔊 button (or <b>M</b>) mutes sound</p>
         <p class="keys">Full race night vs a <b>12-kart field</b>: Qualify → your Heat Race → the Feature.</p>
         <p class="keys">Qualify (2 hot laps) sets the heats · finish up front in your heat to start the feature near the pole.</p>
-        <p class="keys" style="color:#FFD400; font-weight:700;">GAME VERSION 16</p>
+        <p class="keys" style="color:#FFD400; font-weight:700;">GAME VERSION 17</p>
     </div>
 
     <div id="grid" class="overlay hidden">
@@ -1595,7 +1602,7 @@ function frame(now) {
     cx2d.textAlign = 'right';
     cx2d.font = 'bold 12px Bahnschrift, Arial Narrow, sans-serif';
     cx2d.fillStyle = 'rgba(255,212,0,0.55)';
-    cx2d.fillText('v16', W - 10, H - 10);
+    cx2d.fillText('v17', W - 10, H - 10);
 
     requestAnimationFrame(frame);
 }
