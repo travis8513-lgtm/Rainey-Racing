@@ -1,0 +1,1562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rainey Racing — Dirt Showdown</title>
+<meta name="description" content="Rainey Racing Dirt Showdown — race the No. 10X or No. 3 kart around the dirt oval. Free browser game from the Rainey Racing team.">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+    --purple:#7C3AED; --purple-dark:#6D28D9;
+    --blue:#2563EB; --yellow:#FFD400;
+    --carbon:#0d0b18; --carbon-2:#17142a; --carbon-3:#221c3c;
+    --line:#2b2547; --text:#f4f2fa; --muted:#a9a3c4;
+}
+html,body { height:100%; }
+body {
+    font-family:'Bahnschrift','Arial Narrow','Segoe UI',sans-serif;
+    background:var(--carbon); color:var(--text);
+    display:flex; flex-direction:column; align-items:center;
+    min-height:100%; overflow-x:hidden;
+}
+.topbar {
+    width:100%; text-align:center; padding:6px 10px;
+    background:linear-gradient(90deg,var(--purple),var(--blue));
+    font-weight:600; letter-spacing:1.5px; font-size:.8rem; text-transform:uppercase;
+}
+.topbar b { color:var(--yellow); }
+header { text-align:center; padding:14px 10px 6px; }
+header h1 { font-size:2rem; letter-spacing:2px; text-transform:uppercase; }
+header h1 span { color:var(--yellow); }
+header p { color:var(--muted); font-size:.95rem; }
+#wrap { position:relative; margin:10px auto 6px; max-width:100%; }
+canvas {
+    display:block; background:#1a1410;
+    border:3px solid var(--line); border-radius:12px;
+    max-width:100%; height:auto;
+    box-shadow:0 10px 40px rgba(0,0,0,.6);
+}
+/* ---- overlay screens ---- */
+.overlay {
+    position:absolute; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:14px;
+    background:rgba(13,11,24,.88); border-radius:12px; text-align:center; padding:20px;
+}
+.overlay.hidden { display:none; }
+.overlay h2 { font-size:2.2rem; letter-spacing:2px; text-transform:uppercase; }
+.overlay h2 span { color:var(--yellow); }
+.overlay .sub { color:var(--muted); max-width:520px; }
+.drivers { display:flex; gap:18px; flex-wrap:wrap; justify-content:center; }
+.driver-btn {
+    background:var(--carbon-3); border:2px solid var(--line); border-radius:14px;
+    color:var(--text); padding:16px 22px; cursor:pointer; min-width:170px;
+    font-family:inherit; font-size:1rem; transition:transform .15s, border-color .15s;
+}
+.driver-btn:hover { transform:translateY(-3px); border-color:var(--yellow); }
+.driver-btn .num { display:block; font-size:2.4rem; font-weight:800; }
+.driver-btn.travis .num { color:var(--yellow); }
+.driver-btn.ronnie .num { color:#5B9BFF; }
+.driver-btn small { color:var(--muted); }
+.btn {
+    background:linear-gradient(90deg,var(--purple),var(--blue));
+    border:none; color:#fff; font-family:inherit; font-weight:700;
+    font-size:1.05rem; letter-spacing:1px; text-transform:uppercase;
+    padding:12px 30px; border-radius:999px; cursor:pointer;
+}
+.btn:hover { filter:brightness(1.15); }
+.results { border-collapse:collapse; min-width:280px; }
+.results td, .results th { padding:6px 14px; border-bottom:1px solid var(--line); font-size:1rem; }
+.results .you { color:var(--yellow); font-weight:700; }
+.keys { color:var(--muted); font-size:.9rem; }
+.keys b { color:var(--text); background:var(--carbon-3); border:1px solid var(--line); border-radius:6px; padding:1px 8px; }
+/* ---- touch controls ---- */
+#touch { display:none; width:100%; max-width:1000px; justify-content:space-between; padding:8px 14px 14px; gap:10px; user-select:none; -webkit-user-select:none; touch-action:none; }
+#touch .tgroup { display:flex; gap:10px; }
+#touch button {
+    width:76px; height:76px; border-radius:50%; border:2px solid var(--line);
+    background:var(--carbon-3); color:var(--text); font-size:1.7rem; touch-action:none;
+}
+#touch button:active { background:var(--purple); }
+@media (pointer:coarse) { #touch { display:flex; } }
+#muteBtn {
+    position:absolute; left:10px; bottom:10px; z-index:60;
+    width:44px; height:44px; border-radius:50%;
+    background:rgba(13,11,24,0.72); border:1px solid var(--line);
+    color:var(--text); font-size:1.2rem; line-height:1; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+}
+#muteBtn:hover { border-color:var(--yellow); }
+#muteBtn.muted { color:var(--yellow); border-color:var(--yellow); }
+footer { color:var(--muted); font-size:.85rem; padding:8px 10px 18px; text-align:center; }
+footer a { color:var(--yellow); text-decoration:none; }
+</style>
+</head>
+<body>
+<div class="topbar">✝ <b>GOD FIRST · FAMILY ALWAYS</b> • RAINEY RACING PRESENTS</div>
+<header>
+    <h1>🏁 RAINEY<span>RACING</span> — DIRT SHOWDOWN</h1>
+    <p>Qualify, win your heat, take the feature. 12 karts on the Rainey dirt oval.</p>
+</header>
+
+<div id="wrap">
+    <canvas id="game" width="1000" height="640"></canvas>
+
+    <div id="menu" class="overlay">
+        <h2>PICK YOUR <span>DRIVER</span></h2>
+        <p class="sub">Predator Box Stock · 5-lap feature on the Rainey dirt oval</p>
+        <div class="drivers">
+            <button class="driver-btn travis" data-driver="travis">
+                <span class="num">#10X</span>
+                Travis Rainey
+                <br><small>Yellow &amp; Purple legacy</small>
+            </button>
+            <button class="driver-btn ronnie" data-driver="ronnie">
+                <span class="num">#3</span>
+                Ronnie Rainey
+                <br><small>Blue lightning</small>
+            </button>
+        </div>
+        <p class="keys">Drive with <b>&#8593;</b> gas &nbsp; <b>&#8595;</b> brake &nbsp; <b>&#8592;</b> <b>&#8594;</b> steer &nbsp;(or <b>W</b><b>A</b><b>S</b><b>D</b>)</p>
+        <p class="keys">Hold <b>SPACE</b> to power-slide the kart through the turns</p>
+        <p class="keys">Press <b>C</b> to switch camera: In-Kart → Behind Kart → TV View &nbsp;·&nbsp; 🔊 button (or <b>M</b>) mutes sound</p>
+        <p class="keys">Full race night vs a <b>12-kart field</b>: Qualify → your Heat Race → the Feature.</p>
+        <p class="keys">Qualify (2 hot laps) sets the heats · finish up front in your heat to start the feature near the pole.</p>
+        <p class="keys" style="color:#FFD400; font-weight:700;">GAME VERSION 13</p>
+    </div>
+
+    <div id="grid" class="overlay hidden">
+        <h2 id="gridTitle">TIME TRIALS <span>COMPLETE</span></h2>
+        <p class="sub" id="gridSub">Your qualifying lap sets your starting spot.</p>
+        <table class="results" id="gridTable"></table>
+        <button class="btn" id="featureBtn">Next ▸</button>
+    </div>
+
+    <div id="finish" class="overlay hidden">
+        <h2 id="finishTitle">RACE <span>COMPLETE</span></h2>
+        <table class="results" id="resultsTable"></table>
+        <p class="sub" id="bestLapLine"></p>
+        <button class="btn" id="againBtn">Race Again</button>
+    </div>
+
+    <button id="muteBtn" aria-label="Mute sound" title="Mute sound (M)">&#128266;</button>
+</div>
+
+<div id="touch">
+    <div class="tgroup">
+        <button id="tLeft">&#8678;</button>
+        <button id="tRight">&#8680;</button>
+        <button id="tCam">&#128247;</button>
+    </div>
+    <div class="tgroup">
+        <button id="tBrake">&#128721;</button>
+        <button id="tSlide">&#127744;</button>
+        <button id="tGas">&#128293;</button>
+    </div>
+</div>
+
+<footer>A Rainey Racing game · <a href="https://raineymotorsports.com">raineymotorsports.com</a></footer>
+
+<script>
+"use strict";
+const cv = document.getElementById('game');
+const cx2d = cv.getContext('2d');
+const W = cv.width, H = cv.height;
+
+// ---------- Track geometry: a real stadium oval — two long straights + two 180° turns ----------
+// The centerline is every point at distance R from the "spine" segment
+// (cx-A,cy)..(cx+A,cy). Straights are 2*A long; turns have radius R.
+const TRK = { cx: W/2, cy: H/2 + 14, A: 225, R: 190, halfW: 68 };
+// polar angle (measured from the start line) where the last turn ends and the
+// front stretch begins — the green flag drops here
+const TURN4_EXIT = Math.PI/2 - Math.atan(TRK.R / TRK.A);
+
+function polar(x, y) {
+    const dx = x - TRK.cx, dy = y - TRK.cy;
+    return { phi: Math.atan2(dy, dx), r: Math.hypot(dx, dy) };
+}
+// polar distance from center to the centerline in direction phi
+function ringRadius(phi) {
+    const s = Math.sin(phi), c = Math.cos(phi);
+    if (Math.abs(s) > 1e-9) {
+        const r = TRK.R / Math.abs(s);                 // ray hits a straight?
+        if (r * Math.abs(c) <= TRK.A) return r;
+    }
+    return TRK.A*Math.abs(c) + Math.sqrt(Math.max(0, TRK.R*TRK.R - TRK.A*TRK.A*s*s));
+}
+function spineClosest(x, y) {
+    return { x: Math.max(TRK.cx - TRK.A, Math.min(TRK.cx + TRK.A, x)), y: TRK.cy };
+}
+// unit outward normal + true perpendicular offset from the centerline
+function trackNormal(x, y) {
+    const cp = spineClosest(x, y);
+    let dx = x - cp.x, dy = y - cp.y, d = Math.hypot(dx, dy);
+    if (d < 1e-6) { dx = 0; dy = 1; d = 1; }
+    return { nx: dx/d, ny: dy/d, off: d - TRK.R };
+}
+function pointOnRing(phi, off) {
+    const r = ringRadius(phi);
+    const bx = TRK.cx + Math.cos(phi)*r, by = TRK.cy + Math.sin(phi)*r;
+    if (!off) return { x: bx, y: by };
+    const n = trackNormal(bx, by);
+    return { x: bx + n.nx*off, y: by + n.ny*off };
+}
+// racing direction at a point (tangent to the track, phi decreasing)
+function travelHeadingAt(x, y) {
+    const n = trackNormal(x, y);
+    return Math.atan2(-n.nx, n.ny);
+}
+function angDiff(a, b) {
+    let d = a - b;
+    while (d >  Math.PI) d -= 2*Math.PI;
+    while (d < -Math.PI) d += 2*Math.PI;
+    return d;
+}
+
+// ---------- Karts ----------
+let LAPS = 6;                 // set per session (heat vs feature)
+const ROSTER = {
+    travis: { name:'Travis Rainey', num:'10X', body:'#FFD400', trim:'#7C3AED' },
+    ronnie: { name:'Ronnie Rainey', num:'3',   body:'#2563EB', trim:'#FFD400' }
+};
+// a full field for heat-race competition
+const RIVALS = [
+    { name:'Dusty Hall',   num:'7',  body:'#E14D4D', trim:'#ffffff', skill:0.980 },
+    { name:'Big Mike',     num:'88', body:'#3AAE5C', trim:'#111111', skill:0.968 },
+    { name:'J.T. Slick',   num:'21', body:'#E88A1A', trim:'#ffffff', skill:0.962 },
+    { name:'Roy Boomer',   num:'5',  body:'#B8B8C4', trim:'#7C3AED', skill:0.956 },
+    { name:'Cole Dozier',  num:'14', body:'#17A2B8', trim:'#ffffff', skill:0.950 },
+    { name:'Wade Prophet', num:'2',  body:'#E84393', trim:'#111111', skill:0.944 },
+    { name:'Hank Cutter',  num:'42', body:'#F1C40F', trim:'#111111', skill:0.938 },
+    { name:'Bo Tucker',    num:'9',  body:'#6C5CE7', trim:'#ffffff', skill:0.932 },
+    { name:'Earl Nixon',   num:'00', body:'#E67E22', trim:'#111111', skill:0.926 },
+    { name:'Gil Rhodes',   num:'56', body:'#00B894', trim:'#111111', skill:0.920 }
+];
+
+let field = [];               // the full car count for the night
+let karts = [], player = null, particles = [];
+let state = 'menu';           // menu | qualify | gridready | countdown | race | done
+let session = 'feature';      // qualify | heat | feature (what the on-track action is)
+let gridNextAction = 'feature';
+let countStart = 0, raceStart = 0, raceTime = 0;
+let finishOrder = [];
+
+// ---------- Race control: rolling start, caution flags, banners ----------
+const PACE_SPEED = 85;        // formation speed before the green
+const SLOT_GAP = 0.15;        // spacing (radians) between karts in the caution line
+let caution = { active: false, phase: '', order: [], startMs: 0, cooldownUntil: 0, leadPrevD: null };
+let banner = { text: '', color: '', until: 0 };
+function cautionActive() { return caution.active; }
+function showBanner(text, color, secs) {
+    banner = { text, color, until: performance.now() + secs*1000 };
+}
+function raceFlag() {
+    if (!player) return 'green';
+    if (player.done) return 'checkered';
+    if (caution.active) return 'yellow';
+    if (player.lap === LAPS - 1) return 'white';
+    return 'green';
+}
+function drawFlagRect(x, y, w, h) {
+    const f = raceFlag();
+    if (f === 'checkered') {
+        for (let r=0;r<2;r++) for (let c=0;c<4;c++) {
+            cx2d.fillStyle = (r+c)%2 ? '#111' : '#fff';
+            cx2d.fillRect(x + c*w/4, y + r*h/2, w/4, h/2);
+        }
+    } else {
+        cx2d.fillStyle = f === 'yellow' ? '#FFD400' : f === 'white' ? '#ffffff' : '#1d9c43';
+        cx2d.fillRect(x, y, w, h);
+    }
+}
+
+function steerToward(k, tx, ty) {
+    const want = Math.atan2(ty - k.y, tx - k.x);
+    return Math.max(-1, Math.min(1, angDiff(want, k.heading) * 2.2));
+}
+function rescueKart(k) {      // the push truck: back on the racing line, pointed the right way
+    const pol = polar(k.x, k.y);
+    const p = pointOnRing(pol.phi, 0);
+    k.x = p.x; k.y = p.y;
+    k.heading = travelHeadingAt(p.x, p.y);
+    k.vx = Math.cos(k.heading) * 70; k.vy = Math.sin(k.heading) * 70;
+    k.slowTime = 0; k.steerVal = 0;
+}
+
+// ---------- Camera: cockpit (in the seat) / chase (behind kart) / tv (whole track) ----------
+let cam = 'cockpit';
+let camAng = 0;               // smoothed camera heading (chase cam)
+const CAM = { zoom: 1.55, anchorX: W/2, anchorY: H*0.70 };
+
+function camActive() { return cam === 'chase' && state !== 'menu' && player; }
+function applyCamera() {
+    if (!camActive()) return;
+    cx2d.translate(CAM.anchorX, CAM.anchorY);
+    cx2d.rotate(-camAng - Math.PI/2);
+    cx2d.scale(CAM.zoom, CAM.zoom);
+    cx2d.translate(-player.x, -player.y);
+}
+function worldToScreen(x, y) {
+    if (!camActive()) return { x, y };
+    const dx = x - player.x, dy = y - player.y;
+    const th = -camAng - Math.PI/2, c = Math.cos(th), s = Math.sin(th);
+    return { x: CAM.anchorX + CAM.zoom * (c*dx - s*dy),
+             y: CAM.anchorY + CAM.zoom * (s*dx + c*dy) };
+}
+function toggleCam() {
+    cam = cam === 'cockpit' ? 'chase' : (cam === 'chase' ? 'tv' : 'cockpit');
+}
+
+function gridPlace(k, slot) {
+    const phi = Math.PI/2 + 2.4 + slot * 0.18;            // grid on the backstretch — pace through 3 & 4 to the green
+    const off = (slot % 2 === 0) ? -24 : 24;
+    const p = pointOnRing(phi, off);
+    k.x = p.x; k.y = p.y; k.heading = travelHeadingAt(p.x, p.y);
+    k.vx = 0; k.vy = 0;
+    k.prevPhi = phi; k.progress = -(2.4 + slot*0.18) / (2*Math.PI);
+}
+function resetRaceFields(k) {
+    k.lap = 0; k.lapStart = 0; k.bestLap = null; k.done = false; k.finishTime = 0;
+    k.slowTime = 0; k.steerVal = 0;
+}
+function makeKart(info, isPlayer, gridSlot, skill) {
+    const k = {
+        ...info, isPlayer, skill: skill || 1,
+        x:0, y:0, heading:0, vx:0, vy:0, prevPhi:0, progress:0,
+        lap:0, lapStart:0, bestLap:null, done:false, finishTime:0,
+        slowTime:0, steerVal:0, parked:false, qualTime:null, startPos:gridSlot,
+        aiOffset: (Math.random()*2-1) * 26, aiWobble: Math.random()*10
+    };
+    gridPlace(k, gridSlot);
+    return k;
+}
+
+function buildField(driverKey) {
+    const other = driverKey === 'travis' ? 'ronnie' : 'travis';
+    field = [];
+    field.push(makeKart(ROSTER[driverKey], true, 0));
+    field.push(makeKart({ ...ROSTER[other], name: ROSTER[other].name + ' (CPU)' }, false, 1, 0.965));
+    RIVALS.forEach((r, i) => field.push(makeKart(r, false, i + 2, r.skill)));
+    player = field[0];
+    karts = field;
+}
+
+function hideOverlays() {
+    ['menu','grid','finish'].forEach(id => document.getElementById(id).classList.add('hidden'));
+}
+
+function beginCountdown() {
+    particles = []; finishOrder = [];
+    caution = { active: false, phase: '', order: [], startMs: 0, cooldownUntil: 0, leadPrevD: null };
+    countdownPrevD = null;
+    banner = { text: '', color: '', until: 0 };
+    raceTime = 0;
+    camAng = player.heading;               // camera starts lined up behind the kart
+    startEngine();                          // user just clicked, so audio is allowed
+    state = 'countdown'; countStart = performance.now();
+    hideOverlays();
+}
+
+const QUAL_LAPS = 2, HEAT_LAPS = 4, FEATURE_LAPS = 6;
+
+// straight into a full-field feature — used for "quick race" / testing
+function startRace(driverKey) {
+    buildField(driverKey);
+    LAPS = FEATURE_LAPS; session = 'feature'; karts = field;
+    field.forEach((k, i) => { k.parked = false; k.startPos = i; gridPlace(k, i); resetRaceFields(k); });
+    beginCountdown();
+}
+
+// ---------- Qualifying: a solo timed run that seeds the heat races ----------
+function startQualify(driverKey) {
+    buildField(driverKey);
+    karts = field;
+    field.forEach(k => { if (!k.isPlayer) k.parked = true; });   // rivals wait in the pits
+    // launch the player onto the front stretch at speed for two flying laps
+    const p = pointOnRing(Math.PI/2 + 0.03, 0);
+    player.x = p.x; player.y = p.y;
+    player.heading = travelHeadingAt(p.x, p.y);
+    player.vx = Math.cos(player.heading)*300; player.vy = Math.sin(player.heading)*300;
+    player.prevPhi = polar(player.x, player.y).phi;
+    resetRaceFields(player);
+    particles = [];
+    banner = { text: '', color: '', until: 0 };
+    camAng = player.heading;
+    startEngine();
+    state = 'qualify'; session = 'qualify'; raceStart = performance.now(); raceTime = 0;
+    hideOverlays();
+    showBanner('⏱ QUALIFYING — ' + QUAL_LAPS + ' HOT LAPS!', '#2563EB', 3);
+}
+
+function finishQualify() {
+    state = 'gridready';
+    player.qualTime = player.bestLap || 9.99;
+    field.forEach(k => {
+        if (k.isPlayer) return;
+        k.qualTime = 5.15 + (0.975 - k.skill) * 15 + (Math.random()*2 - 1) * 0.22;
+    });
+    // split the fast qualifiers evenly into two heats
+    const byQual = [...field].sort((a,b) => a.qualTime - b.qualTime);
+    byQual.forEach((k,i) => { k.heat = (i % 2) + 1; });
+    gridNextAction = 'heat';
+    document.getElementById('gridTitle').innerHTML = `You're in <span>Heat ${player.heat}</span>`;
+    document.getElementById('gridSub').textContent =
+        'Qualifying sets the two heat races. Run up front in your heat to start the feature near the pole.';
+    let rows = '<tr><th>Heat</th><th>Driver</th><th>Kart</th><th>Qual</th></tr>';
+    byQual.forEach(k => {
+        rows += `<tr${k.isPlayer?' class="you"':''}><td>H${k.heat}</td><td>${k.name}</td><td>#${k.num}</td><td>${k.qualTime.toFixed(2)}s</td></tr>`;
+    });
+    document.getElementById('gridTable').innerHTML = rows;
+    document.getElementById('featureBtn').textContent = 'Go To Your Heat ▸';
+    beep(880, 0.3);
+    setTimeout(() => document.getElementById('grid').classList.remove('hidden'), 900);
+}
+
+function startHeat() {
+    LAPS = HEAT_LAPS; session = 'heat';
+    const mine = field.filter(k => k.heat === player.heat).sort((a,b) => a.qualTime - b.qualTime);
+    karts = mine;
+    mine.forEach((k, slot) => { k.parked = false; k.startPos = slot; gridPlace(k, slot); resetRaceFields(k); });
+    beginCountdown();
+    showBanner('🔥 HEAT ' + player.heat + ' — ' + HEAT_LAPS + ' LAPS', '#a08300', 2.5);
+}
+
+function finishHeat() {
+    state = 'done';
+    // rank the player's heat: finishers first, then whoever is furthest along
+    const rest = karts.filter(k => !finishOrder.includes(k)).sort((a,b) => b.progress - a.progress);
+    const heatOrder = [...finishOrder, ...rest];
+    heatOrder.forEach((k,i) => k.heatPos = i);
+    const place = heatOrder.indexOf(player) + 1;
+    // simulate the other heat from driver skill + a little racing luck
+    field.filter(k => k.heat !== player.heat)
+        .map(k => ({ k, score: k.skill + (Math.random()-0.5)*0.06 }))
+        .sort((a,b) => b.score - a.score)
+        .forEach((o,i) => o.k.heatPos = i);
+    // feature lineup: interleave the heats by finish (heat winners share the front row)
+    const h1 = field.filter(k => k.heat === 1).sort((a,b) => a.heatPos - b.heatPos);
+    const h2 = field.filter(k => k.heat === 2).sort((a,b) => a.heatPos - b.heatPos);
+    const lineup = [];
+    for (let i = 0; i < Math.max(h1.length, h2.length); i++) {
+        if (h1[i]) lineup.push(h1[i]);
+        if (h2[i]) lineup.push(h2[i]);
+    }
+    lineup.forEach((k,i) => k.startPos = i);
+    gridNextAction = 'feature';
+    const sfx = p => p===1?'st':p===2?'nd':p===3?'rd':'th';
+    document.getElementById('gridTitle').innerHTML =
+        `Heat ${player.heat}: <span>${place}${sfx(place)}</span> · Feature Lineup`;
+    document.getElementById('gridSub').textContent =
+        'Where everyone lines up for the ' + FEATURE_LAPS + '-lap feature, set by the heat races.';
+    let rows = '<tr><th>Start</th><th>Driver</th><th>Kart</th><th>From</th></tr>';
+    lineup.forEach((k,i) => {
+        rows += `<tr${k.isPlayer?' class="you"':''}><td>${i+1}</td><td>${k.name}</td><td>#${k.num}</td><td>H${k.heat} P${k.heatPos+1}</td></tr>`;
+    });
+    document.getElementById('gridTable').innerHTML = rows;
+    document.getElementById('featureBtn').textContent = 'Line Up For The Feature ▸';
+    beep(880, 0.3);
+    setTimeout(() => document.getElementById('grid').classList.remove('hidden'), 1200);
+}
+
+function startFeature() {
+    LAPS = FEATURE_LAPS; session = 'feature'; karts = field;
+    field.forEach(k => { k.parked = false; gridPlace(k, k.startPos); resetRaceFields(k); });
+    beginCountdown();
+}
+
+// ---------- Input ----------
+const input = { up:false, down:false, left:false, right:false, slide:false };
+const KEYMAP = {
+    ArrowUp:'up', KeyW:'up', ArrowDown:'down', KeyS:'down',
+    ArrowLeft:'left', KeyA:'left', ArrowRight:'right', KeyD:'right',
+    Space:'slide', ShiftLeft:'slide', ShiftRight:'slide'
+};
+addEventListener('keydown', e => {
+    const k=KEYMAP[e.code];
+    if(k){ input[k]=true; e.preventDefault(); }
+    else if (e.code === 'KeyC') toggleCam();
+    else if (e.code === 'KeyM') toggleMute();
+});
+addEventListener('keyup',   e => { const k=KEYMAP[e.code]; if(k) input[k]=false; });
+document.getElementById('tCam').addEventListener('pointerdown', e => { toggleCam(); e.preventDefault(); });
+[['tGas','up'],['tBrake','down'],['tLeft','left'],['tRight','right'],['tSlide','slide']].forEach(([id,k]) => {
+    const b = document.getElementById(id);
+    const on  = e => { input[k]=true;  e.preventDefault(); };
+    const off = e => { input[k]=false; e.preventDefault(); };
+    b.addEventListener('pointerdown', on);
+    b.addEventListener('pointerup', off);
+    b.addEventListener('pointercancel', off);
+    b.addEventListener('pointerleave', off);
+});
+
+// ---------- Physics ----------
+const PHYS = {
+    accel: 500, maxSpeed: 430, reverseMax: -90,
+    brake: 520, drag: 0.72,
+    steer: 3.2, grip: 12,             // higher grip = less slide
+    offtrackDrag: 3.2, wallBounce: 0.35
+};
+
+function stepKart(k, dt) {
+    const fwdX = Math.cos(k.heading), fwdY = Math.sin(k.heading);
+    const speed = k.vx*fwdX + k.vy*fwdY;             // signed forward speed
+    let throttle = 0, steer = 0;
+
+    if (state === 'countdown') {                     // rolling start: pace in formation
+        throttle = speed < PACE_SPEED ? 0.4 : 0;
+        steer = aiSteer(k);
+    } else if (k.done) {                             // cruise after the checkers
+        throttle = 0.25; steer = aiSteer(k);
+    } else if (cautionActive() && state === 'race') {
+        // yellow flag: everyone (player included) files in behind the leader
+        // and follows the pace line until the green
+        const pol0 = polar(k.x, k.y);
+        steer = steerToward(k, ...(p => [p.x, p.y])(pointOnRing(pol0.phi - 0.35, 0)));
+        const idx = caution.order.indexOf(k);
+        if (idx <= 0) {                              // pace leader
+            throttle = speed < 120 ? 0.4 : 0;
+        } else {                                     // close up to your slot, then hold pace
+            const lp = polar(caution.order[0].x, caution.order[0].y);
+            const err = angDiff(pol0.phi, lp.phi + idx * SLOT_GAP);   // >0: behind your slot
+            if (err > 0.05) throttle = speed < 260 ? 0.9 : 0;
+            else if (err < -0.05) throttle = 0;
+            else throttle = speed < 120 ? 0.4 : 0;
+        }
+    } else if (k.isPlayer && (state === 'race' || state === 'qualify')) {
+        if (input.up) throttle = 1;
+        if (input.down) throttle = -1;
+        // buttons are on/off; ramp them slowly so a tap = a small correction
+        const target = (input.left ? -1 : 0) + (input.right ? 1 : 0);
+        const rate = (target !== 0 ? 4.5 : 10) * dt;
+        k.steerVal += Math.max(-rate, Math.min(rate, target - k.steerVal));
+        steer = k.steerVal;
+    } else if (!k.isPlayer && (state === 'race' || state === 'done')) {
+        steer = aiSteer(k);
+        // real drivers lift for the corners — full send only when the wheel is near straight
+        throttle = k.skill * (Math.abs(steer) > 0.35 ? 0.5 : 1);
+    }
+
+    // power-slide: hold SPACE to break the rear loose and pitch it sideways
+    const sliding = k.isPlayer && input.slide && (state === 'race' || state === 'qualify') && !cautionActive() && !k.done;
+
+    // steering strength scales with speed but never drops to zero (a kart pinned
+    // against the wall must still turn free), and tapers hard at top speed so a
+    // tap of the button doesn't snap the kart sideways
+    const sf = Math.min(1, (Math.abs(speed) + 45) / 165)
+             / (1 + Math.max(0, Math.abs(speed) - 200) / 320)
+             * (sliding ? 1.25 : 1);
+    k.heading += steer * PHYS.steer * sf * dt * (speed < 0 ? -1 : 1);
+
+    // thrust / brake
+    if (throttle > 0 && speed < PHYS.maxSpeed * k.skill) {
+        k.vx += fwdX * PHYS.accel * throttle * dt;
+        k.vy += fwdY * PHYS.accel * throttle * dt;
+    } else if (throttle < 0) {
+        if (speed > 10) { k.vx -= fwdX * PHYS.brake * dt; k.vy -= fwdY * PHYS.brake * dt; }
+        else if (speed > PHYS.reverseMax) { k.vx += fwdX * PHYS.accel * 0.5 * throttle * dt; k.vy += fwdY * PHYS.accel * 0.5 * throttle * dt; }
+    }
+
+    // split velocity into forward + lateral, bleed the lateral (dirt slide);
+    // the low groove is tacky, the high side near the wall is loose marbles
+    const highSide = trackNormal(k.x, k.y).off > TRK.halfW - 24;
+    const f2 = k.vx*fwdX + k.vy*fwdY;
+    let latX = k.vx - fwdX*f2, latY = k.vy - fwdY*f2;
+    const slide = Math.hypot(latX, latY);
+    const keep = Math.exp(-PHYS.grip * (highSide ? 0.55 : 1) * (sliding ? 0.13 : 1) * dt);
+    k.vx = fwdX*f2 + latX*keep;
+    k.vy = fwdY*f2 + latY*keep;
+
+    // rolling drag (sliding scrubs a little extra speed — drifting isn't free)
+    const dragKeep = Math.exp(-(PHYS.drag + (sliding ? 0.45 : 0)) * dt);
+    k.vx *= dragKeep; k.vy *= dragKeep;
+
+    // rooster tail: dirt thrown up and back off the rear tires
+    const spd = Math.hypot(k.vx, k.vy);
+    const throwing = sliding || slide > 45 || (throttle > 0 && spd > 55);
+    if (throwing) {
+        const bx = k.x - fwdX*13, by = k.y - fwdY*13;
+        const heavy = sliding ? 1.7 : 1;
+        if (Math.random() < 0.6*heavy) particles.push({ kind:'dust', x:bx, y:by, z:2,
+            vx:(Math.random()-0.5)*40 - fwdX*25, vy:(Math.random()-0.5)*40 - fwdY*25, vz: 45+Math.random()*60,
+            life: 0.5 + Math.random()*0.4, age:0, size: 3+Math.random()*4 });
+        if (Math.random() < 0.5*heavy) particles.push({ kind:'clod', x:bx, y:by, z:3,
+            vx:(Math.random()-0.5)*70 - fwdX*(45+Math.random()*70), vy:(Math.random()-0.5)*70 - fwdY*(45+Math.random()*70),
+            vz: 120+Math.random()*150, life: 0.55 + Math.random()*0.45, age:0, size: 2+Math.random()*3 });
+    }
+
+    k.x += k.vx * dt; k.y += k.vy * dt;
+
+    // track limits: soft walls on both edges of the ring
+    const tn = trackNormal(k.x, k.y);
+    const lim = TRK.halfW - 9;
+    if (Math.abs(tn.off) > lim) {
+        const nx = tn.nx, ny = tn.ny;
+        const cp = spineClosest(k.x, k.y);
+        const target = TRK.R + Math.sign(tn.off) * lim;
+        k.x = cp.x + nx * target; k.y = cp.y + ny * target;
+        const vn = k.vx*nx + k.vy*ny;
+        if (Math.sign(vn) === Math.sign(tn.off)) {
+            const vmag = Math.hypot(k.vx, k.vy);
+            k.vx -= nx * vn; k.vy -= ny * vn;
+            // riding the wall REDIRECTS your speed along it (like the cushion on a
+            // real dirt track) instead of scrubbing it off — costs a little, not all
+            const tSpd = Math.hypot(k.vx, k.vy);
+            if (tSpd > 30) {
+                const newMag = Math.min(vmag * 0.995, tSpd + Math.abs(vn) * 0.8);
+                k.vx *= newMag / tSpd; k.vy *= newMag / tSpd;
+            } else {
+                k.vx *= 0.985; k.vy *= 0.985;
+            }
+            const along = Math.hypot(k.vx, k.vy);
+            if (along > 5) {
+                // tires drag the nose back toward the direction of travel
+                const tDir = Math.atan2(k.vy, k.vx);
+                k.heading += Math.max(-8*dt, Math.min(8*dt, angDiff(tDir, k.heading)));
+            } else {
+                // nearly stopped nose-first in the wall: the kart works itself
+                // free toward the racing direction — you can never truly stick
+                const freeDir = travelHeadingAt(k.x, k.y);
+                k.heading += Math.max(-7*dt, Math.min(7*dt, angDiff(freeDir, k.heading)));
+            }
+            // on the gas against the fence: tires claw you forward along it
+            if (throttle > 0 && along < 130) {
+                const fd = travelHeadingAt(k.x, k.y);
+                k.vx += Math.cos(fd) * 260 * dt;
+                k.vy += Math.sin(fd) * 260 * dt;
+            }
+            for (let i=0;i<4;i++) particles.push({ x:k.x, y:k.y,
+                vx:(Math.random()-0.5)*60, vy:(Math.random()-0.5)*60,
+                life:0.4, age:0, size:3+Math.random()*3 });
+        }
+    }
+    const pol = polar(k.x, k.y);
+
+    // stuck watch — feeds the caution/push-truck system
+    if (state === 'race' && !k.done) {
+        if (Math.hypot(k.vx, k.vy) < 55) k.slowTime += dt;
+        else k.slowTime = 0;
+    }
+
+    // lap progress (race direction = phi decreasing)
+    const dphi = angDiff(k.prevPhi, pol.phi);         // positive when moving the right way
+    k.prevPhi = pol.phi;
+    if (!k.done && (state === 'race' || state === 'qualify')) {
+        k.progress += dphi / (2*Math.PI);
+        const lapNow = Math.floor(k.progress);
+        if (lapNow > k.lap) {
+            k.lap = lapNow;
+            const t = raceTime;
+            if (k.lap > 0) {
+                const lt = t - k.lapStart;
+                if (k.bestLap === null || lt < k.bestLap) k.bestLap = lt;
+            }
+            k.lapStart = t;
+            if (state === 'qualify') {
+                if (k.isPlayer && k.lap >= QUAL_LAPS) finishQualify();
+            } else {
+                if (k.isPlayer && k.lap === LAPS - 1) {
+                    showBanner('⚪ WHITE FLAG — ONE TO GO!', '#565b66', 2.5);
+                    beep(660, 0.25);
+                }
+                if (k.lap >= LAPS) {
+                    k.done = true; k.finishTime = t;
+                    finishOrder.push(k);
+                    if (k.isPlayer) { if (session === 'heat') finishHeat(); else endRace(); }
+                }
+            }
+        }
+    }
+}
+
+function aiSteer(k) {
+    const pol = polar(k.x, k.y);
+    // look ahead in proportion to speed — a fast kart aims far down the track,
+    // a pacing kart follows the middle of the track right in front of its nose
+    // (a fixed far target makes slow karts cut corners and grind the inside wall)
+    const sp = Math.hypot(k.vx, k.vy);
+    const lookDist = Math.max(90, Math.min(260, sp * 0.55));
+    const pA = pointOnRing(pol.phi, 0), pB = pointOnRing(pol.phi - 0.08, 0);
+    const pxPerRad = Math.hypot(pB.x - pA.x, pB.y - pA.y) / 0.08;
+    const look = Math.max(0.08, Math.min(1.0, lookDist / pxPerRad));
+    const wob = Math.sin(performance.now()/1400 + k.aiWobble) * 8;
+    const t = pointOnRing(pol.phi - look, k.aiOffset + wob);
+    const want = Math.atan2(t.y - k.y, t.x - k.x);
+    const d = angDiff(want, k.heading);
+    return Math.max(-1, Math.min(1, d * 2.2));
+}
+
+function collideKarts() {
+    const R = 15;
+    for (let i=0;i<karts.length;i++) for (let j=i+1;j<karts.length;j++) {
+        const a = karts[i], b = karts[j];
+        const dx = b.x-a.x, dy = b.y-a.y, dist = Math.hypot(dx,dy);
+        if (dist > 0 && dist < R*2) {
+            const nx = dx/dist, ny = dy/dist, push = (R*2 - dist)/2;
+            a.x -= nx*push; a.y -= ny*push; b.x += nx*push; b.y += ny*push;
+            const rvx = b.vx-a.vx, rvy = b.vy-a.vy, rel = rvx*nx + rvy*ny;
+            if (rel < 0) {
+                const imp = rel * 0.45;
+                a.vx += nx*imp; a.vy += ny*imp; b.vx -= nx*imp; b.vy -= ny*imp;
+            }
+        }
+    }
+}
+
+function endRace() {
+    state = 'done';
+    // rank: finishers by time, then everyone else by progress
+    const rest = karts.filter(k => !finishOrder.includes(k)).sort((a,b) => b.progress - a.progress);
+    const order = [...finishOrder, ...rest];
+    const place = order.indexOf(player) + 1;
+    const sfx = p => p===1?'st':p===2?'nd':p===3?'rd':'th';
+    document.getElementById('finishTitle').innerHTML =
+        place === 1 ? '🏆 YOU WON THE <span>FEATURE!</span>'
+                    : `You finished <span>${place}${sfx(place)}</span>`;
+    let rows = '<tr><th>Pos</th><th>Driver</th><th>Kart</th></tr>';
+    order.forEach((k,i) => {
+        rows += `<tr${k.isPlayer?' class="you"':''}><td>${i+1}</td><td>${k.name}</td><td>#${k.num}</td></tr>`;
+    });
+    document.getElementById('resultsTable').innerHTML = rows;
+    document.getElementById('bestLapLine').textContent =
+        player.bestLap ? `Your best lap: ${player.bestLap.toFixed(2)}s` : '';
+    setTimeout(() => document.getElementById('finish').classList.remove('hidden'), 1400);
+}
+
+// ---------- Drawing ----------
+function drawBackground() {
+    // grass fills the screen (drawn before the camera transform)
+    cx2d.fillStyle = '#20301c';
+    cx2d.fillRect(0,0,W,H);
+}
+
+// ---------- Track surroundings: grandstand, flag stand, lights, haulers, trees ----------
+const SCENERY = [
+    { t:'stand',  x: 500, y: 644 },                                  // main grandstand
+    { t:'flag',   x: 556, y: 612 },                                  // flagman at the stripe
+    { t:'pole',   x: 124, y: 90 },  { t:'pole', x: 876, y: 90 },     // corner lights
+    { t:'pole',   x: 124, y: 592 }, { t:'pole', x: 876, y: 592 },
+    { t:'tree',   x: 300, y: 60 }, { t:'tree', x: 415, y: 52 },
+    { t:'tree',   x: 585, y: 52 }, { t:'tree', x: 700, y: 60 },
+    { t:'hauler', x: 400, y: 256, c:'#FFD400', c2:'#7C3AED', label:'RAINEY' },
+    { t:'hauler', x: 570, y: 256, c:'#2563EB', c2:'#FFD400', label:'RACING' },
+    { t:'tires',  x: 476, y: 266 }, { t:'tires', x: 330, y: 262 },
+    { t:'bubbas', x: 500, y: 244 }                                   // sponsor board
+];
+const CROWD_COLORS = ['#c46a6a','#6a8fc4','#c4b06a','#7bc46a','#a06ac4','#c4906a','#d8d8e0'];
+
+function drawSceneryItem(s, x, y, sc) {
+    if (s.t === 'stand') {
+        const w = 320*sc, h = 30*sc;
+        cx2d.fillStyle = '#1c1830';
+        cx2d.fillRect(x - w/2, y - h, w, h);
+        cx2d.fillStyle = '#7C3AED';
+        cx2d.fillRect(x - w/2, y - h - 5*sc, w, 5*sc);
+        if (sc > 0.45) {
+            // bunting flags along the roof line
+            const BUNT = ['#FFD400', '#ffffff', '#7C3AED'];
+            for (let c = 0; c < 16; c++) {
+                cx2d.fillStyle = BUNT[c % 3];
+                const bx = x - w/2 + (c + 0.5) * w/16;
+                cx2d.beginPath();
+                cx2d.moveTo(bx - 4*sc, y - h - 5*sc);
+                cx2d.lineTo(bx + 4*sc, y - h - 5*sc);
+                cx2d.lineTo(bx, y - h + 3*sc);
+                cx2d.closePath();
+                cx2d.fill();
+            }
+        }
+        if (sc > 0.45) {
+            for (let r = 0; r < 2; r++) for (let c = 0; c < 26; c++) {
+                cx2d.fillStyle = CROWD_COLORS[(r*26 + c*7) % CROWD_COLORS.length];
+                cx2d.beginPath();
+                cx2d.arc(x - w/2 + (c + 0.5) * w/26, y - h + (r + 0.55) * h/2.4, 2.4*sc, 0, 2*Math.PI);
+                cx2d.fill();
+            }
+        }
+    } else if (s.t === 'flag') {
+        cx2d.fillStyle = '#221c3c';
+        cx2d.fillRect(x - 6*sc, y - 18*sc, 12*sc, 18*sc);
+        cx2d.fillStyle = '#888';
+        cx2d.fillRect(x - 1*sc, y - 40*sc, 2*sc, 22*sc);
+        drawFlagRect(x + 1*sc, y - 40*sc, 15*sc, 10*sc);
+    } else if (s.t === 'pole') {
+        // pool of light on the ground beneath the pole
+        cx2d.fillStyle = 'rgba(255,230,150,0.10)';
+        cx2d.beginPath();
+        cx2d.ellipse(x, y + 4*sc, 44*sc, 18*sc, 0, 0, 2*Math.PI);
+        cx2d.fill();
+        cx2d.fillStyle = '#3a3a44';
+        cx2d.fillRect(x - 2*sc, y - 46*sc, 4*sc, 46*sc);
+        cx2d.fillRect(x - 10*sc, y - 49*sc, 20*sc, 4*sc);
+        cx2d.fillStyle = 'rgba(255,230,150,0.25)';
+        cx2d.beginPath(); cx2d.arc(x - 6*sc, y - 50*sc, 8*sc, 0, 2*Math.PI); cx2d.fill();
+        cx2d.beginPath(); cx2d.arc(x + 6*sc, y - 50*sc, 8*sc, 0, 2*Math.PI); cx2d.fill();
+        cx2d.fillStyle = '#ffe9a8';
+        cx2d.beginPath(); cx2d.arc(x - 6*sc, y - 50*sc, 3.5*sc, 0, 2*Math.PI); cx2d.fill();
+        cx2d.beginPath(); cx2d.arc(x + 6*sc, y - 50*sc, 3.5*sc, 0, 2*Math.PI); cx2d.fill();
+    } else if (s.t === 'tree') {
+        cx2d.fillStyle = '#4a331e';
+        cx2d.fillRect(x - 2*sc, y - 10*sc, 4*sc, 10*sc);
+        cx2d.fillStyle = '#2c4a24';
+        cx2d.beginPath(); cx2d.arc(x, y - 17*sc, 11*sc, 0, 2*Math.PI); cx2d.fill();
+        cx2d.fillStyle = '#223a1c';
+        cx2d.beginPath(); cx2d.arc(x + 3*sc, y - 14*sc, 6*sc, 0, 2*Math.PI); cx2d.fill();
+    } else if (s.t === 'hauler') {
+        cx2d.fillStyle = s.c;
+        cx2d.beginPath(); cx2d.roundRect(x - 35*sc, y - 26*sc, 58*sc, 26*sc, 3*sc); cx2d.fill();
+        cx2d.strokeStyle = s.c2; cx2d.lineWidth = Math.max(1, 2*sc); cx2d.stroke();
+        cx2d.fillStyle = '#222';
+        cx2d.fillRect(x + 23*sc, y - 18*sc, 14*sc, 18*sc);
+        cx2d.fillStyle = '#0e0e12';
+        for (const wx of [-24, -8, 28]) {
+            cx2d.beginPath(); cx2d.arc(x + wx*sc, y, 3.5*sc, 0, 2*Math.PI); cx2d.fill();
+        }
+        if (sc > 0.5) {
+            cx2d.fillStyle = s.c2;
+            cx2d.font = `bold ${Math.max(8, Math.round(10*sc))}px Bahnschrift, Arial Narrow, sans-serif`;
+            cx2d.textAlign = 'center';
+            cx2d.fillText(s.label, x - 6*sc, y - 10*sc);
+        }
+    } else if (s.t === 'tires') {
+        cx2d.strokeStyle = '#333'; cx2d.lineWidth = Math.max(1, 1.5*sc);
+        cx2d.fillStyle = '#0e0e12';
+        for (const [ox, oy] of [[0, -3], [-9, -2], [-4, -10]]) {
+            cx2d.beginPath(); cx2d.arc(x + ox*sc, y + oy*sc, 5*sc, 0, 2*Math.PI);
+            cx2d.fill(); cx2d.stroke();
+        }
+    } else if (s.t === 'bubbas') {
+        cx2d.fillStyle = '#6b4a2e';
+        cx2d.fillRect(x - 40*sc, y - 8*sc, 3*sc, 8*sc);
+        cx2d.fillRect(x + 37*sc, y - 8*sc, 3*sc, 8*sc);
+        cx2d.fillStyle = '#fff8ee';
+        cx2d.fillRect(x - 52*sc, y - 30*sc, 104*sc, 22*sc);
+        cx2d.strokeStyle = '#c22222'; cx2d.lineWidth = Math.max(1, 2*sc);
+        cx2d.strokeRect(x - 52*sc, y - 30*sc, 104*sc, 22*sc);
+        if (sc > 0.4) {
+            cx2d.fillStyle = '#c22222';
+            cx2d.font = `bold ${Math.max(8, Math.round(11*sc))}px Bahnschrift, Arial Narrow, sans-serif`;
+            cx2d.textAlign = 'center';
+            cx2d.fillText("BUBBA'S HOT DOGS", x, y - 15*sc);
+        }
+    }
+}
+
+function drawTrack() {
+    // world-space grass mottling — streams past the kart in driver cam
+    cx2d.fillStyle = 'rgba(0,0,0,0.12)';
+    for (let i=0;i<120;i++) {
+        const x = TRK.cx + (((i*137)%997)/997 - 0.5) * (TRK.A + TRK.R + 260) * 2;
+        const y = TRK.cy + (((i*761)%991)/991 - 0.5) * (TRK.R + 260) * 2;
+        cx2d.fillRect(x, y, 40, 3);
+    }
+
+    // helper: trace the stadium loop at a given offset from the centerline
+    const loop = (off) => {
+        const A = TRK.A, r = TRK.R + off;
+        cx2d.beginPath();
+        cx2d.moveTo(TRK.cx - A, TRK.cy - r);
+        cx2d.lineTo(TRK.cx + A, TRK.cy - r);
+        cx2d.arc(TRK.cx + A, TRK.cy, r, -Math.PI/2, Math.PI/2);
+        cx2d.lineTo(TRK.cx - A, TRK.cy + r);
+        cx2d.arc(TRK.cx - A, TRK.cy, r, Math.PI/2, 3*Math.PI/2);
+        cx2d.closePath();
+    };
+
+    // dirt surface (ring between the two edges)
+    loop(TRK.halfW);
+    cx2d.fillStyle = '#8a6238';
+    cx2d.fill();
+    loop(-TRK.halfW);
+    cx2d.fillStyle = '#20301c';
+    cx2d.fill();
+
+    // groove (darker worn band around the racing line):
+    // fill the outer groove loop, then re-fill its hole with base dirt
+    loop(16);
+    cx2d.fillStyle = 'rgba(90,60,32,0.55)';
+    cx2d.fill();
+    loop(-22);
+    cx2d.fillStyle = '#8a6238';
+    cx2d.fill();
+    // re-punch the infield grass (the groove fill covered it)
+    loop(-TRK.halfW);
+    cx2d.fillStyle = '#20301c';
+    cx2d.fill();
+
+    // mowed stripes on the infield grass
+    for (let i = 0; i < 3; i++) {
+        loop(-TRK.halfW - 14 - i*26);
+        cx2d.fillStyle = i % 2 ? '#20301c' : '#243a1f';
+        cx2d.fill();
+    }
+
+    // worn racing lines rubbered into the dirt
+    cx2d.strokeStyle = 'rgba(0,0,0,0.10)';
+    cx2d.lineWidth = 3;
+    for (const off of [-30, -8, 12, 32]) { loop(off); cx2d.stroke(); }
+
+    // skid marks at the corner entries
+    cx2d.strokeStyle = 'rgba(30,18,8,0.30)';
+    cx2d.lineWidth = 3;
+    for (const basePhi of [0.62, Math.PI + 0.62]) {
+        for (let i = 0; i < 6; i++) {
+            const phi = basePhi + 0.05 + i * 0.055;
+            const off = -26 + (i * 37) % 52;
+            const p = pointOnRing(phi, off);
+            const hd = travelHeadingAt(p.x, p.y);
+            cx2d.beginPath();
+            cx2d.moveTo(p.x, p.y);
+            cx2d.lineTo(p.x + Math.cos(hd + 0.12)*24, p.y + Math.sin(hd + 0.12)*24);
+            cx2d.stroke();
+        }
+    }
+
+    // worn patches and pebbles scattered on the dirt — speed cue for driver cam
+    for (let i=0;i<110;i++) {
+        const phi = i * 2.399963;                      // golden-angle spread
+        const off = (((i*389)%233)/233 - 0.5) * (TRK.halfW*2 - 24);
+        const p = pointOnRing(phi, off);
+        cx2d.fillStyle = i%3 ? 'rgba(60,40,20,0.28)' : 'rgba(205,175,135,0.16)';
+        cx2d.beginPath();
+        cx2d.arc(p.x, p.y, 2 + (i%3), 0, 2*Math.PI);
+        cx2d.fill();
+    }
+
+    // edges
+    cx2d.lineWidth = 5;
+    cx2d.strokeStyle = '#4a331e';
+    loop(TRK.halfW); cx2d.stroke();
+    loop(-TRK.halfW); cx2d.stroke();
+
+    // tire barriers
+    cx2d.fillStyle = '#0e0e12';
+    for (let i=0;i<100;i++) {
+        const phi = i/100 * 2*Math.PI;
+        const po = pointOnRing(phi, TRK.halfW+10);
+        const pi_ = pointOnRing(phi, -(TRK.halfW+10));
+        cx2d.beginPath(); cx2d.arc(po.x, po.y, 5, 0, 2*Math.PI); cx2d.fill();
+        cx2d.beginPath(); cx2d.arc(pi_.x, pi_.y, 5, 0, 2*Math.PI); cx2d.fill();
+    }
+
+    // start/finish line: real two-row checkers across the front stretch
+    const lineTop = TRK.cy + TRK.R - TRK.halfW + 4;
+    const lineH = (2*TRK.halfW - 8) / 10;
+    for (let r = 0; r < 2; r++) for (let c = 0; c < 10; c++) {
+        cx2d.fillStyle = (r + c) % 2 ? '#ffffff' : '#111111';
+        cx2d.fillRect(TRK.cx - 7 + r*7, lineTop + c*lineH, 7, lineH);
+    }
+
+    // infield sign
+    cx2d.textAlign = 'center';
+    cx2d.fillStyle = 'rgba(255,212,0,0.18)';
+    cx2d.font = 'bold 44px Bahnschrift, Arial Narrow, sans-serif';
+    cx2d.fillText('RAINEY RACING', TRK.cx, TRK.cy - 4);
+    cx2d.fillStyle = 'rgba(244,242,250,0.14)';
+    cx2d.font = 'bold 20px Bahnschrift, Arial Narrow, sans-serif';
+    cx2d.fillText('✝ GOD FIRST · FAMILY ALWAYS', TRK.cx, TRK.cy + 26);
+
+    // the grounds: grandstand, flagman, lights, haulers, trees, sponsor board
+    for (const s of SCENERY) drawSceneryItem(s, s.x, s.y, 1);
+}
+
+function drawKart(k) {
+    if (k.parked) return;
+    cx2d.save();
+    cx2d.translate(k.x, k.y);
+    cx2d.rotate(k.heading);
+    // shadow
+    cx2d.fillStyle = 'rgba(0,0,0,0.35)';
+    cx2d.beginPath(); cx2d.ellipse(-1, 2, 14, 10, 0, 0, 2*Math.PI); cx2d.fill();
+    // rear tires
+    cx2d.fillStyle = '#111';
+    cx2d.fillRect(-12, -11, 7, 5); cx2d.fillRect(-12, 6, 7, 5);
+    // front tires
+    cx2d.fillRect(6, -9, 5, 4); cx2d.fillRect(6, 5, 5, 4);
+    // nerf bars and front bumper
+    cx2d.fillStyle = '#22222a';
+    cx2d.fillRect(-6, -10.5, 9, 2.5);
+    cx2d.fillRect(-6, 8, 9, 2.5);
+    cx2d.fillRect(12.5, -4, 2, 8);
+    // body
+    cx2d.fillStyle = k.body;
+    cx2d.beginPath();
+    cx2d.moveTo(13, 0); cx2d.lineTo(4, -7); cx2d.lineTo(-11, -6);
+    cx2d.lineTo(-11, 6); cx2d.lineTo(4, 7); cx2d.closePath();
+    cx2d.fill();
+    cx2d.strokeStyle = k.trim; cx2d.lineWidth = 1.5; cx2d.stroke();
+    // driver helmet
+    cx2d.fillStyle = k.trim;
+    cx2d.beginPath(); cx2d.arc(-2, 0, 4, 0, 2*Math.PI); cx2d.fill();
+    cx2d.restore();
+}
+
+function drawKartTags() {
+    // drawn in screen space after the camera restore, so tags never rotate
+    cx2d.textAlign = 'center';
+    cx2d.font = 'bold 12px Bahnschrift, Arial Narrow, sans-serif';
+    for (const k of karts) {
+        if (k.parked) continue;
+        const s = worldToScreen(k.x, k.y);
+        if (s.x < -20 || s.x > W+20 || s.y < -20 || s.y > H+20) continue;
+        cx2d.fillStyle = k.isPlayer ? '#FFD400' : 'rgba(255,255,255,0.85)';
+        cx2d.fillText('#' + k.num, s.x, s.y - (camActive() ? 30 : 18));
+    }
+}
+
+function drawMinimap() {
+    // little track map, top-right, driver cam only
+    const s = 0.2, mx = W - 105, my = 118;
+    cx2d.save();
+    cx2d.globalAlpha = 0.85;
+    cx2d.fillStyle = 'rgba(13,11,24,0.7)';
+    cx2d.beginPath();
+    cx2d.roundRect(mx - 88, my - 62, 176, 124, 10);
+    cx2d.fill();
+    cx2d.strokeStyle = '#8a6238'; cx2d.lineWidth = 10;
+    cx2d.beginPath();
+    cx2d.moveTo(mx - TRK.A*s, my - TRK.R*s);
+    cx2d.lineTo(mx + TRK.A*s, my - TRK.R*s);
+    cx2d.arc(mx + TRK.A*s, my, TRK.R*s, -Math.PI/2, Math.PI/2);
+    cx2d.lineTo(mx - TRK.A*s, my + TRK.R*s);
+    cx2d.arc(mx - TRK.A*s, my, TRK.R*s, Math.PI/2, 3*Math.PI/2);
+    cx2d.closePath();
+    cx2d.stroke();
+    // start line tick
+    cx2d.strokeStyle = '#fff'; cx2d.lineWidth = 2;
+    cx2d.beginPath();
+    cx2d.moveTo(mx, my + (TRK.R - TRK.halfW)*s);
+    cx2d.lineTo(mx, my + (TRK.R + TRK.halfW)*s);
+    cx2d.stroke();
+    for (const k of karts) {
+        if (k.parked) continue;
+        cx2d.fillStyle = k.body;
+        cx2d.beginPath();
+        cx2d.arc(mx + (k.x-TRK.cx)*s, my + (k.y-TRK.cy)*s, k.isPlayer ? 4.5 : 3, 0, 2*Math.PI);
+        cx2d.fill();
+        if (k.isPlayer) { cx2d.strokeStyle = '#fff'; cx2d.lineWidth = 1.5; cx2d.stroke(); }
+    }
+    cx2d.restore();
+}
+
+// ---------- Cockpit view: perspective render from the driver's seat ----------
+const COCKPIT = { eyeH: 26, focal: 900, horizon: Math.round(H*0.40), far: 2600 };
+
+function drawCockpitView() {
+    const a = player.heading;
+    const fx = Math.cos(a), fy = Math.sin(a);
+    const rx = -fy, ry = fx;                        // driver's right hand side
+    const ex = player.x - fx*14, ey = player.y - fy*14;
+    const HOR = COCKPIT.horizon, F = COCKPIT.focal, EH = COCKPIT.eyeH;
+
+    // dusk sky
+    let g = cx2d.createLinearGradient(0, 0, 0, HOR);
+    g.addColorStop(0, '#120c26'); g.addColorStop(0.75, '#2c1f4e'); g.addColorStop(1, '#6b4630');
+    cx2d.fillStyle = g; cx2d.fillRect(0, 0, W, HOR);
+    // stars
+    for (let i = 0; i < 42; i++) {
+        cx2d.fillStyle = `rgba(255,255,255,${(0.25 + ((i*13)%10)/28).toFixed(2)})`;
+        cx2d.fillRect((i*173)%W, (i*89)%(HOR-90), 2, 2);
+    }
+    // crescent moon
+    cx2d.fillStyle = '#e8e4d0';
+    cx2d.beginPath(); cx2d.arc(W*0.78, 62, 16, 0, 2*Math.PI); cx2d.fill();
+    cx2d.fillStyle = '#1d1538';
+    cx2d.beginPath(); cx2d.arc(W*0.78 - 8, 58, 14, 0, 2*Math.PI); cx2d.fill();
+    // treeline silhouette on the horizon
+    cx2d.fillStyle = '#0d0a1c';
+    cx2d.fillRect(0, HOR - 7, W, 7);
+    for (let x = 0; x < W; x += 46) {
+        cx2d.beginPath();
+        cx2d.arc(x + 20, HOR - 6, 9 + (x*7) % 8, Math.PI, 0);
+        cx2d.fill();
+    }
+    // grass base
+    cx2d.fillStyle = '#20301c'; cx2d.fillRect(0, HOR, W, H - HOR);
+
+    // chord of the scanline (in u along the driver's-right axis) inside the
+    // capsule "all points within distance D of the spine segment"
+    const chord = (Cx, Cy, D) => {
+        let lo = Infinity, hi = -Infinity, any = false;
+        // rectangle part
+        let l = -Infinity, h = Infinity, ok = true;
+        if (Math.abs(ry) < 1e-9) { if (Math.abs(Cy - TRK.cy) > D) ok = false; }
+        else {
+            const u1 = (TRK.cy - D - Cy)/ry, u2 = (TRK.cy + D - Cy)/ry;
+            l = Math.max(l, Math.min(u1,u2)); h = Math.min(h, Math.max(u1,u2));
+        }
+        if (ok) {
+            if (Math.abs(rx) < 1e-9) { if (Cx < TRK.cx-TRK.A || Cx > TRK.cx+TRK.A) ok = false; }
+            else {
+                const u1 = (TRK.cx - TRK.A - Cx)/rx, u2 = (TRK.cx + TRK.A - Cx)/rx;
+                l = Math.max(l, Math.min(u1,u2)); h = Math.min(h, Math.max(u1,u2));
+            }
+        }
+        if (ok && l <= h) { lo = l; hi = h; any = true; }
+        // the two turn caps
+        for (const capX of [TRK.cx - TRK.A, TRK.cx + TRK.A]) {
+            const dx = Cx - capX, dy = Cy - TRK.cy;
+            const b = dx*rx + dy*ry, c0 = dx*dx + dy*dy - D*D;
+            const disc = b*b - c0;
+            if (disc > 0) {
+                const rt = Math.sqrt(disc);
+                lo = Math.min(lo, -b - rt); hi = Math.max(hi, -b + rt); any = true;
+            }
+        }
+        return any ? [lo, hi] : null;
+    };
+
+    const eyeFwd = ex*fx + ey*fy;
+    const ROW = 2;
+    for (let y = HOR + 1; y < H; y += ROW) {
+        const z = EH * F / (y - HOR);
+        if (z > COCKPIT.far) continue;
+        const Cx = ex + fx*z, Cy = ey + fy*z;
+        const s = F / z;
+        const dirtO = chord(Cx, Cy, TRK.R + TRK.halfW);
+        if (!dirtO) continue;
+        const dirtI = chord(Cx, Cy, TRK.R - TRK.halfW);
+        cx2d.fillStyle = (Math.floor((eyeFwd + z)/70) & 1) ? '#8a6238' : '#825c33';
+        const spans = dirtI ? [[dirtO[0], dirtI[0]], [dirtI[1], dirtO[1]]] : [dirtO];
+        for (const sp of spans) if (sp[1] > sp[0])
+            cx2d.fillRect(W/2 + sp[0]*s, y, Math.max(1,(sp[1]-sp[0])*s), ROW);
+        const gO = chord(Cx, Cy, TRK.R + 16);
+        if (gO) {
+            const gI = chord(Cx, Cy, TRK.R - 22);
+            cx2d.fillStyle = 'rgba(90,60,32,0.55)';
+            const gs = gI ? [[gO[0], gI[0]], [gI[1], gO[1]]] : [gO];
+            for (const sp of gs) if (sp[1] > sp[0])
+                cx2d.fillRect(W/2 + sp[0]*s, y, Math.max(1,(sp[1]-sp[0])*s), ROW);
+        }
+        // start/finish stripe (a white band across the front stretch)
+        let sl = -Infinity, sh = Infinity, sOk = true;
+        if (Math.abs(rx) < 1e-9) { if (Cx < TRK.cx-6 || Cx > TRK.cx+6) sOk = false; }
+        else {
+            const u1 = (TRK.cx-6-Cx)/rx, u2 = (TRK.cx+6-Cx)/rx;
+            sl = Math.max(sl, Math.min(u1,u2)); sh = Math.min(sh, Math.max(u1,u2));
+        }
+        if (sOk) {
+            if (Math.abs(ry) < 1e-9) { if (Cy < TRK.cy+TRK.R-TRK.halfW || Cy > TRK.cy+TRK.R+TRK.halfW) sOk = false; }
+            else {
+                const u1 = (TRK.cy+TRK.R-TRK.halfW-Cy)/ry, u2 = (TRK.cy+TRK.R+TRK.halfW-Cy)/ry;
+                sl = Math.max(sl, Math.min(u1,u2)); sh = Math.min(sh, Math.max(u1,u2));
+            }
+            if (sOk && sl < sh) {
+                cx2d.fillStyle = '#e6e6e6';
+                cx2d.fillRect(W/2 + sl*s, y, Math.max(1,(sh-sl)*s), ROW);
+            }
+        }
+    }
+
+    // depth haze at the horizon
+    g = cx2d.createLinearGradient(0, HOR, 0, HOR + 150);
+    g.addColorStop(0, 'rgba(18,12,38,0.6)'); g.addColorStop(1, 'rgba(18,12,38,0)');
+    cx2d.fillStyle = g; cx2d.fillRect(0, HOR, W, 150);
+
+    // sprites: barriers, sign, karts, dust — far to near
+    const proj = (wx, wy) => {
+        const dx = wx - ex, dy = wy - ey;
+        const v = dx*fx + dy*fy;
+        if (v < 10 || v > COCKPIT.far) return null;
+        const sc = F / v;
+        return { x: W/2 + (dx*rx + dy*ry)*sc, y: HOR + EH*sc, s: sc, v };
+    };
+    const items = [];
+    // 3D barrier walls — vertical posts with a white/red crash-wall cap
+    for (let i = 0; i < 110; i++) {
+        const phi = i/110 * 2*Math.PI;
+        const capStripe = (i % 2) ? '#d23a3a' : '#e8e8e8';
+        for (const off of [TRK.halfW+11, -(TRK.halfW+11)]) {
+            const p0 = pointOnRing(phi, off);
+            const pr = proj(p0.x, p0.y);
+            if (pr && pr.v > 35) items.push({ v: pr.v, draw: () => {
+                const postH = Math.min(17*pr.s, 95);
+                const wpx = Math.max(2, Math.min(8*pr.s, 40));
+                cx2d.fillStyle = '#15151a';
+                cx2d.fillRect(pr.x - wpx/2, pr.y - postH, wpx, postH);
+                cx2d.fillStyle = capStripe;
+                cx2d.fillRect(pr.x - wpx/2, pr.y - postH, wpx, Math.max(1, postH*0.34));
+            }});
+        }
+    }
+    const sign = proj(TRK.cx, TRK.cy + TRK.R - 130);
+    if (sign && sign.s > 0.22) items.push({ v: sign.v, draw: () => {
+        const w2 = 170*sign.s, h2 = 46*sign.s;
+        cx2d.fillStyle = '#2b2547';
+        cx2d.fillRect(sign.x - 3*sign.s, sign.y - 34*sign.s, 6*sign.s, 34*sign.s);
+        cx2d.fillStyle = '#17142a';
+        cx2d.fillRect(sign.x - w2/2, sign.y - h2 - 34*sign.s, w2, h2);
+        cx2d.strokeStyle = '#FFD400'; cx2d.lineWidth = Math.max(1, 2*sign.s);
+        cx2d.strokeRect(sign.x - w2/2, sign.y - h2 - 34*sign.s, w2, h2);
+        if (sign.s > 0.3) {
+            cx2d.fillStyle = '#FFD400';
+            cx2d.font = `bold ${Math.max(8, Math.round(19*sign.s))}px Bahnschrift, Arial Narrow, sans-serif`;
+            cx2d.textAlign = 'center';
+            cx2d.fillText('RAINEY RACING', sign.x, sign.y - h2/2 - 28*sign.s);
+        }
+    }});
+    for (const sc of SCENERY) {
+        const pr = proj(sc.x, sc.y);
+        if (pr) items.push({ v: pr.v, draw: () => drawSceneryItem(sc, pr.x, pr.y, Math.min(pr.s, 7)) });
+    }
+    for (const k of karts) {
+        if (k === player || k.parked) continue;
+        const pr = proj(k.x, k.y);
+        if (pr) items.push({ v: pr.v, draw: () => drawKartSprite(k, pr) });
+    }
+    for (const p of particles) {
+        const pr = proj(p.x, p.y);
+        if (pr) items.push({ v: pr.v, draw: () => {
+            const al = 1 - p.age/p.life;
+            const yy = pr.y - Math.min(((p.z||0) + 5) * pr.s, 150);   // lift by the dirt's height
+            if (p.kind === 'clod') cx2d.fillStyle = `rgba(74,51,30,${(0.75*al).toFixed(3)})`;
+            else cx2d.fillStyle = `rgba(200,168,124,${(0.5*al).toFixed(3)})`;
+            cx2d.beginPath();
+            cx2d.arc(pr.x, yy, Math.min(p.size*(1+p.age*2)*pr.s, 60), 0, 2*Math.PI);
+            cx2d.fill();
+        }});
+    }
+    items.sort((a,b) => b.v - a.v);
+    for (const it of items) it.draw();
+
+    drawCockpitOverlay();
+}
+
+function drawKartSprite(k, pr) {
+    // cap the scale and fade out karts you're passing right beside,
+    // so a close kart doesn't balloon over the whole windshield
+    const s = Math.min(pr.s, 9), x = pr.x, y = pr.y;
+    cx2d.save();
+    if (pr.v < 90) cx2d.globalAlpha = Math.max(0, (pr.v - 40) / 50);
+    cx2d.fillStyle = 'rgba(0,0,0,0.35)';
+    cx2d.beginPath(); cx2d.ellipse(x, y, 15*s, 5*s, 0, 0, 2*Math.PI); cx2d.fill();
+    cx2d.fillStyle = '#111';
+    cx2d.fillRect(x - 14*s, y - 9*s, 6*s, 10*s);
+    cx2d.fillRect(x + 8*s, y - 9*s, 6*s, 10*s);
+    cx2d.fillStyle = k.body;
+    cx2d.beginPath();
+    cx2d.roundRect(x - 10*s, y - 12*s, 20*s, 12*s, 3*s);
+    cx2d.fill();
+    cx2d.strokeStyle = k.trim; cx2d.lineWidth = Math.max(1, 1.5*s); cx2d.stroke();
+    cx2d.fillStyle = k.trim;
+    cx2d.beginPath(); cx2d.arc(x, y - 16*s, 5*s, 0, 2*Math.PI); cx2d.fill();
+    if (pr.s > 0.35 && pr.s < 6) {
+        cx2d.fillStyle = 'rgba(255,255,255,0.9)';
+        cx2d.font = `bold ${Math.min(24, Math.max(9, Math.round(11*pr.s)))}px Bahnschrift, Arial Narrow, sans-serif`;
+        cx2d.textAlign = 'center';
+        cx2d.fillText('#' + k.num, x, y - 24*s);
+    }
+    cx2d.restore();
+}
+
+function drawCockpitOverlay() {
+    // your kart's nose, in your colors
+    cx2d.fillStyle = player.body;
+    cx2d.beginPath();
+    cx2d.moveTo(W/2 - 190, H);
+    cx2d.lineTo(W/2 - 70, H - 78);
+    cx2d.lineTo(W/2 + 70, H - 78);
+    cx2d.lineTo(W/2 + 190, H);
+    cx2d.closePath();
+    cx2d.fill();
+    cx2d.strokeStyle = player.trim; cx2d.lineWidth = 5; cx2d.stroke();
+    cx2d.fillStyle = player.trim;
+    cx2d.fillRect(W/2 - 8, H - 78, 16, 78);
+    cx2d.fillStyle = 'rgba(255,255,255,0.9)';
+    cx2d.font = 'bold 20px Bahnschrift, Arial Narrow, sans-serif';
+    cx2d.textAlign = 'center';
+    cx2d.fillText('#' + player.num, W/2 + 96, H - 18);
+    // steering wheel — turns with your hands
+    cx2d.save();
+    cx2d.translate(W/2, H + 62);
+    cx2d.rotate(player.steerVal * 1.5);
+    cx2d.strokeStyle = '#15151a'; cx2d.lineWidth = 22;
+    cx2d.beginPath(); cx2d.arc(0, 0, 118, 0, 2*Math.PI); cx2d.stroke();
+    cx2d.strokeStyle = '#26262e'; cx2d.lineWidth = 12;
+    for (const ang of [-0.75*Math.PI, -0.25*Math.PI, 0.5*Math.PI]) {
+        cx2d.beginPath(); cx2d.moveTo(0, 0);
+        cx2d.lineTo(Math.cos(ang)*110, Math.sin(ang)*110);
+        cx2d.stroke();
+    }
+    cx2d.fillStyle = player.trim;
+    cx2d.beginPath(); cx2d.arc(0, 0, 26, 0, 2*Math.PI); cx2d.fill();
+    cx2d.restore();
+}
+
+function drawHUD() {
+    const speed = Math.round(Math.hypot(player.vx, player.vy) / 3.2);
+    cx2d.fillStyle = 'rgba(13,11,24,0.82)';
+    cx2d.fillRect(0, 0, W, 40);
+    cx2d.fillStyle = '#f4f2fa';
+    cx2d.font = 'bold 19px Bahnschrift, Arial Narrow, sans-serif';
+
+    if (state === 'qualify' || state === 'gridready') {
+        cx2d.textAlign = 'left';
+        cx2d.fillStyle = '#5B9BFF';
+        cx2d.fillText('⏱ QUALIFYING', 20, 27);
+        cx2d.fillStyle = '#f4f2fa';
+        cx2d.fillText(`LAP ${Math.min(QUAL_LAPS, player.lap + 1)}/${QUAL_LAPS}`, 200, 27);
+        cx2d.textAlign = 'center';
+        cx2d.fillStyle = '#FFD400';
+        cx2d.fillText((raceTime - player.lapStart).toFixed(2) + 's', W/2, 27);
+        cx2d.textAlign = 'right';
+        cx2d.fillStyle = '#f4f2fa';
+        cx2d.fillText(speed + ' mph', W - 130, 27);
+        cx2d.fillStyle = '#a9a3c4';
+        cx2d.fillText(player.bestLap ? `best ${player.bestLap.toFixed(2)}s` : 'best —', W - 20, 27);
+        return;
+    }
+
+    const ranked = [...karts].sort((a,b) =>
+        (b.done ? LAPS + 1/(1+b.finishTime) : b.progress) - (a.done ? LAPS + 1/(1+a.finishTime) : a.progress));
+    const pos = ranked.indexOf(player) + 1;
+    const lap = Math.min(LAPS, Math.max(1, player.lap + 1));
+    const sess = session === 'heat' ? ('HEAT ' + player.heat) : 'FEATURE';
+    cx2d.textAlign = 'left';
+    cx2d.fillStyle = session === 'heat' ? '#FFD400' : '#5B9BFF';
+    cx2d.fillText(sess, 20, 27);
+    cx2d.fillStyle = '#f4f2fa';
+    cx2d.fillText(`LAP ${player.done ? LAPS : lap}/${LAPS}`, 150, 27);
+    cx2d.fillText(`POS ${pos}/${karts.length}`, 285, 27);
+    cx2d.textAlign = 'center';
+    cx2d.fillStyle = '#FFD400';
+    cx2d.fillText(raceTime.toFixed(1) + 's', W/2, 27);
+    cx2d.textAlign = 'right';
+    cx2d.fillStyle = '#f4f2fa';
+    cx2d.fillText(speed + ' mph', W - 130, 27);
+    cx2d.fillStyle = '#a9a3c4';
+    cx2d.fillText(player.bestLap ? `best ${player.bestLap.toFixed(2)}s` : 'best —', W - 20, 27);
+
+    // flag stand: what flag the race is under right now
+    const fx = 400, fy = 11, fw = 26, fh = 18;
+    drawFlagRect(fx, fy, fw, fh);
+    cx2d.strokeStyle = '#666'; cx2d.lineWidth = 1;
+    cx2d.strokeRect(fx, fy, fw, fh);
+}
+
+function drawBanner() {
+    if (performance.now() > banner.until) return;
+    cx2d.save();
+    cx2d.globalAlpha = 0.92;
+    cx2d.fillStyle = banner.color;
+    cx2d.fillRect(0, 44, W, 38);
+    cx2d.globalAlpha = 1;
+    cx2d.fillStyle = '#fff';
+    cx2d.textAlign = 'center';
+    cx2d.font = 'bold 22px Bahnschrift, Arial Narrow, sans-serif';
+    cx2d.fillText(banner.text, W/2, 71);
+    cx2d.restore();
+}
+
+let countdownPrevD = null;
+function drawCountdown() {
+    const t = (performance.now() - countStart) / 1000;
+    cx2d.textAlign = 'center';
+    if (state === 'countdown') {
+        cx2d.font = 'bold 62px Bahnschrift, Arial Narrow, sans-serif';
+        cx2d.fillStyle = '#FFD400';
+        cx2d.fillText('PACE LAP', W/2, H/2 - 40);
+        cx2d.font = 'bold 26px Bahnschrift, Arial Narrow, sans-serif';
+        cx2d.fillStyle = 'rgba(244,242,250,0.85)';
+        cx2d.fillText('GREEN FLAG OFF TURN 4 — GET READY', W/2, H/2 + 8);
+        // green flies as the pole-sitter straightens out of turn 4 (15s failsafe)
+        const leader = karts.reduce((a,b) => (a.startPos <= b.startPos ? a : b));
+        const lp = polar(leader.x, leader.y);
+        const d = angDiff(lp.phi, Math.PI/2);
+        const crossed = countdownPrevD !== null && countdownPrevD > TURN4_EXIT && d <= TURN4_EXIT && d > 0;
+        if ((crossed && t > 1) || t > 15) {
+            state = 'race'; raceStart = performance.now(); beepGo();
+            // the field paced forward — re-anchor each kart's lap scoring to
+            // where it actually sits when the green flies (signed smallest
+            // distance, so nosing past the stripe isn't scored a lap down)
+            for (const k of karts) {
+                const pol = polar(k.x, k.y);
+                k.prevPhi = pol.phi;
+                k.progress = -angDiff(pol.phi, Math.PI/2) / (2*Math.PI);
+                k.lapStart = 0;
+            }
+            showBanner('🟢 GREEN GREEN GREEN!', '#1d7c37', 2);
+        }
+        countdownPrevD = d;
+    } else if (raceTime < 0.8) {
+        cx2d.font = 'bold 110px Bahnschrift, Arial Narrow, sans-serif';
+        cx2d.fillStyle = '#3AAE5C';
+        cx2d.fillText('GO!', W/2, H/2 - 30);
+    }
+}
+
+// tiny countdown beeps
+let audio = null, lastBeep = 0, muted = false;
+function beep(freq, dur) {
+    if (muted) return;
+    try {
+        audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+        const o = audio.createOscillator(), g = audio.createGain();
+        o.frequency.value = freq; o.type = 'square';
+        g.gain.setValueAtTime(0.08, audio.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + dur);
+        o.connect(g); g.connect(audio.destination);
+        o.start(); o.stop(audio.currentTime + dur);
+    } catch(e) {}
+}
+function beepOnce(n) { if (n !== lastBeep) { lastBeep = n; beep(440, 0.15); } }
+function beepGo() { beep(880, 0.4); lastBeep = 0; }
+
+// ---------- Engine sound: a low growl that revs with your speed ----------
+let engine = null;
+function toggleMute() {
+    muted = !muted;
+    const b = document.getElementById('muteBtn');
+    b.innerHTML = muted ? '&#128263;' : '&#128266;';   // 🔇 / 🔊
+    b.classList.toggle('muted', muted);
+}
+function startEngine() {
+    try {
+        audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+        if (audio.state === 'suspended') audio.resume();
+        if (engine) return;
+        const g = audio.createGain(); g.gain.value = 0;
+        const f = audio.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 480;
+        const o1 = audio.createOscillator(); o1.type = 'sawtooth';
+        const o2 = audio.createOscillator(); o2.type = 'square';
+        const g2 = audio.createGain(); g2.gain.value = 0.35;
+        o1.connect(f); o2.connect(g2); g2.connect(f); f.connect(g); g.connect(audio.destination);
+        o1.start(); o2.start();
+        engine = { o1, o2, g };
+    } catch(e) {}
+}
+function updateEngine() {
+    if (!engine || !player) return;
+    const running = state === 'countdown' || state === 'race' || state === 'done';
+    const sp = Math.hypot(player.vx, player.vy);
+    const rev = 55 + (sp / PHYS.maxSpeed) * 135 + (input.up && state === 'race' ? 12 : 0);
+    engine.o1.frequency.setTargetAtTime(rev, audio.currentTime, 0.06);
+    engine.o2.frequency.setTargetAtTime(rev / 2, audio.currentTime, 0.06);
+    engine.g.gain.setTargetAtTime(running && !muted ? 0.05 : 0, audio.currentTime, 0.12);
+}
+
+// ---------- Main loop ----------
+let lastT = performance.now();
+function frame(now) {
+    let dt = Math.min(0.033, (now - lastT) / 1000);
+    lastT = now;
+
+    if (state === 'race' || state === 'done' || state === 'qualify') raceTime = (now - raceStart) / 1000;
+
+    if (state === 'qualify') {
+        stepKart(player, dt);
+        if (raceTime > 60) finishQualify();          // failsafe if the run never completes
+    } else if (state !== 'menu' && state !== 'gridready') {
+        for (const k of karts) stepKart(k, dt);
+        collideKarts();
+    }
+
+    // race control: stuck karts bring out the yellow (or a quiet push-truck save)
+    if (state === 'race') {
+        const stuck = karts.filter(k => !k.done && k.slowTime > 1.0);
+        if (stuck.length) {
+            stuck.forEach(rescueKart);
+            if (!caution.active && now > caution.cooldownUntil && player.lap < LAPS - 1) {
+                caution.active = true; caution.phase = 'form';
+                caution.startMs = now; caution.leadPrevD = null;
+                caution.order = [...karts].filter(k => !k.done).sort((a,b) => b.progress - a.progress);
+                showBanner('🟡 CAUTION — LINE UP SINGLE FILE', '#a08300', 4);
+                beep(330, 0.35);
+            }
+        }
+        if (caution.active) {
+            const lead = caution.order[0];
+            const lp = polar(lead.x, lead.y);
+            if (caution.phase === 'form') {
+                // formed when everyone is near their slot in line (or we stop waiting)
+                const formed = now - caution.startMs > 6000 ||
+                    caution.order.every((k, i) => i === 0 ||
+                        Math.abs(angDiff(polar(k.x, k.y).phi, lp.phi + i * SLOT_GAP)) < 0.12);
+                if (formed) {
+                    caution.phase = 'armed';
+                    showBanner('🟡 ONE TO GO — GREEN OFF TURN 4!', '#a08300', 3);
+                    beep(440, 0.2);
+                }
+            } else if (caution.phase === 'armed') {
+                // drop the green as the leader exits the last corner before the stripe
+                const d = angDiff(lp.phi, Math.PI/2);      // >0 and shrinking on the approach
+                if (caution.leadPrevD !== null && caution.leadPrevD > TURN4_EXIT && d <= TURN4_EXIT && d > 0) {
+                    caution.active = false; caution.cooldownUntil = now + 15000;
+                    karts.forEach(k => k.steerVal = 0);
+                    showBanner('🟢 GREEN GREEN GREEN!', '#1d7c37', 2);
+                    beepGo();
+                }
+                caution.leadPrevD = d;
+            }
+        }
+    }
+    updateEngine();
+    // particles (dirt clods arc up under gravity, then settle)
+    for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.age += dt; p.x += p.vx*dt; p.y += p.vy*dt;
+        if (p.z !== undefined) {
+            p.vz -= 330*dt; p.z += p.vz*dt;
+            if (p.z < 0) { p.z = 0; p.vz *= -0.35; }
+        }
+        if (p.age > p.life) particles.splice(i, 1);
+    }
+
+    // camera smoothly tracks the player's heading in driver cam
+    if (player) camAng += angDiff(player.heading, camAng) * Math.min(1, 8*dt);
+
+    if (cam === 'cockpit' && state !== 'menu' && player) {
+        drawCockpitView();
+    } else {
+        drawBackground();
+        cx2d.save();
+        applyCamera();
+        drawTrack();
+        for (const p of particles) {
+            const a = 1 - p.age/p.life;
+            const lift = (p.z || 0) * 0.4;               // a little visual pop off the ground
+            if (p.kind === 'clod') cx2d.fillStyle = `rgba(74,51,30,${(0.65*a).toFixed(3)})`;
+            else cx2d.fillStyle = `rgba(200,168,124,${(0.5*a).toFixed(3)})`;
+            cx2d.beginPath(); cx2d.arc(p.x, p.y - lift, p.size*(1+p.age*2), 0, 2*Math.PI); cx2d.fill();
+        }
+        if (state !== 'menu') {
+            // draw back-of-field first so the player renders on top
+            [...karts].reverse().forEach(drawKart);
+        }
+        cx2d.restore();
+        if (state !== 'menu') drawKartTags();
+    }
+    if (state !== 'menu') {
+        drawHUD();
+        drawBanner();
+        if (cam !== 'tv') drawMinimap();
+    }
+    if (state === 'countdown' || (state === 'race' && raceTime < 0.8)) drawCountdown();
+
+    // version tag — if this doesn't match the newest version, the browser is showing a stale copy
+    cx2d.textAlign = 'right';
+    cx2d.font = 'bold 12px Bahnschrift, Arial Narrow, sans-serif';
+    cx2d.fillStyle = 'rgba(255,212,0,0.55)';
+    cx2d.fillText('v13', W - 10, H - 10);
+
+    requestAnimationFrame(frame);
+}
+
+let lastDriver = 'travis';
+document.querySelectorAll('.driver-btn').forEach(b =>
+    b.addEventListener('click', () => { lastDriver = b.dataset.driver; startQualify(lastDriver); }));
+document.getElementById('featureBtn').addEventListener('click', () => {
+    if (gridNextAction === 'heat') startHeat(); else startFeature();
+});
+document.getElementById('muteBtn').addEventListener('click', toggleMute);
+document.getElementById('againBtn').addEventListener('click', () => {
+    document.getElementById('finish').classList.add('hidden');
+    document.getElementById('menu').classList.remove('hidden');
+    state = 'menu';
+});
+
+drawBackground();
+drawTrack();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
