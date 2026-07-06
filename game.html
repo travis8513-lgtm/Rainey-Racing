@@ -19,6 +19,17 @@ body {
     background:var(--carbon); color:var(--text);
     display:flex; flex-direction:column; align-items:center;
     min-height:100%; overflow-x:hidden;
+    /* iOS: game controls are not text — no long-press copy/select popup, no tap flash */
+    -webkit-user-select:none; -moz-user-select:none; user-select:none;
+    -webkit-touch-callout:none;
+    -webkit-tap-highlight-color:transparent;
+    overscroll-behavior:none;
+}
+/* the on-screen controls and buttons never behave like selectable text */
+#touch, #touch button, .btn, .driver-btn, #muteBtn, canvas {
+    -webkit-user-select:none; user-select:none;
+    -webkit-touch-callout:none;
+    -webkit-tap-highlight-color:transparent;
 }
 .topbar {
     width:100%; text-align:center; padding:6px 10px;
@@ -164,7 +175,7 @@ footer a { color:var(--yellow); text-decoration:none; }
         <p class="keys">Press <b>C</b> to switch camera: In-Kart → Behind Kart → TV View &nbsp;·&nbsp; 🔊 button (or <b>M</b>) mutes sound</p>
         <p class="keys">Full race night vs a <b>12-kart field</b>: Qualify → your Heat Race → the Feature.</p>
         <p class="keys">Qualify (2 hot laps) sets the heats · finish up front in your heat to start the feature near the pole.</p>
-        <p class="keys" style="color:#FFD400; font-weight:700;">GAME VERSION 14</p>
+        <p class="keys" style="color:#FFD400; font-weight:700;">GAME VERSION 15</p>
     </div>
 
     <div id="grid" class="overlay hidden">
@@ -1578,7 +1589,7 @@ function frame(now) {
     cx2d.textAlign = 'right';
     cx2d.font = 'bold 12px Bahnschrift, Arial Narrow, sans-serif';
     cx2d.fillStyle = 'rgba(255,212,0,0.55)';
-    cx2d.fillText('v14', W - 10, H - 10);
+    cx2d.fillText('v15', W - 10, H - 10);
 
     requestAnimationFrame(frame);
 }
