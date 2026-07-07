@@ -67,8 +67,17 @@
     justify-content:center; font-size:17px; font-weight:900; color:#0d1a10; opacity:0;}
   .row.on .box{background:var(--green); border-color:var(--green);}
   .row.on .box::after{opacity:1;}
-  .row .lbl{flex:1 1 auto; font-size:15px; line-height:1.35; padding-top:1px;}
-  .row.on .lbl{color:var(--muted); text-decoration:line-through;}
+  .row .lbl{flex:1 1 auto; font-size:15px; line-height:1.35; padding-top:1px; display:flex; flex-direction:column; align-items:flex-start;}
+  .row.on .lbl>span:first-child{color:var(--muted); text-decoration:line-through;}
+  .pn{margin-top:4px; font-size:11px; color:var(--muted); background:var(--card2); border:1px solid var(--line);
+    border-radius:6px; padding:2px 7px; font-variant-numeric:tabular-nums; letter-spacing:.2px;}
+  .buy{flex:0 0 auto; align-self:center; text-decoration:none; background:var(--purpleB); color:#fff;
+    font-weight:800; font-size:12px; padding:9px 12px; border-radius:10px; white-space:nowrap;}
+  .buy:active{filter:brightness(.9);}
+  .vendor{background:var(--card); border:1px solid var(--purple); border-radius:14px; padding:12px 14px; margin:0 0 12px;}
+  .vendor-h{font-weight:800; color:var(--yellow); font-size:14px; margin-bottom:6px;}
+  .vendor-link{display:inline-block; color:var(--purpleB); font-weight:800; text-decoration:none; font-size:15px;}
+  .vendor-note{font-size:12px; color:var(--muted); margin-top:7px;} .vendor-note b{color:var(--text);}
   .row .del{flex:0 0 auto; color:var(--muted); font-size:20px; padding:0 4px; line-height:1;}
 
   /* Reference rows (no checkbox) */
@@ -201,17 +210,17 @@ const CHECK = {
     title:"Shopping List", hint:"What to buy. Tap to check off as you get it.",
     lists:[
       ["tires","🛞 Tires & Wheels",[
-        "Left-rear dirt tire (softer / grippier)",
-        "Right-rear dirt tire (bigger, for stagger)",
-        "Left-front & right-front dirt tires",
+        {t:"Rear tires — Unilli SL Slick 12×9.00-6 (set of 2)", pn:"UN-505SL12", url:"https://www.bmikarts.com/6-Unilli-Racing-SL-Slick-12-x-900-6_p_5062.html"},
+        {t:"Front tire — Unilli SL Slick 11×6.00-6", pn:"UN-505SL116006", url:"https://www.bmikarts.com/6-Unilli-Racing-SL-Slick-11-x-600-6_p_5061.html"},
+        {t:"Front tire — Unilli SL Slick 11.5×8.00-6", pn:"UN-505SL1158006", url:"https://www.bmikarts.com/6-Unilli-Racing-SL-Slick-115-x-800-6-_p_10589.html"},
+        {t:"Rims ×4 — VanK 6×9 wheels", pn:"170.6900.4", url:"https://www.bmikarts.com/VanK_bymfg_283-0-1.html"},
         "A full SPARE set of tires (track changes all day)",
-        "Extra rims / wheels",
         "Bead sealer + valve stems & caps",
         "Tire prep / conditioner (only if your class allows)",
         "Low-range tire gauge, 0–20 psi (accurate)",
       ]],
       ["engine","🔧 Engine (Predator 212 / Clone)",[
-        "Racing oil — your spec (buy several quarts)",
+        "Engine oil — Valvoline VR1 Racing (buy several quarts)",
         "Spark plugs — NGK (buy a few, pre-gap them)",
         "Air filters + foam-filter oil",
         "Pre-filters / Outerwears covers",
@@ -223,12 +232,12 @@ const CHECK = {
         "Backup / spare motor (big one — great insurance)",
       ]],
       ["drivetrain","⛓️ Drivetrain — Chain, Clutch, Gears",[
-        "#35 chain — 2 or more loops",
+        {t:"#35 chain — Regina Gold", pn:"400635R / 400631", url:"https://www.bmikarts.com/35-Regina-Chain--Gold_p_643.html"},
+        {t:"#35 split sprocket (53T–85T)", pn:"6335", url:"https://www.bmikarts.com/35-Split-Sprocket_p_1413.html"},
         "Master links — a whole bag",
         "Spare clutch (complete)",
         "Clutch shoes / springs / drum",
         "Driver (clutch) gears — several tooth counts",
-        "Axle sprockets — several tooth counts",
         "Axle key stock",
         "Chain lube — dry / wax type (for dirt)",
         "Chain breaker / chain tool",
@@ -483,6 +492,7 @@ ST.checked = ST.checked||{};
 ST.custom  = ST.custom||[];
 
 function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function itText(it){ return (typeof it==="string")? it : it.t; }
 function refFmt(s){ const i=s.indexOf(" — "); if(i<0) return esc(s);
   return "<b>"+esc(s.slice(0,i))+"</b> "+esc(s.slice(i+3)); }
 
@@ -495,6 +505,11 @@ function render(){
   const grp = isRef?REF[CUR]:CHECK[CUR];
   let h=`<div class="tabtitle"><h2>${esc(grp.title)}</h2></div>`;
   h+=`<div class="note">${esc(grp.hint)}</div>`;
+  if(CUR==="shop"){
+    h+=`<div class="vendor"><div class="vendor-h">📍 Where we buy</div>`+
+       `<a class="vendor-link" href="https://www.bmikarts.com" target="_blank" rel="noopener">BMI Karts &amp; Parts — bmikarts.com ↗</a>`+
+       `<div class="vendor-note">Tap <b>🛒 Buy</b> on a part below to jump straight to it on BMI.</div></div>`;
+  }
   grp.lists.forEach((L,idx)=>{
     const [lid,ttl,items]=L;
     const openCls = idx===0?" open":"";
@@ -506,33 +521,35 @@ function render(){
       h+=`</div></div>`;
     }else{
       const total=items.length;
-      let done=items.filter(it=>ST.checked[lid+"::"+it]).length;
+      let done=items.filter(it=>ST.checked[lid+"::"+itText(it)]).length;
       h+=`<div class="acc${openCls}"><div class="acc-head" onclick="toggleAcc(this)">
         <div class="t">${esc(ttl)}</div><div class="cnt" id="cnt-${lid}">${done}/${total}</div><div class="chev">▶</div></div>
         <div class="acc-body">`;
       items.forEach(it=>{
-        const k=lid+"::"+it, on=ST.checked[k]?" on":"";
-        h+=`<div class="row${on}" onclick="toggle('${lid}',this)" data-item="${esc(it)}">
-          <div class="box"></div><div class="lbl">${esc(it)}</div></div>`;
+        const text=itText(it), k=lid+"::"+text, on=ST.checked[k]?" on":"";
+        let inner=`<div class="box"></div><div class="lbl"><span>${esc(text)}</span>`;
+        if(typeof it!=="string" && it.pn) inner+=`<span class="pn">Part&nbsp;# ${esc(it.pn)}</span>`;
+        inner+=`</div>`;
+        if(typeof it!=="string" && it.url) inner+=`<a class="buy" href="${esc(it.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">🛒 Buy</a>`;
+        h+=`<div class="row${on}" onclick="toggle('${lid}',this)" data-item="${esc(text)}">${inner}</div>`;
       });
-      // custom items (shop only)
-      if(grp.custom){
-        ST.custom.forEach((it,ci)=>{
-          const k="custom::"+it, on=ST.checked[k]?" on":"";
-          h+=`<div class="row${on}" data-item="${esc(it)}">
-            <div class="box" onclick="toggleCustom('${esc(it)}',this.parentNode)"></div>
-            <div class="lbl" onclick="toggleCustom('${esc(it)}',this.parentNode)">${esc(it)}</div>
-            <div class="del" onclick="delCustom(${ci})">×</div></div>`;
-        });
-        h+=`<div class="adder">
-          <input id="addbox" placeholder="Add your own item…" enterkeyhint="done"
-            onkeydown="if(event.key==='Enter'){addCustom();}">
-          <button onclick="addCustom()">Add</button></div>`;
-      }
       h+=`<div class="listtools"><button class="reset" onclick="resetList('${lid}',event)">Reset ${esc(ttl.replace(/^[^ ]+ /,''))}</button></div>`;
       h+=`</div></div>`;
     }
   });
+  if(CUR==="shop"){
+    h+=`<div class="acc open"><div class="acc-head" onclick="toggleAcc(this)">`+
+       `<div class="t">➕ My Extra Items</div><div class="cnt">${ST.custom.length}</div><div class="chev">▶</div></div>`+
+       `<div class="acc-body">`;
+    ST.custom.forEach((it,ci)=>{
+      const on=ST.checked["custom::"+it]?" on":"";
+      h+=`<div class="row${on}" onclick="toggleCustom(${ci})"><div class="box"></div>`+
+         `<div class="lbl"><span>${esc(it)}</span></div>`+
+         `<div class="del" onclick="event.stopPropagation();delCustom(${ci})">×</div></div>`;
+    });
+    h+=`<div class="adder"><input id="addbox" placeholder="Add your own item…" enterkeyhint="done" onkeydown="if(event.key==='Enter'){addCustom();}"><button onclick="addCustom()">Add</button></div>`;
+    h+=`</div></div>`;
+  }
   main.innerHTML=h;
   window.scrollTo(0,0);
 }
@@ -545,16 +562,16 @@ function toggle(lid,rowEl){
   else { ST.checked[k]=1; rowEl.classList.add("on"); }
   save(); updateCount(lid);
 }
-function toggleCustom(it,rowEl){
+function toggleCustom(ci){
+  const it=ST.custom[ci]; if(it===undefined) return;
   const k="custom::"+it;
-  if(ST.checked[k]){ delete ST.checked[k]; rowEl.classList.remove("on"); }
-  else { ST.checked[k]=1; rowEl.classList.add("on"); }
-  save();
+  if(ST.checked[k]) delete ST.checked[k]; else ST.checked[k]=1;
+  save(); render();
 }
 function updateCount(lid){
   const grp=CHECK[CUR]; if(!grp) return;
   const L=grp.lists.find(x=>x[0]===lid); if(!L) return;
-  const done=L[2].filter(it=>ST.checked[lid+"::"+it]).length;
+  const done=L[2].filter(it=>ST.checked[lid+"::"+itText(it)]).length;
   const el=document.getElementById("cnt-"+lid); if(el) el.textContent=done+"/"+L[2].length;
 }
 function resetList(lid,ev){
