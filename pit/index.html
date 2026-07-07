@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#14101f">
+<meta name="robots" content="noindex, nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pit Book">
+<meta name="description" content="Rainey Racing pit book — shopping list, checklists, maintenance, setup & troubleshooting.">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-180.png">
+<title>Rainey Racing — Pit Book</title>
+<style>
+  :root{
+    --bg:#14101f; --card:#1f1830; --card2:#271e3d; --line:#3a2f56;
+    --text:#f3eeff; --muted:#a99cc7; --yellow:#ffc400; --purple:#8a5cd6;
+    --purpleB:#a46bff; --blue:#5aa0ff; --green:#37c871; --red:#ff6b6b;
+    --safe-b: env(safe-area-inset-bottom); --safe-t: env(safe-area-inset-top);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    overscroll-behavior:none; -webkit-text-size-adjust:100%;}
+  body{padding-bottom:calc(74px + var(--safe-b));}
+  button,.tab,.row,.acc-head{ -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
+
+  /* Header */
+  header{position:sticky; top:0; z-index:20; background:linear-gradient(180deg,#1c1430,#171021);
+    border-bottom:2px solid var(--yellow); padding:calc(10px + var(--safe-t)) 14px 10px;}
+  .hwrap{display:flex; align-items:center; gap:10px; max-width:720px; margin:0 auto;}
+  .badge{width:38px; height:38px; border-radius:9px; flex:0 0 auto;
+    background:conic-gradient(#000 0 25%,#fff 0 50%,#000 0 75%,#fff 0 100%);
+    background-size:12px 12px; border:2px solid var(--yellow);}
+  .htxt{flex:1 1 auto; min-width:0;}
+  .htxt h1{font-size:17px; margin:0; line-height:1.1; letter-spacing:.3px;}
+  .htxt h1 .y{color:var(--yellow);} .htxt h1 .p{color:var(--purpleB);}
+  .htxt p{margin:2px 0 0; font-size:11.5px; color:var(--muted);}
+  .bookbtn{flex:0 0 auto; text-decoration:none; color:#14101f; background:var(--yellow);
+    font-weight:800; font-size:12px; padding:8px 11px; border-radius:9px; white-space:nowrap;}
+
+  main{max-width:720px; margin:0 auto; padding:12px 12px 20px;}
+  .tabtitle{display:flex; align-items:baseline; justify-content:space-between; margin:2px 2px 10px;}
+  .tabtitle h2{font-size:20px; margin:0;}
+  .tabtitle span{font-size:12px; color:var(--muted);}
+
+  /* Accordions */
+  .acc{background:var(--card); border:1px solid var(--line); border-radius:14px;
+    margin:0 0 10px; overflow:hidden;}
+  .acc-head{display:flex; align-items:center; gap:10px; padding:14px 14px; cursor:pointer;}
+  .acc-head .t{flex:1 1 auto; font-weight:700; font-size:15.5px; line-height:1.2;}
+  .acc-head .cnt{font-size:12px; color:var(--muted); background:var(--card2);
+    border:1px solid var(--line); padding:3px 8px; border-radius:20px; white-space:nowrap;}
+  .acc-head .chev{color:var(--muted); transition:transform .18s ease; font-size:13px;}
+  .acc.open .chev{transform:rotate(90deg);}
+  .acc-body{display:none; padding:2px 8px 10px;}
+  .acc.open .acc-body{display:block;}
+
+  /* Rows */
+  .row{display:flex; align-items:flex-start; gap:12px; padding:12px 8px; min-height:48px;
+    border-top:1px solid var(--line); cursor:pointer;}
+  .row:first-child{border-top:none;}
+  .box{flex:0 0 auto; width:26px; height:26px; margin-top:1px; border-radius:7px;
+    border:2px solid var(--purple); background:transparent; position:relative;}
+  .box::after{content:"✓"; position:absolute; inset:0; display:flex; align-items:center;
+    justify-content:center; font-size:17px; font-weight:900; color:#0d1a10; opacity:0;}
+  .row.on .box{background:var(--green); border-color:var(--green);}
+  .row.on .box::after{opacity:1;}
+  .row .lbl{flex:1 1 auto; font-size:15px; line-height:1.35; padding-top:1px;}
+  .row.on .lbl{color:var(--muted); text-decoration:line-through;}
+  .row .del{flex:0 0 auto; color:var(--muted); font-size:20px; padding:0 4px; line-height:1;}
+
+  /* Reference rows (no checkbox) */
+  .rrow{display:flex; gap:10px; padding:10px 8px; border-top:1px solid var(--line); font-size:14.5px; line-height:1.4;}
+  .rrow:first-child{border-top:none;}
+  .rrow .dot{color:var(--yellow); flex:0 0 auto; font-weight:900;}
+  .rrow b{color:var(--yellow); font-weight:700;}
+
+  .listtools{display:flex; justify-content:flex-end; padding:6px 8px 2px;}
+  .reset{background:transparent; border:1px solid var(--line); color:var(--muted);
+    font-size:12px; padding:7px 12px; border-radius:9px;}
+  .reset:active{background:var(--card2);}
+
+  /* Add-your-own */
+  .adder{display:flex; gap:8px; padding:10px 8px 4px;}
+  .adder input{flex:1 1 auto; font-size:16px; padding:11px 12px; border-radius:10px;
+    border:1px solid var(--line); background:#160f26; color:var(--text);}
+  .adder button{flex:0 0 auto; background:var(--purpleB); color:#fff; border:none; font-weight:800;
+    font-size:15px; padding:0 16px; border-radius:10px;}
+
+  .note{background:var(--card2); border:1px dashed var(--line); border-radius:12px;
+    padding:11px 13px; font-size:13px; color:var(--muted); margin:0 0 12px; line-height:1.45;}
+  .note b{color:var(--yellow);}
+
+  /* Home-screen tip */
+  #hint{position:fixed; left:10px; right:10px; bottom:calc(80px + var(--safe-b)); z-index:30;
+    background:#241a3a; border:1px solid var(--purple); border-radius:14px; padding:12px 14px;
+    font-size:13px; color:var(--text); box-shadow:0 8px 30px #0009; display:none; line-height:1.4;}
+  #hint b{color:var(--yellow);}
+  #hint .x{position:absolute; top:6px; right:10px; color:var(--muted); font-size:20px; padding:4px;}
+
+  /* Bottom tab bar */
+  nav{position:fixed; left:0; right:0; bottom:0; z-index:25; background:#171021;
+    border-top:1px solid var(--line); display:flex; padding-bottom:var(--safe-b);}
+  .tab{flex:1 1 0; background:none; border:none; color:var(--muted); padding:9px 2px 8px;
+    display:flex; flex-direction:column; align-items:center; gap:3px; font-size:10.5px; font-weight:700;}
+  .tab .ic{font-size:20px; line-height:1;}
+  .tab.active{color:var(--yellow);}
+  .tab.active .ic{transform:translateY(-1px);}
+  .hidden{display:none !important;}
+</style>
+</head>
+<body>
+<header>
+  <div class="hwrap">
+    <div class="badge" aria-hidden="true"></div>
+    <div class="htxt">
+      <h1><span class="y">RAINEY</span> <span class="p">RACING</span> · Pit Book</h1>
+      <p>#10X · #3 &nbsp;•&nbsp; Camden Speedway · dirt clone / Predator</p>
+    </div>
+    <a class="bookbtn" href="setup-book.pdf" target="_blank" rel="noopener">📄 Book</a>
+  </div>
+</header>
+
+<main id="main"></main>
+
+<div id="hint">
+  <span class="x" onclick="dismissHint()">×</span>
+  <b>Make it an app:</b> tap the <b>Share</b> button in Safari, then <b>“Add to Home Screen.”</b>
+  It opens full-screen and remembers everything you check.
+</div>
+
+<nav id="nav">
+  <button class="tab active" data-tab="shop"><span class="ic">🛒</span>Shop</button>
+  <button class="tab" data-tab="checks"><span class="ic">✅</span>Checklists</button>
+  <button class="tab" data-tab="maint"><span class="ic">🔧</span>Maint</button>
+  <button class="tab" data-tab="setup"><span class="ic">🏁</span>Setup</button>
+  <button class="tab" data-tab="fix"><span class="ic">🩺</span>Fix-It</button>
+</nav>
+
+<script>
+/* ---------------- DATA ---------------- */
+const CHECK = {
+  shop: {
+    title:"Shopping List", hint:"What to buy. Tap to check off as you get it.",
+    lists:[
+      ["tires","🛞 Tires & Wheels",[
+        "Left-rear dirt tire (softer / grippier)",
+        "Right-rear dirt tire (bigger, for stagger)",
+        "Left-front & right-front dirt tires",
+        "A full SPARE set of tires (track changes all day)",
+        "Extra rims / wheels",
+        "Bead sealer + valve stems & caps",
+        "Tire prep / conditioner (only if your class allows)",
+        "Low-range tire gauge, 0–20 psi (accurate)",
+      ]],
+      ["engine","🔧 Engine (Predator 212 / Clone)",[
+        "Racing oil — your spec (buy several quarts)",
+        "Spark plugs — NGK (buy a few, pre-gap them)",
+        "Air filters + foam-filter oil",
+        "Pre-filters / Outerwears covers",
+        "Carb & intake gasket set",
+        "Valve-cover gasket",
+        "Head gasket",
+        "Inline fuel filters",
+        "Spare pull-start rope / recoil",
+        "Backup / spare motor (big one — great insurance)",
+      ]],
+      ["drivetrain","⛓️ Drivetrain — Chain, Clutch, Gears",[
+        "#35 chain — 2 or more loops",
+        "Master links — a whole bag",
+        "Spare clutch (complete)",
+        "Clutch shoes / springs / drum",
+        "Driver (clutch) gears — several tooth counts",
+        "Axle sprockets — several tooth counts",
+        "Axle key stock",
+        "Chain lube — dry / wax type (for dirt)",
+        "Chain breaker / chain tool",
+      ]],
+      ["chassis","🏎️ Chassis & Steering",[
+        "Tie rods + tie-rod ends",
+        "Spare spindle",
+        "Axle bearings + cassettes / collars",
+        "Seat bolts + nerf-bar / bumper hardware kit",
+        "Brake pads",
+        "Brake fluid (sealed)",
+        "Kill switch + wire + connectors",
+        "Lead ballast + mounting bolts (to make weight)",
+      ]],
+      ["tools","🧰 Tools",[
+        "Torque wrench (in-lb AND ft-lb)",
+        "Feeler gauges + spark-plug gap tool",
+        "Stagger / roll-out tape",
+        "Caster–camber gauge + toe plates",
+        "Kart stand / jack",
+        "Cordless impact + socket set",
+        "Kart scales (4-corner — best setup tool you can buy)",
+        "Bead breaker + tire irons + air pump / compressor",
+      ]],
+      ["supplies","🧴 Fluids & Shop Supplies",[
+        "Blue thread-locker + anti-seize",
+        "Safety wire + zip ties + cotter pins",
+        "Brake cleaner + WD-40 + RTV silicone",
+        "Duct / racer tape",
+        "Rags, nitrile gloves, hand cleaner",
+        "Zip-top bags + a parts organizer bin",
+        "Paint pen (mark bolts so you spot a loose one)",
+      ]],
+      ["safety","🦺 Safety Gear",[
+        "Helmet — in-date rating (Snell) + tear-offs",
+        "Neck brace / collar",
+        "Racing suit or jacket",
+        "Racing gloves",
+        "Racing shoes (over the ankle)",
+        "Rib protector",
+        "Fire extinguisher — ABC (mount one)",
+        "First-aid kit",
+      ]],
+      ["pit","⛺ Pit & Comfort",[
+        "EZ-up canopy",
+        "Folding chairs + a work table",
+        "Cooler + water + electrolyte packs",
+        "Generator or power station + cords",
+        "Work light",
+        "Fuel jugs (fresh fuel)",
+        "Sunscreen + bug spray + hats",
+      ]],
+    ],
+    custom:true,
+  },
+  checks: {
+    title:"Checklists", hint:"Tap to check. Hit Reset to reuse next race.",
+    lists:[
+      ["night","🌙 Night Before (at home)",[
+        "Oil changed / level good",
+        "Air filter cleaned, oiled, sealed tight",
+        "Fresh spark plug in + spare in the bag",
+        "Chain: tension, alignment, clip forward, lubed",
+        "Motor-plate & mount bolts torqued + paint-marked",
+        "Baseline setup on the kart (stagger, pressures, width)",
+        "Tires good, pressures set, spares loaded",
+        "Ballast bolted low & left — makes minimum weight",
+        "Brakes firm, pads good",
+        "Driver gear packed (helmet, collar, suit, gloves, shoes)",
+        "Trailer: tools, spares, fuel, canopy, chairs",
+        "Money for pit passes & entry; phone charged",
+      ]],
+      ["track","🏁 At the Track (race-day flow)",[
+        "Unload; walk-around for anything shaken loose",
+        "Sign in / pay / get transponder",
+        "Pass tech inspection",
+        "Go to the drivers' meeting",
+        "Before practice: fuel, oil, kill switch works",
+        "Chain + motor-plate bolts + pressures (60-sec check)",
+        "Practice: is it tight or loose? WHERE on the track?",
+        "Note gear / RPM down the straight",
+        "Between sessions: adjust as the track slicks off",
+        "Re-check chain + bolts + pressures EVERY time out",
+        "Grid: fuel, chain, bolts, pressures, belts, hydrated",
+      ]],
+      ["post","📦 After the Race / Load-Out",[
+        "Let the engine cool (no cold water on a hot engine)",
+        "Quick look for damage, leaks, bent parts",
+        "Write down final pressures + the day's notes",
+        "Grab trophies / payout; return transponder",
+        "Strap karts down front & rear",
+        "Count the tools — nothing left in the dirt",
+        "Fuel & fluids upright & closed",
+        "Leave your spot clean",
+      ]],
+      ["packing","🎒 Packing List (load the trailer)",[
+        "Both karts",
+        "Spare tires (multiple sets) + wheels",
+        "Spares kit (chain, clutch, sprockets, plugs, gaskets)",
+        "Ballast + bolts",
+        "Fuel + oil + chain lube",
+        "Toolbox + kart tools + torque wrench",
+        "Scales + tire gauge + air",
+        "Grid bag (gauge, wrench, tape, zip ties, wire, spare plug)",
+        "Driver gear + backup layers / rain gear",
+        "First-aid kit + fire extinguisher",
+        "Canopy, chairs, table, cooler, water",
+        "Phone + charger; license / membership; cash",
+      ]],
+    ],
+  },
+  maint: {
+    title:"Maintenance", hint:"Keep the karts fast and safe. Check as you go; Reset to reuse.",
+    lists:[
+      ["every","🔁 After EVERY Race Day",[
+        "Wash / blow off the kart (protect carb & electrics)",
+        "Change or check the oil",
+        "Clean & re-oil the air filter; check the intake is sealed",
+        "Chain: wear, tension, master link, re-lube",
+        "Re-torque all motor-mount / motor-plate bolts",
+        "Look over tires; note pressures & wear",
+        "Check for cracks, bent nerf bars, loose seat bolts",
+        "Brakes firm; pads good",
+      ]],
+      ["weekly","🗓️ Weekly / Between Races",[
+        "Re-torque head bolts; check valve lash (cold)",
+        "Clutch: shoes, drum, engagement; grease per maker",
+        "Axle bearings, hubs, keys",
+        "Steering: tie-rod ends, king pins, no slop",
+        "Confirm caster / camber / toe + ride height",
+        "Fastener audit; safety-wire what should be wired",
+        "Restock the trailer from the Shopping List",
+      ]],
+      ["monthly","📅 Monthly / Every Few Races",[
+        "Replace air filter if run hard on dry-slick",
+        "Fresh plug; read the old one",
+        "Drain & clean carb bowl; check fuel filter",
+        "Repack / replace axle bearings if gritty",
+        "Rotate / measure tires; log stagger & wear",
+        "Brake fluid change if spongy",
+      ]],
+      ["seasonal","❄️ Seasonal / Off-Season",[
+        "Engine freshen-up with your builder",
+        "New chain & clutch if worn; new bearings",
+        "Check frame for tweak / cracks; fix nerf bars",
+        "Fresh brake fluid + new pads",
+        "Deep-clean trailer; refresh the whole spares kit",
+        "Review your season logs → build your Camden baseline",
+      ]],
+    ],
+  },
+};
+
+const REF = {
+  setup: {
+    title:"Setup & Tuning", hint:"The track starts tacky and slicks off. Change ONE thing, then feel it.",
+    lists:[
+      ["read","🌡️ Reading the Track",[
+        "Morning / hot laps — Tacky, high grip. Kart may push — free it up.",
+        "Midday / heats — Drying & changing. Small tweaks between sessions.",
+        "Feature — Slick, dry-slick. Hunt for bite; keep it hooked up.",
+      ]],
+      ["tight","➡️ Kart is TIGHT (won't turn) — fixes",[
+        "Stagger — ADD rear stagger",
+        "Crossweight — take OUT wedge",
+        "Seat / weight — free the rear (a little forward)",
+        "Rear grip — stiffer axle or shorter hubs",
+        "Front — a touch more front grip (front tire pressure)",
+        "Rear width — widen the rear (test)",
+      ]],
+      ["loose","↩️ Kart is LOOSE (spins) — fixes",[
+        "Stagger — REDUCE rear stagger",
+        "Crossweight — ADD wedge",
+        "Seat / weight — move weight rearward",
+        "Rear grip — softer axle or longer hubs",
+        "Rear tire — lower the rear pressure for grip",
+        "Rear width — narrow the rear (test)",
+      ]],
+      ["feedback","🗣️ Driver Feedback Words",[
+        "\"Won't turn in the middle\" — tight / push → use TIGHT fixes",
+        "\"Rear steps out\" — loose → use LOOSE fixes",
+        "\"No drive off the corner\" — won't hook up → pressures / axle / gear",
+        "\"Inside rear lifts / bicycles\" — check wedge & stagger",
+        "\"Fast but on edge\" — maybe too free → calm it a touch",
+      ]],
+      ["baseline","📝 Log Your Baseline (write these down)",[
+        "Rear stagger / front stagger",
+        "Cold pressures LF / RF / LR / RR",
+        "Left-side % / crossweight %",
+        "Seat position; rear & front width",
+        "Caster / camber / toe; axle & hubs",
+        "Gear (driver / axle) + straightaway RPM",
+        "Clutch + engagement RPM",
+      ]],
+    ],
+  },
+  fix: {
+    title:"Fix-It / Troubleshooting", hint:"Work top to bottom — most common cause first.",
+    lists:[
+      ["nostart","🔌 Won't Start / Hard to Start",[
+        "Fuel — in tank? valve on? fresh? filter clear? bowl has fuel?",
+        "Spark — kill switch on & working? plug wire on? spark at the plug?",
+        "Plug — fouled / wet? swap the pre-gapped spare",
+        "Choke — set right for cold vs warm",
+        "Air — filter not packed with mud",
+        "Slow weak pull, no pop — check valve lash / deeper issue",
+      ]],
+      ["runsbad","💨 Runs but Bogs / Won't Rev",[
+        "Bogs off the corner — clutch engagement high, gear too tall, or lean",
+        "Black smoke / fouls — too rich; check choke & over-oiled filter",
+        "Surges / lean & hot — fuel starvation; check flow, filter, vent",
+        "Sputters after dust — dirt in the carb; clean the bowl, check filter seal",
+        "Dies at idle — idle / clutch drag or fuel",
+      ]],
+      ["overheat","🔥 Overheating / Down on Power",[
+        "Clean the cooling fins & shroud (mud cooks it)",
+        "Oil level right, not overfilled; oil fresh",
+        "Not running lean (lean = hot) — read the plug",
+        "Clutch not slipping / dragging",
+      ]],
+      ["chain","⛓️ Chain Problems",[
+        "Came off — tension, alignment, worn sprockets; replace a stretched chain",
+        "Broke — fresh loop + NEW master link (clip forward); check sprockets",
+        "Master link keeps failing — clip backwards or reused; always a new link",
+        "Plate + chain loose — re-torque plate bolts + thread-locker + paint-mark",
+      ]],
+      ["clutch","⚙️ Clutch Problems",[
+        "Slips / blue drum — glazed or worn shoes; service or replace",
+        "Won't drive off idle — engagement too high or worn",
+        "Drags / creeps at idle — engagement low or over-greased",
+      ]],
+      ["handling","🎯 Handling Problems",[
+        "Won't turn (tight) — add stagger, take out wedge, free the rear",
+        "Spins (loose) — reduce stagger, add wedge, add rear grip",
+        "No forward bite — lower pressures, softer axle / longer hubs, check gear",
+      ]],
+      ["noise","🔊 Vibration / Strange Noise — STOP",[
+        "New vibration — loose motor mount, bent axle, wheel / hub, clutch. Don't keep running it.",
+        "Grinding — a bearing (axle or wheel). Squeal — brake or clutch.",
+        "Can't find it fast? Sit the session out. A cheap part now beats a big repair.",
+      ]],
+    ],
+  },
+};
+
+/* ---------------- STATE ---------------- */
+const KEY="rr_pit_v1";
+let ST = load();
+function load(){ try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}} }
+function save(){ try{localStorage.setItem(KEY, JSON.stringify(ST))}catch(e){} }
+ST.checked = ST.checked||{};
+ST.custom  = ST.custom||[];
+
+function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function refFmt(s){ const i=s.indexOf(" — "); if(i<0) return esc(s);
+  return "<b>"+esc(s.slice(0,i))+"</b> "+esc(s.slice(i+3)); }
+
+/* ---------------- RENDER ---------------- */
+let CUR="shop";
+function render(){
+  const main=document.getElementById("main");
+  const isRef = REF[CUR]!==undefined;
+  const grp = isRef?REF[CUR]:CHECK[CUR];
+  let h=`<div class="tabtitle"><h2>${esc(grp.title)}</h2></div>`;
+  h+=`<div class="note">${esc(grp.hint)}</div>`;
+  grp.lists.forEach((L,idx)=>{
+    const [lid,ttl,items]=L;
+    const openCls = idx===0?" open":"";
+    if(isRef){
+      h+=`<div class="acc${openCls}"><div class="acc-head" onclick="toggleAcc(this)">
+        <div class="t">${esc(ttl)}</div><div class="chev">▶</div></div>
+        <div class="acc-body">`;
+      items.forEach(it=>{ h+=`<div class="rrow"><span class="dot">•</span><span>${refFmt(it)}</span></div>`; });
+      h+=`</div></div>`;
+    }else{
+      const total=items.length;
+      let done=items.filter(it=>ST.checked[lid+"::"+it]).length;
+      h+=`<div class="acc${openCls}"><div class="acc-head" onclick="toggleAcc(this)">
+        <div class="t">${esc(ttl)}</div><div class="cnt" id="cnt-${lid}">${done}/${total}</div><div class="chev">▶</div></div>
+        <div class="acc-body">`;
+      items.forEach(it=>{
+        const k=lid+"::"+it, on=ST.checked[k]?" on":"";
+        h+=`<div class="row${on}" onclick="toggle('${lid}',this)" data-item="${esc(it)}">
+          <div class="box"></div><div class="lbl">${esc(it)}</div></div>`;
+      });
+      // custom items (shop only)
+      if(grp.custom){
+        ST.custom.forEach((it,ci)=>{
+          const k="custom::"+it, on=ST.checked[k]?" on":"";
+          h+=`<div class="row${on}" data-item="${esc(it)}">
+            <div class="box" onclick="toggleCustom('${esc(it)}',this.parentNode)"></div>
+            <div class="lbl" onclick="toggleCustom('${esc(it)}',this.parentNode)">${esc(it)}</div>
+            <div class="del" onclick="delCustom(${ci})">×</div></div>`;
+        });
+        h+=`<div class="adder">
+          <input id="addbox" placeholder="Add your own item…" enterkeyhint="done"
+            onkeydown="if(event.key==='Enter'){addCustom();}">
+          <button onclick="addCustom()">Add</button></div>`;
+      }
+      h+=`<div class="listtools"><button class="reset" onclick="resetList('${lid}',event)">Reset ${esc(ttl.replace(/^[^ ]+ /,''))}</button></div>`;
+      h+=`</div></div>`;
+    }
+  });
+  main.innerHTML=h;
+  window.scrollTo(0,0);
+}
+
+function toggleAcc(head){ head.parentNode.classList.toggle("open"); }
+
+function toggle(lid,rowEl){
+  const it=rowEl.getAttribute("data-item"); const k=lid+"::"+it;
+  if(ST.checked[k]){ delete ST.checked[k]; rowEl.classList.remove("on"); }
+  else { ST.checked[k]=1; rowEl.classList.add("on"); }
+  save(); updateCount(lid);
+}
+function toggleCustom(it,rowEl){
+  const k="custom::"+it;
+  if(ST.checked[k]){ delete ST.checked[k]; rowEl.classList.remove("on"); }
+  else { ST.checked[k]=1; rowEl.classList.add("on"); }
+  save();
+}
+function updateCount(lid){
+  const grp=CHECK[CUR]; if(!grp) return;
+  const L=grp.lists.find(x=>x[0]===lid); if(!L) return;
+  const done=L[2].filter(it=>ST.checked[lid+"::"+it]).length;
+  const el=document.getElementById("cnt-"+lid); if(el) el.textContent=done+"/"+L[2].length;
+}
+function resetList(lid,ev){
+  ev.stopPropagation();
+  Object.keys(ST.checked).forEach(k=>{ if(k.indexOf(lid+"::")===0) delete ST.checked[k]; });
+  save(); render();
+}
+function addCustom(){
+  const inp=document.getElementById("addbox"); if(!inp) return;
+  const v=inp.value.trim(); if(!v) return;
+  if(ST.custom.indexOf(v)<0) ST.custom.push(v);
+  save(); render();
+  // reopen shop first? keep it simple: re-render keeps first open; focus add box
+  setTimeout(()=>{ const b=document.getElementById("addbox"); if(b){b.focus();} },30);
+}
+function delCustom(i){
+  const it=ST.custom[i]; if(it!==undefined){ delete ST.checked["custom::"+it]; ST.custom.splice(i,1); }
+  save(); render();
+}
+
+/* tabs */
+document.querySelectorAll(".tab").forEach(t=>{
+  t.addEventListener("click",()=>{
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+    t.classList.add("active"); CUR=t.getAttribute("data-tab"); render();
+  });
+});
+
+/* home-screen hint (iOS Safari, once) */
+function dismissHint(){ ST.hint=1; save(); document.getElementById("hint").style.display="none"; }
+(function maybeHint(){
+  const isiOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  const standalone=window.navigator.standalone===true;
+  if(isiOS && !standalone && !ST.hint){
+    setTimeout(()=>{ document.getElementById("hint").style.display="block"; },900);
+  }
+})();
+
+render();
+</script>
+</body>
+</html>
