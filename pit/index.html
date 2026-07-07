@@ -103,11 +103,55 @@
   /* Bottom tab bar */
   nav{position:fixed; left:0; right:0; bottom:0; z-index:25; background:#171021;
     border-top:1px solid var(--line); display:flex; padding-bottom:var(--safe-b);}
-  .tab{flex:1 1 0; background:none; border:none; color:var(--muted); padding:9px 2px 8px;
-    display:flex; flex-direction:column; align-items:center; gap:3px; font-size:10.5px; font-weight:700;}
-  .tab .ic{font-size:20px; line-height:1;}
+  .tab{flex:1 1 0; background:none; border:none; color:var(--muted); padding:9px 1px 8px; white-space:nowrap;
+    display:flex; flex-direction:column; align-items:center; gap:3px; font-size:10px; font-weight:700;}
+  .tab .ic{font-size:19px; line-height:1;}
   .tab.active{color:var(--yellow);}
   .tab.active .ic{transform:translateY(-1px);}
+
+  /* Lap timer */
+  .lt-best{text-align:center; font-size:13px; color:var(--muted); margin:0 0 10px;}
+  .lt-best b{color:var(--yellow);}
+  .lt-sel{display:flex; align-items:center; gap:6px; margin:0 0 12px; flex-wrap:wrap;}
+  .chip{background:var(--card2); border:1px solid var(--line); color:var(--muted); font-weight:800;
+    font-size:14px; padding:8px 14px; border-radius:20px;}
+  .chip.sm{font-size:12.5px; padding:7px 12px; font-weight:700;}
+  .chip.on{background:var(--yellow); color:#14101f; border-color:var(--yellow);}
+  .lt-gap{flex:1 1 auto;}
+  .lt-face{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px 14px 14px;
+    text-align:center; margin:0 0 12px;}
+  .lt-face.tap{border-color:var(--yellow);}
+  .lt-lapno{font-size:12.5px; color:var(--purpleB); font-weight:800; letter-spacing:.5px; text-transform:uppercase;}
+  .lt-time{font-size:62px; font-weight:800; line-height:1.04; margin:2px 0; color:var(--text);
+    font-variant-numeric:tabular-nums; font-feature-settings:"tnum";}
+  .lt-total{font-size:13px; color:var(--muted);}
+  .lt-big{width:100%; border:none; border-radius:16px; font-size:26px; font-weight:900; padding:22px 0; margin:0 0 10px; color:#14101f;}
+  .lt-big.start{background:var(--green);}
+  .lt-big.lap{background:var(--yellow);}
+  .lt-big:active{filter:brightness(.92);}
+  .lt-ctrls{display:flex; gap:10px; margin:0 0 12px;}
+  .lt-btn{flex:1 1 0; background:var(--card2); border:1px solid var(--line); color:var(--text);
+    font-weight:800; font-size:16px; padding:15px 0; border-radius:12px;}
+  .lt-btn.stop{background:#3a1620; border-color:#7a2a3a; color:#ff9aa8;}
+  .lt-btn.save{background:var(--green); color:#0d1a10; border:none;}
+  .lt-stats{display:flex; gap:8px; margin:0 0 10px;}
+  .lt-stat{flex:1 1 0; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:9px 4px; text-align:center;}
+  .lt-stat .k{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px;}
+  .lt-stat .v{font-size:20px; font-weight:800; font-variant-numeric:tabular-nums;}
+  .v.good,.good{color:var(--green);}
+  .lt-laps{margin:0 0 12px;}
+  .lt-lap{display:flex; align-items:center; gap:10px; padding:11px 12px; border:1px solid var(--line);
+    border-radius:10px; margin:0 0 6px; background:var(--card);}
+  .lt-lap.best{border-color:var(--green); background:#14261a;}
+  .lt-lap .n{color:var(--muted); font-weight:800; width:38px;}
+  .lt-lap .t{flex:1 1 auto; font-size:19px; font-weight:800; font-variant-numeric:tabular-nums;}
+  .lt-lap .d{font-size:12px; color:var(--muted);}
+  .lt-lap.best .d{color:var(--green); font-weight:800;}
+  .lt-sess{padding:10px 8px; border-top:1px solid var(--line);}
+  .lt-sess:first-child{border-top:none;}
+  .lt-sess-h{font-size:14px;} .lt-sess-h b{color:var(--text);}
+  .lt-sess-x{float:right; color:var(--muted); font-size:20px; padding:0 6px; margin-top:-2px;}
+  .lt-sess-s{font-size:12.5px; color:var(--muted); margin-top:3px;}
   .hidden{display:none !important;}
 </style>
 </head>
@@ -133,10 +177,11 @@
 
 <nav id="nav">
   <button class="tab active" data-tab="shop"><span class="ic">🛒</span>Shop</button>
-  <button class="tab" data-tab="checks"><span class="ic">✅</span>Checklists</button>
+  <button class="tab" data-tab="checks"><span class="ic">✅</span>Checks</button>
   <button class="tab" data-tab="maint"><span class="ic">🔧</span>Maint</button>
+  <button class="tab" data-tab="laps"><span class="ic">⏱️</span>Laps</button>
   <button class="tab" data-tab="setup"><span class="ic">🏁</span>Setup</button>
-  <button class="tab" data-tab="fix"><span class="ic">🩺</span>Fix-It</button>
+  <button class="tab" data-tab="fix"><span class="ic">🩺</span>Fix</button>
 </nav>
 
 <script>
@@ -434,6 +479,7 @@ function refFmt(s){ const i=s.indexOf(" — "); if(i<0) return esc(s);
 /* ---------------- RENDER ---------------- */
 let CUR="shop";
 function render(){
+  if(CUR==="laps"){ renderLaps(true); return; }
   const main=document.getElementById("main");
   const isRef = REF[CUR]!==undefined;
   const grp = isRef?REF[CUR]:CHECK[CUR];
@@ -536,6 +582,110 @@ function dismissHint(){ ST.hint=1; save(); document.getElementById("hint").style
     setTimeout(()=>{ document.getElementById("hint").style.display="block"; },900);
   }
 })();
+
+/* ---------------- LAP TIMER ---------------- */
+const LKEY="rr_laps_v1";
+let LS = loadLaps();
+function loadLaps(){ try{return JSON.parse(localStorage.getItem(LKEY))||{sessions:[]}}catch(e){return {sessions:[]}} }
+function saveLS(){ try{localStorage.setItem(LKEY, JSON.stringify(LS))}catch(e){} }
+LS.sessions = LS.sessions||[];
+
+let LT={running:false, stopped:false, t0:0, lapStart:0, laps:[], driver:"10X", label:"Practice"};
+
+function fmt(ms){
+  const s=ms/1000;
+  if(s<60) return s.toFixed(2);
+  const m=Math.floor(s/60), r=s-m*60;
+  return m+":"+(r<10?"0":"")+r.toFixed(2);
+}
+function bestEver(dv){
+  let b=null;
+  LS.sessions.forEach(x=>{ if(x.driver===dv && x.best!=null && (b==null||x.best<b)) b=x.best; });
+  return b;
+}
+function ltTick(){
+  if(!LT.running) return;
+  const el=document.getElementById("lt-current");
+  if(el){
+    const now=performance.now();
+    el.textContent=fmt(now-LT.lapStart);
+    const tt=document.getElementById("lt-total"); if(tt) tt.textContent="Total "+fmt(now-LT.t0);
+  }
+  requestAnimationFrame(ltTick);
+}
+function ltStart(){ LT.running=true; LT.stopped=false; LT.laps=[]; LT.t0=LT.lapStart=performance.now(); renderLaps(); requestAnimationFrame(ltTick); }
+function ltLap(){ if(!LT.running) return; const now=performance.now(); LT.laps.push(now-LT.lapStart); LT.lapStart=now; renderLaps(); }
+function ltStop(){ if(!LT.running) return; LT.running=false; LT.stopped=true; renderLaps(); }
+function ltReset(){ LT.running=false; LT.stopped=false; LT.laps=[]; renderLaps(); }
+function ltSave(){
+  if(!LT.laps.length) return;
+  const best=Math.min(...LT.laps), avg=LT.laps.reduce((a,b)=>a+b,0)/LT.laps.length;
+  const d=new Date();
+  LS.sessions.unshift({id:Date.now(), date:(d.getMonth()+1)+"/"+d.getDate(), driver:LT.driver, label:LT.label, laps:LT.laps.slice(), best, avg});
+  saveLS(); ltReset();
+}
+function ltDelete(id){ LS.sessions=LS.sessions.filter(s=>s.id!==id); saveLS(); renderLaps(); }
+function ltDriver(dv){ LT.driver=dv; renderLaps(); }
+function ltLabel(lb){ LT.label=lb; renderLaps(); }
+
+function renderLaps(scroll){
+  const main=document.getElementById("main");
+  const be10=bestEver("10X"), be3=bestEver("3");
+  let h=`<div class="tabtitle"><h2>Lap Timer</h2></div>`;
+  h+=`<div class="note">Tap <b>LAP</b> each time the kart crosses the start/finish line. Your best lap is highlighted in green.</div>`;
+  h+=`<div class="lt-best">🏆 Best #10X: <b>${be10!=null?fmt(be10):"—"}</b> &nbsp;•&nbsp; Best #3: <b>${be3!=null?fmt(be3):"—"}</b></div>`;
+  h+=`<div class="lt-sel">`;
+  ["10X","3"].forEach(dv=>{ h+=`<button class="chip${LT.driver===dv?" on":""}" onclick="ltDriver('${dv}')">#${dv}</button>`; });
+  h+=`<span class="lt-gap"></span>`;
+  ["Practice","Heat","Feature"].forEach(lb=>{ h+=`<button class="chip sm${LT.label===lb?" on":""}" onclick="ltLabel('${lb}')">${lb}</button>`; });
+  h+=`</div>`;
+
+  const cur = LT.running ? "0.00" : (LT.laps.length? fmt(LT.laps[LT.laps.length-1]) : "0.00");
+  const sub = LT.running ? "Total 0.00" : (LT.laps.length? (LT.laps.length+" laps") : ("#"+LT.driver+" • "+LT.label));
+  const lapno = LT.running ? ("Lap "+(LT.laps.length+1)) : (LT.stopped? "Stopped" : "Ready");
+  h+=`<div class="lt-face${LT.running?" tap":""}" onclick="if(LT.running)ltLap()">
+        <div class="lt-lapno">${lapno}</div>
+        <div class="lt-time" id="lt-current">${cur}</div>
+        <div class="lt-total" id="lt-total">${sub}</div>
+      </div>`;
+
+  if(LT.running){
+    h+=`<button class="lt-big lap" onclick="ltLap()">⏱ LAP</button>`;
+    h+=`<div class="lt-ctrls"><button class="lt-btn stop" onclick="ltStop()">■ Stop</button></div>`;
+  } else if(LT.stopped && LT.laps.length){
+    h+=`<div class="lt-ctrls"><button class="lt-btn save" onclick="ltSave()">💾 Save Run</button><button class="lt-btn" onclick="ltReset()">↺ Clear</button></div>`;
+  } else {
+    h+=`<button class="lt-big start" onclick="ltStart()">▶ START</button>`;
+  }
+
+  if(LT.laps.length){
+    const best=Math.min(...LT.laps), last=LT.laps[LT.laps.length-1], avg=LT.laps.reduce((a,b)=>a+b,0)/LT.laps.length;
+    h+=`<div class="lt-stats">
+      <div class="lt-stat"><div class="k">Best</div><div class="v good">${fmt(best)}</div></div>
+      <div class="lt-stat"><div class="k">Last</div><div class="v">${fmt(last)}</div></div>
+      <div class="lt-stat"><div class="k">Avg</div><div class="v">${fmt(avg)}</div></div></div>`;
+    h+=`<div class="lt-laps">`;
+    for(let i=LT.laps.length-1;i>=0;i--){
+      const t=LT.laps[i], isb=(t===best);
+      h+=`<div class="lt-lap${isb?" best":""}"><span class="n">L${i+1}</span><span class="t">${fmt(t)}</span>`+
+         `<span class="d">${isb?"★ best":("+"+((t-best)/1000).toFixed(2))}</span></div>`;
+    }
+    h+=`</div>`;
+  }
+
+  if(LS.sessions.length){
+    h+=`<div class="acc" ><div class="acc-head" onclick="toggleAcc(this)">
+      <div class="t">💾 Saved Runs</div><div class="cnt">${LS.sessions.length}</div><div class="chev">▶</div></div><div class="acc-body">`;
+    LS.sessions.forEach(s=>{
+      h+=`<div class="lt-sess"><div class="lt-sess-h"><b>${s.date}</b> · #${s.driver} · ${esc(s.label)}
+        <span class="lt-sess-x" onclick="ltDelete(${s.id})">×</span></div>
+        <div class="lt-sess-s">Best <b class="good">${fmt(s.best)}</b> · Avg ${fmt(s.avg)} · ${s.laps.length} laps</div></div>`;
+    });
+    h+=`</div></div>`;
+  }
+  main.innerHTML=h;
+  if(scroll) window.scrollTo(0,0);
+}
 
 render();
 </script>
