@@ -125,6 +125,16 @@
   .lt-time{font-size:62px; font-weight:800; line-height:1.04; margin:2px 0; color:var(--text);
     font-variant-numeric:tabular-nums; font-feature-settings:"tnum";}
   .lt-total{font-size:13px; color:var(--muted);}
+  .lt-delta{font-size:15px; font-weight:800; margin-top:5px; min-height:19px;}
+  .lt-delta.good{color:var(--green);} .lt-delta.bad{color:var(--red);} .lt-delta.neu{color:var(--muted); font-weight:700;}
+  @keyframes flgood{0%{background:#1e5c37;}100%{background:var(--card);}}
+  @keyframes flbad{0%{background:#5c1e2a;}100%{background:var(--card);}}
+  .lt-face.good{animation:flgood 1s ease-out 1;}
+  .lt-face.bad{animation:flbad 1s ease-out 1;}
+  .lt-track{display:flex; align-items:center; gap:8px; margin:0 0 12px; font-size:15px; color:var(--muted);}
+  .lt-track input{flex:1 1 auto; font-size:16px; padding:9px 11px; border-radius:10px; border:1px solid var(--line); background:#160f26; color:var(--text);}
+  .lt-notes{width:100%; font-size:16px; padding:11px 12px; border-radius:10px; border:1px solid var(--line); background:#160f26; color:var(--text); margin:0 0 10px; font-family:inherit;}
+  .lt-sess-note{font-size:12.5px; color:var(--text); font-style:italic; margin-top:3px;}
   .lt-big{width:100%; border:none; border-radius:16px; font-size:26px; font-weight:900; padding:22px 0; margin:0 0 10px; color:#14101f;}
   .lt-big.start{background:var(--green);}
   .lt-big.lap{background:var(--yellow);}
@@ -590,7 +600,7 @@ function loadLaps(){ try{return JSON.parse(localStorage.getItem(LKEY))||{session
 function saveLS(){ try{localStorage.setItem(LKEY, JSON.stringify(LS))}catch(e){} }
 LS.sessions = LS.sessions||[];
 
-let LT={running:false, stopped:false, t0:0, lapStart:0, laps:[], driver:"10X", label:"Practice"};
+let LT={running:false, stopped:false, t0:0, lapStart:0, laps:[], driver:"10X", label:"Practice", track:(LS.lastTrack||"Camden"), notes:"", flash:null};
 
 function fmt(ms){
   const s=ms/1000;
@@ -613,16 +623,27 @@ function ltTick(){
   }
   requestAnimationFrame(ltTick);
 }
-function ltStart(){ LT.running=true; LT.stopped=false; LT.laps=[]; LT.t0=LT.lapStart=performance.now(); renderLaps(); requestAnimationFrame(ltTick); }
-function ltLap(){ if(!LT.running) return; const now=performance.now(); LT.laps.push(now-LT.lapStart); LT.lapStart=now; renderLaps(); }
+function ltStart(){ LT.running=true; LT.stopped=false; LT.laps=[]; LT.flash=null; LT.notes=""; LT.t0=LT.lapStart=performance.now(); renderLaps(); requestAnimationFrame(ltTick); }
+function ltLap(){
+  if(!LT.running) return;
+  const now=performance.now(), lap=now-LT.lapStart;
+  const prevBest = LT.laps.length? Math.min(...LT.laps) : null;
+  LT.laps.push(lap); LT.lapStart=now;
+  if(prevBest==null) LT.flash={type:"first", lap:lap, delta:0};
+  else if(lap<=prevBest) LT.flash={type:"good", lap:lap, delta:lap-prevBest};
+  else LT.flash={type:"bad", lap:lap, delta:lap-prevBest};
+  renderLaps();
+}
 function ltStop(){ if(!LT.running) return; LT.running=false; LT.stopped=true; renderLaps(); }
-function ltReset(){ LT.running=false; LT.stopped=false; LT.laps=[]; renderLaps(); }
+function ltReset(){ LT.running=false; LT.stopped=false; LT.laps=[]; LT.flash=null; LT.notes=""; renderLaps(); }
 function ltSave(){
   if(!LT.laps.length) return;
+  const nel=document.getElementById("lt-notes"); const notes = nel? nel.value : (LT.notes||"");
   const best=Math.min(...LT.laps), avg=LT.laps.reduce((a,b)=>a+b,0)/LT.laps.length;
   const d=new Date();
-  LS.sessions.unshift({id:Date.now(), date:(d.getMonth()+1)+"/"+d.getDate(), driver:LT.driver, label:LT.label, laps:LT.laps.slice(), best, avg});
-  saveLS(); ltReset();
+  LS.lastTrack = LT.track||"";
+  LS.sessions.unshift({id:Date.now(), date:(d.getMonth()+1)+"/"+d.getDate(), driver:LT.driver, label:LT.label, track:(LT.track||""), notes:notes, laps:LT.laps.slice(), best, avg});
+  saveLS(); LT.notes=""; ltReset();
 }
 function ltDelete(id){ LS.sessions=LS.sessions.filter(s=>s.id!==id); saveLS(); renderLaps(); }
 function ltDriver(dv){ LT.driver=dv; renderLaps(); }
@@ -639,20 +660,29 @@ function renderLaps(scroll){
   h+=`<span class="lt-gap"></span>`;
   ["Practice","Heat","Feature"].forEach(lb=>{ h+=`<button class="chip sm${LT.label===lb?" on":""}" onclick="ltLabel('${lb}')">${lb}</button>`; });
   h+=`</div>`;
+  h+=`<div class="lt-track">📍 <input id="lt-trackin" value="${esc(LT.track||"")}" placeholder="Track (e.g. Camden)" oninput="LT.track=this.value" onchange="LS.lastTrack=this.value; saveLS();"></div>`;
 
   const cur = LT.running ? "0.00" : (LT.laps.length? fmt(LT.laps[LT.laps.length-1]) : "0.00");
   const sub = LT.running ? "Total 0.00" : (LT.laps.length? (LT.laps.length+" laps") : ("#"+LT.driver+" • "+LT.label));
   const lapno = LT.running ? ("Lap "+(LT.laps.length+1)) : (LT.stopped? "Stopped" : "Ready");
-  h+=`<div class="lt-face${LT.running?" tap":""}" onclick="if(LT.running)ltLap()">
+  const flashCls = (LT.running && LT.flash && LT.flash.type!=="first") ? (" "+LT.flash.type) : "";
+  h+=`<div class="lt-face${LT.running?" tap":""}${flashCls}" onclick="if(LT.running)ltLap()">
         <div class="lt-lapno">${lapno}</div>
         <div class="lt-time" id="lt-current">${cur}</div>
-        <div class="lt-total" id="lt-total">${sub}</div>
-      </div>`;
+        <div class="lt-total" id="lt-total">${sub}</div>`;
+  if(LT.running && LT.flash){
+    const f=LT.flash;
+    if(f.type==="first") h+=`<div class="lt-delta neu">Last: ${fmt(f.lap)} · set the mark</div>`;
+    else if(f.type==="good") h+=`<div class="lt-delta good">▼ ${fmt(f.lap)} — ${f.delta<0?("NEW BEST ("+(f.delta/1000).toFixed(2)+")"):"= best"}</div>`;
+    else h+=`<div class="lt-delta bad">▲ ${fmt(f.lap)} — +${(f.delta/1000).toFixed(2)} off best</div>`;
+  }
+  h+=`</div>`;
 
   if(LT.running){
     h+=`<button class="lt-big lap" onclick="ltLap()">⏱ LAP</button>`;
     h+=`<div class="lt-ctrls"><button class="lt-btn stop" onclick="ltStop()">■ Stop</button></div>`;
   } else if(LT.stopped && LT.laps.length){
+    h+=`<input class="lt-notes" id="lt-notes" placeholder="Notes (optional): added stagger, track slick…" value="${esc(LT.notes||"")}" oninput="LT.notes=this.value">`;
     h+=`<div class="lt-ctrls"><button class="lt-btn save" onclick="ltSave()">💾 Save Run</button><button class="lt-btn" onclick="ltReset()">↺ Clear</button></div>`;
   } else {
     h+=`<button class="lt-big start" onclick="ltStart()">▶ START</button>`;
@@ -677,9 +707,11 @@ function renderLaps(scroll){
     h+=`<div class="acc" ><div class="acc-head" onclick="toggleAcc(this)">
       <div class="t">💾 Saved Runs</div><div class="cnt">${LS.sessions.length}</div><div class="chev">▶</div></div><div class="acc-body">`;
     LS.sessions.forEach(s=>{
-      h+=`<div class="lt-sess"><div class="lt-sess-h"><b>${s.date}</b> · #${s.driver} · ${esc(s.label)}
+      h+=`<div class="lt-sess"><div class="lt-sess-h"><b>${esc(s.date)}</b> · #${esc(s.driver)} · ${esc(s.label)}${s.track?(" · "+esc(s.track)):""}
         <span class="lt-sess-x" onclick="ltDelete(${s.id})">×</span></div>
-        <div class="lt-sess-s">Best <b class="good">${fmt(s.best)}</b> · Avg ${fmt(s.avg)} · ${s.laps.length} laps</div></div>`;
+        <div class="lt-sess-s">Best <b class="good">${fmt(s.best)}</b> · Avg ${fmt(s.avg)} · ${s.laps.length} laps</div>`;
+      if(s.notes) h+=`<div class="lt-sess-note">“${esc(s.notes)}”</div>`;
+      h+=`</div>`;
     });
     h+=`</div></div>`;
   }
