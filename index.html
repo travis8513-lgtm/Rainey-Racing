@@ -11,7 +11,7 @@
     <meta property="og:description" content="Championship dirt go-kart racing — brothers Travis 10X and Ronnie 3. Sponsor us, follow the season, and grab team merch.">
     <meta property="og:url" content="https://raineymotorsports.com/">
     <meta property="og:image" content="https://raineymotorsports.com/images/race/rr-42.jpg">
-    <link rel="stylesheet" href="styles.css?v=10">
+    <link rel="stylesheet" href="styles.css?v=11">
 </head>
 <body>
     <!-- Top speed bar -->
@@ -75,6 +75,39 @@
         </div>
     </section>
 
+    <!-- Race ticker (broadcast crawl) -->
+    <div class="ticker" aria-hidden="true">
+        <div class="ticker-tag">🏁 Race Center</div>
+        <div class="ticker-viewport">
+            <div class="ticker-track">
+                <span class="ticker-item">🗓️ Next Race · Sun Jul 12 · Camden Speedway · Gates 12PM</span>
+                <span class="ticker-dot">•</span>
+                <span class="ticker-item">🏆 Last Time Out · Travis Sweeps Box Stock — Heat + Feature</span>
+                <span class="ticker-dot">•</span>
+                <span class="ticker-item">🥉 Ronnie Grabs a Podium in Run What You Brung</span>
+                <span class="ticker-dot">•</span>
+                <span class="ticker-item">📊 2026 Season · 4 Wins · 5 Podiums</span>
+                <span class="ticker-dot">•</span>
+                <span class="ticker-item">🎮 Play the Free Rainey Racing Game</span>
+                <span class="ticker-dot">•</span>
+                <span class="ticker-item">🤝 Now Accepting 2026 Sponsors · Your Logo on Both Karts</span>
+                <span class="ticker-dot">•</span>
+                <span class="ticker-item">🗓️ Next Race · Sun Jul 12 · Camden Speedway · Gates 12PM</span>
+                <span class="ticker-dot">•</span>
+                <span class="ticker-item">🏆 Last Time Out · Travis Sweeps Box Stock — Heat + Feature</span>
+                <span class="ticker-dot">•</span>
+                <span class="ticker-item">🥉 Ronnie Grabs a Podium in Run What You Brung</span>
+                <span class="ticker-dot">•</span>
+                <span class="ticker-item">📊 2026 Season · 4 Wins · 5 Podiums</span>
+                <span class="ticker-dot">•</span>
+                <span class="ticker-item">🎮 Play the Free Rainey Racing Game</span>
+                <span class="ticker-dot">•</span>
+                <span class="ticker-item">🤝 Now Accepting 2026 Sponsors · Your Logo on Both Karts</span>
+                <span class="ticker-dot">•</span>
+            </div>
+        </div>
+    </div>
+
     <!-- Stats Bar -->
     <section class="stats">
         <div class="container stats-grid">
@@ -134,7 +167,7 @@
                 <p class="section-intro">A brother team chasing checkered flags together — Travis &amp; Ronnie Rainey.</p>
             </div>
             <div class="team-grid">
-                <div class="driver-card">
+                <div class="driver-card driver-10x">
                     <div class="driver-photo">
                         <img src="images/race/rr-01.jpg" alt="Travis Rainey in the No. 10X kart">
                         <span class="driver-num">#10X</span>
@@ -146,7 +179,7 @@
                         <button class="bio-btn" data-bio="bio-travis">Read Full Bio ▸</button>
                     </div>
                 </div>
-                <div class="driver-card">
+                <div class="driver-card driver-3">
                     <div class="driver-photo">
                         <img src="images/race/rr-12.jpg" alt="Ronnie Rainey in the No. 3 kart">
                         <span class="driver-num">#3</span>
@@ -158,7 +191,7 @@
                         <button class="bio-btn" data-bio="bio-ronnie">Read Full Bio ▸</button>
                     </div>
                 </div>
-                <div class="driver-card">
+                <div class="driver-card driver-crew">
                     <div class="driver-photo">
                         <img src="images/race/rr-60.jpg" alt="Ronnie Rainey Sr. looking over the 10X kart at the track">
                         <span class="driver-num">🔧</span>
@@ -394,6 +427,36 @@
             <!-- 2026 Season Scoreboard (update these numbers with each race recap) -->
             <div class="scoreboard">
                 <div class="scoreboard-title">🏁 2026 Season Scoreboard</div>
+                <div class="podium" aria-hidden="true">
+                    <div class="podium-spot podium-2">
+                        <div class="podium-driver">
+                            <span class="podium-medal">🥈</span>
+                            <span class="podium-num num-3">#3</span>
+                            <span class="podium-name">Ronnie</span>
+                            <span class="podium-note">2 Podiums</span>
+                        </div>
+                        <div class="podium-block">2</div>
+                    </div>
+                    <div class="podium-spot podium-1">
+                        <div class="podium-driver">
+                            <span class="podium-medal">🏆</span>
+                            <span class="podium-num num-10x">#10X</span>
+                            <span class="podium-name">Travis</span>
+                            <span class="podium-note">2 Feature Wins</span>
+                        </div>
+                        <div class="podium-block">1</div>
+                    </div>
+                    <div class="podium-spot podium-3">
+                        <div class="podium-driver">
+                            <span class="podium-medal">🔧</span>
+                            <span class="podium-num num-crew">CREW</span>
+                            <span class="podium-name">Dad</span>
+                            <span class="podium-note">Crew Chief</span>
+                        </div>
+                        <div class="podium-block">3</div>
+                    </div>
+                </div>
+                <div class="podium-floor" aria-hidden="true"></div>
                 <div class="scoreboard-grid">
                     <div class="score-card score-travis">
                         <div class="score-head">
