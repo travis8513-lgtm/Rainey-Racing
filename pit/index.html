@@ -113,8 +113,8 @@
   nav{position:fixed; left:0; right:0; bottom:0; z-index:25; background:#171021;
     border-top:1px solid var(--line); display:flex; padding-bottom:var(--safe-b);}
   .tab{flex:1 1 0; background:none; border:none; color:var(--muted); padding:9px 0 8px; white-space:nowrap;
-    display:flex; flex-direction:column; align-items:center; gap:2px; font-size:9px; font-weight:700;}
-  .tab .ic{font-size:18px; line-height:1;}
+    display:flex; flex-direction:column; align-items:center; gap:2px; font-size:8.5px; font-weight:700;}
+  .tab .ic{font-size:17px; line-height:1;}
   .tab.active{color:var(--yellow);}
   .tab.active .ic{transform:translateY(-1px);}
 
@@ -205,6 +205,30 @@
   .m-ra{flex:0 0 auto; font-size:16px; font-weight:800; font-variant-numeric:tabular-nums;}
   .m-all{margin-top:12px; padding:12px; background:var(--card2); border:1px solid var(--line); border-radius:12px; font-size:13px; color:var(--muted); text-align:center; line-height:1.5;}
   .m-all span{font-weight:800;}
+  /* Inventory */
+  .s-addbtn{width:100%; border:none; border-radius:12px; font-size:15px; font-weight:800; padding:15px 0; color:#fff; background:var(--purpleB); margin:0 0 12px;}
+  .s-addbtn:active{filter:brightness(.92);}
+  .s-low-banner{background:#3a1620; border:1px solid #7a2a3a; color:#ffc2ca; border-radius:12px; padding:11px 13px; font-size:13px; margin:0 0 12px; line-height:1.4;}
+  .s-low-banner b{color:#ff9aa8;}
+  .s-ok{background:var(--card2); border:1px dashed var(--line); color:var(--muted); border-radius:12px; padding:11px 13px; font-size:12.5px; margin:0 0 12px; line-height:1.4;}
+  .s-row{display:flex; align-items:center; gap:10px; padding:9px 10px; border:1px solid var(--line); border-radius:10px; margin:0 0 6px; background:var(--card);}
+  .s-row.low{border-color:var(--red);}
+  .s-info{flex:1 1 auto; min-width:0; cursor:pointer;}
+  .s-name{font-size:15px; font-weight:700;}
+  .s-low{display:none; margin-left:8px; font-size:10px; font-weight:800; color:#14101f; background:var(--red); padding:2px 6px; border-radius:5px; vertical-align:middle;}
+  .s-row.low .s-low{display:inline-block;}
+  .s-min{font-size:11.5px; color:var(--muted); margin-top:2px;}
+  .s-step{flex:0 0 auto; display:flex; align-items:center; background:var(--card2); border:1px solid var(--line); border-radius:10px; overflow:hidden;}
+  .s-step button{width:42px; height:42px; border:none; background:transparent; color:var(--text); font-size:23px; font-weight:800; line-height:1;}
+  .s-step button:active{background:var(--line);}
+  .s-qty{min-width:36px; text-align:center; font-size:18px; font-weight:800; font-variant-numeric:tabular-nums;}
+  .s-form{background:var(--card); border:1px solid var(--purple); border-radius:14px; padding:14px; margin:0 0 12px;}
+  .s-form label{display:block; font-size:12px; color:var(--muted); margin:9px 0 3px;}
+  .s-form input, .s-form select{width:100%; font-size:16px; padding:11px 12px; border-radius:10px; border:1px solid var(--line); background:#160f26; color:var(--text); font-family:inherit;}
+  .s-frow{display:flex; gap:10px;} .s-frow>div{flex:1 1 0;}
+  .s-fbtns{display:flex; gap:10px; margin-top:13px;}
+  .s-save{flex:1 1 0; border:none; border-radius:10px; font-size:16px; font-weight:800; padding:14px 0; color:#14101f; background:var(--green);}
+  .s-delbtn{flex:0 0 auto; background:#3a1620; border:1px solid #7a2a3a; color:#ff9aa8; font-weight:800; font-size:15px; padding:14px 16px; border-radius:10px;}
   .hidden{display:none !important;}
 </style>
 </head>
@@ -236,6 +260,7 @@
   <button class="tab" data-tab="setup"><span class="ic">🏁</span>Setup</button>
   <button class="tab" data-tab="fix"><span class="ic">🩺</span>Fix</button>
   <button class="tab" data-tab="money"><span class="ic">💰</span>Money</button>
+  <button class="tab" data-tab="stock"><span class="ic">📦</span>Stock</button>
 </nav>
 
 <script>
@@ -536,6 +561,7 @@ let CUR="shop";
 function render(){
   if(CUR==="laps"){ renderLaps(true); return; }
   if(CUR==="money"){ renderMoney(); return; }
+  if(CUR==="stock"){ renderStock(); return; }
   const main=document.getElementById("main");
   const isRef = REF[CUR]!==undefined;
   const grp = isRef?REF[CUR]:CHECK[CUR];
@@ -832,7 +858,7 @@ function renderMoney(){
   h+=moneyCard("This Month",mo);
   h+=moneyCard(MV.y+" — Year to Date",yr);
   if(MADD) h+=moneyForm();
-  else h+=`<div class="m-btns"><button class="m-add exp" onclick="moneyAdd('exp')">− Add Expense</button><button class="m-add inc" onclick="moneyAdd('inc')">+ Add Sponsor $</button></div>`;
+  else h+=`<div class="m-btns"><button class="m-add exp" onclick="moneyAdd('exp')">− Add Expense</button><button class="m-add inc" onclick="moneyAdd('inc')">+ Money In</button></div>`;
   const ib=catBreak(mp,"inc"), eb=catBreak(mp,"exp");
   if(ib.length||eb.length){
     h+=`<div class="acc open"><div class="acc-head" onclick="toggleAcc(this)"><div class="t">📊 ${MONTHS[MV.m-1]} breakdown</div><div class="chev">▶</div></div><div class="acc-body">`;
@@ -854,6 +880,94 @@ function renderMoney(){
   if(MS.entries.length) h+=`<div class="m-all">All time: <span class="pos">+${fmtAmt(all.inc)}</span> in · <span class="neg">−${fmtAmt(all.exp)}</span> out · Net <span class="${all.net>=0?"pos":"neg"}">${all.net<0?"−":""}${fmtAmt(all.net)}</span></div>`;
   main.innerHTML=h;
   window.scrollTo(0,0);
+}
+
+/* ---------------- INVENTORY / STOCK ---------------- */
+const SKEY="rr_stock_v1";
+const STK_STARTER=[
+  ["Rear tires — Unilli 12×9 (set)","Tires"],["Front tire — 11×6.00-6","Tires"],["Front tire — 11.5×8.00-6","Tires"],["Rims — VanK 6×9","Tires"],
+  ["Engine oil — VR1 (qts)","Engine"],["Spark plugs (NGK)","Engine"],["Air filters","Engine"],
+  ["#35 chain — Regina Gold","Drivetrain"],["Master links (#35)","Drivetrain"],["Split sprocket (6335)","Drivetrain"],["Spare clutch","Drivetrain"],
+  ["Chain lube","Consumables"],["Fuel (gallons)","Consumables"],["Thread-locker / anti-seize","Consumables"],["Zip ties / safety wire","Consumables"],
+  ["Fire extinguisher (charged)","Safety"],["First-aid kit","Safety"],
+  ["T-Shirts","Merch"],["Hoodies","Merch"],["Hats","Merch"],["Koozies","Merch"],["Decals","Merch"],
+];
+let STK=(function(){ try{ const j=JSON.parse(localStorage.getItem(SKEY)); if(j&&Array.isArray(j.items)) return j; }catch(e){} return null; })();
+function saveSTK(){ try{localStorage.setItem(SKEY, JSON.stringify(STK))}catch(e){} }
+if(!STK){ STK={items:STK_STARTER.map((x,i)=>({id:100+i,name:x[0],cat:x[1],qty:0,min:0}))}; saveSTK(); }
+let SEDIT=null;
+const STK_CATS=["Tires","Engine","Drivetrain","Consumables","Safety","Merch","Other"];
+
+function stkLow(){ return STK.items.filter(i=>i.min>0 && i.qty<=i.min); }
+function stkBanner(){
+  const low=stkLow();
+  if(!low.length) return `<div class="s-ok">✓ No low-stock warnings right now. Tip: tap an item, set a “reorder at” number, and it'll flag here when you run low.</div>`;
+  return `<div class="s-low-banner"><b>⚠ Running low (${low.length}):</b> ${low.map(i=>esc(i.name)).join(", ")} — time to reorder.</div>`;
+}
+function updBanner(){ const el=document.getElementById("s-lowbanner"); if(el) el.innerHTML=stkBanner(); }
+function stkNew(){ SEDIT="new"; renderStock(); setTimeout(()=>{const n=document.getElementById("s-name"); if(n)n.focus();},40); }
+function stkEdit(id){ SEDIT=id; renderStock(); }
+function stkCancel(){ SEDIT=null; renderStock(); }
+function stkDel(id){ STK.items=STK.items.filter(x=>x.id!==id); saveSTK(); SEDIT=null; renderStock(); }
+function stkSave(){
+  const nel=document.getElementById("s-name"), name=nel.value.trim();
+  if(!name){ nel.style.borderColor="#ff6b6b"; nel.focus(); return; }
+  const cat=document.getElementById("s-cat").value;
+  const qty=Math.max(0, parseInt(document.getElementById("s-qty").value,10)||0);
+  const min=Math.max(0, parseInt(document.getElementById("s-min").value,10)||0);
+  if(SEDIT==="new"){ STK.items.push({id:Date.now(), name:name, cat:cat, qty:qty, min:min}); }
+  else { const it=STK.items.find(x=>x.id===SEDIT); if(it){ it.name=name; it.cat=cat; it.qty=qty; it.min=min; } }
+  saveSTK(); SEDIT=null; renderStock();
+}
+function stkAdj(id,d){
+  const it=STK.items.find(x=>x.id===id); if(!it) return;
+  it.qty=Math.max(0,(it.qty||0)+d); saveSTK();
+  const q=document.getElementById("sq-"+id); if(q) q.textContent=it.qty;
+  const row=document.getElementById("sr-"+id); if(row) row.classList.toggle("low", it.min>0 && it.qty<=it.min);
+  updBanner();
+}
+function stockForm(){
+  const editing=(SEDIT!=="new");
+  const it=editing?STK.items.find(x=>x.id===SEDIT):{name:"",cat:"Tires",qty:0,min:0};
+  if(!it) return "";
+  const opts=STK_CATS.map(c=>`<option value="${esc(c)}"${it.cat===c?" selected":""}>${esc(c)}</option>`).join("");
+  return `<div class="s-form"><div class="m-ft">${editing?"✏️ Edit Item":"➕ Add Item"}</div>`+
+    `<label>Item name</label><input id="s-name" type="text" value="${esc(it.name)}" placeholder="e.g. Spark plugs (NGK)">`+
+    `<label>Category</label><select id="s-cat">${opts}</select>`+
+    `<div class="s-frow"><div><label>Qty on hand</label><input id="s-qty" type="number" inputmode="numeric" min="0" step="1" value="${it.qty}"></div>`+
+    `<div><label>Reorder at</label><input id="s-min" type="number" inputmode="numeric" min="0" step="1" value="${it.min||0}"></div></div>`+
+    `<div class="s-fbtns"><button class="s-save" onclick="stkSave()">Save</button>`+
+    (editing?`<button class="s-delbtn" onclick="stkDel(${it.id})">Delete</button>`:"")+
+    `<button class="m-cancel" onclick="stkCancel()">Cancel</button></div></div>`;
+}
+function renderStock(){
+  const main=document.getElementById("main");
+  let h=`<div class="tabtitle"><h2>Inventory</h2></div>`;
+  h+=`<div class="note">What you've got on hand. Tap −/+ as you use or restock; tap a name to edit it or set a reorder point.</div>`;
+  h+=`<div id="s-lowbanner">${stkBanner()}</div>`;
+  if(SEDIT!==null) h+=stockForm();
+  else h+=`<button class="s-addbtn" onclick="stkNew()">＋ Add Item</button>`;
+  const cats=STK_CATS.slice();
+  [...new Set(STK.items.map(i=>i.cat))].forEach(c=>{ if(cats.indexOf(c)<0) cats.push(c); });
+  let firstOpen=true;
+  cats.forEach(function(c){
+    const items=STK.items.filter(i=>i.cat===c);
+    if(!items.length) return;
+    const openCls=firstOpen?" open":""; firstOpen=false;
+    const lowN=items.filter(i=>i.min>0&&i.qty<=i.min).length;
+    h+=`<div class="acc${openCls}"><div class="acc-head" onclick="toggleAcc(this)"><div class="t">${esc(c)}</div>`+
+       `<div class="cnt">${items.length}${lowN?" · "+lowN+" low":""}</div><div class="chev">▶</div></div><div class="acc-body">`;
+    items.forEach(function(it){
+      const low=it.min>0&&it.qty<=it.min;
+      h+=`<div class="s-row${low?" low":""}" id="sr-${it.id}">`+
+        `<div class="s-info" onclick="stkEdit(${it.id})"><div class="s-name">${esc(it.name)}<span class="s-low">LOW</span></div>`+
+        (it.min>0?`<div class="s-min">reorder at ${it.min}</div>`:"")+`</div>`+
+        `<div class="s-step"><button onclick="stkAdj(${it.id},-1)">−</button><span class="s-qty" id="sq-${it.id}">${it.qty}</span><button onclick="stkAdj(${it.id},1)">+</button></div>`+
+        `</div>`;
+    });
+    h+=`</div></div>`;
+  });
+  main.innerHTML=h; window.scrollTo(0,0);
 }
 
 render();
