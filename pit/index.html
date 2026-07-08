@@ -207,6 +207,14 @@
   .m-ra{flex:0 0 auto; font-size:16px; font-weight:800; font-variant-numeric:tabular-nums;}
   .m-all{margin-top:12px; padding:12px; background:var(--card2); border:1px solid var(--line); border-radius:12px; font-size:13px; color:var(--muted); text-align:center; line-height:1.5;}
   .m-all span{font-weight:800;}
+  .sp-row{display:flex; justify-content:space-between; align-items:center; gap:10px; padding:9px 2px; border-top:1px solid var(--line);}
+  .sp-row:first-child{border-top:none;}
+  .sp-n{flex:1 1 auto; min-width:0; font-size:15px; font-weight:700;}
+  .sp-c{font-size:11px; color:var(--muted); font-weight:600;}
+  .sp-a{flex:0 0 auto; text-align:right; font-size:16px; font-weight:800;}
+  .sp-all{display:block; font-size:11px; color:var(--muted); font-weight:600;}
+  .sp-tot{border-top:1px solid var(--line); margin-top:6px; padding-top:9px; font-size:13px; color:var(--muted); text-align:right;}
+  .sp-tot .pos{font-weight:800; font-size:15px;}
   /* Inventory */
   .s-addbtn{width:100%; border:none; border-radius:12px; font-size:15px; font-weight:800; padding:15px 0; color:#fff; background:var(--purpleB); margin:0 0 12px;}
   .s-addbtn:active{filter:brightness(.92);}
@@ -818,6 +826,18 @@ function todayStr(){ const d=new Date(); return d.getFullYear()+"-"+String(d.get
 function mdFmt(s){ const p=s.split("-"); return (MONTHS[(+p[1])-1]||"?")+" "+(+p[2]); }
 function sumFor(prefix){ let inc=0,exp=0; MS.entries.forEach(e=>{ if(e.date&&e.date.indexOf(prefix)===0){ if(e.type==="inc") inc+=e.amount; else exp+=e.amount; } }); return {inc:inc,exp:exp,net:inc-exp}; }
 function catBreak(prefix,type){ const map={}; MS.entries.forEach(e=>{ if(e.type===type&&e.date&&e.date.indexOf(prefix)===0) map[e.cat]=(map[e.cat]||0)+e.amount; }); return Object.entries(map).sort((a,b)=>b[1]-a[1]); }
+function sponsorTotals(yearPrefix){
+  const yr={}, all={}, cnt={};
+  MS.entries.forEach(function(e){
+    if(e.type==="inc" && e.cat==="Sponsor"){
+      const name=(e.note&&e.note.trim())?e.note.trim():"(no name)";
+      all[name]=(all[name]||0)+e.amount;
+      if(e.date && e.date.indexOf(yearPrefix)===0){ yr[name]=(yr[name]||0)+e.amount; cnt[name]=(cnt[name]||0)+1; }
+    }
+  });
+  return Object.keys(yr).map(function(n){ return {name:n, year:yr[n], all:all[n]||0, count:cnt[n]||0}; }).sort(function(a,b){ return b.year-a.year; });
+}
+function sponsorNames(){ const s={}; MS.entries.forEach(function(e){ if(e.type==="inc"&&e.cat==="Sponsor"&&e.note&&e.note.trim()) s[e.note.trim()]=1; }); return Object.keys(s); }
 function moveMonth(d){ let m=MV.m+d,y=MV.y; if(m<1){m=12;y--;} if(m>12){m=1;y++;} MV.m=m;MV.y=y; MADD=null; renderMoney(); }
 function moneyAdd(t){ MADD=t; renderMoney(); setTimeout(()=>{const a=document.getElementById("m-amt"); if(a)a.focus();},40); }
 function moneyCancel(){ MADD=null; renderMoney(); }
@@ -845,7 +865,8 @@ function moneyForm(){
     `<label>Amount ($)</label><input id="m-amt" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00">`+
     `<label>${isInc?"Where from":"Category"}</label><select id="m-cat">${opts}</select>`+
     `<label>Note ${isInc?"(sponsor name, etc.)":"(what was it?)"}</label>`+
-    `<input id="m-note" type="text" placeholder="${isInc?"e.g. Bubba&#39;s Hot Dogs":"e.g. rear tires from BMI"}">`+
+    `<input id="m-note" type="text" ${isInc?'list="sp-list"':''} placeholder="${isInc?"e.g. Bubba&#39;s Hot Dogs":"e.g. rear tires from BMI"}">`+
+    (isInc?`<datalist id="sp-list">${sponsorNames().map(n=>`<option value="${esc(n)}"></option>`).join("")}</datalist>`:"")+
     `<label>Date</label><input id="m-date" type="date" value="${todayStr()}">`+
     `<div class="m-fbtns"><button class="m-save ${isInc?"inc":"exp"}" onclick="moneySave()">Save</button>`+
     `<button class="m-cancel" onclick="moneyCancel()">Cancel</button></div></div>`;
@@ -893,6 +914,17 @@ function renderMoney(){
     h+=`<div class="acc open"><div class="acc-head" onclick="toggleAcc(this)"><div class="t">📊 ${MONTHS[MV.m-1]} breakdown</div><div class="chev">▶</div></div><div class="acc-body">`;
     if(ib.length){ h+=`<div class="m-bsec">Money in</div>`; ib.forEach(function(p){ h+=`<div class="m-brow"><span>${esc(p[0])}</span><span class="pos">+${fmtAmt(p[1])}</span></div>`; }); }
     if(eb.length){ h+=`<div class="m-bsec">Money out</div>`; eb.forEach(function(p){ h+=`<div class="m-brow"><span>${esc(p[0])}</span><span class="neg">−${fmtAmt(p[1])}</span></div>`; }); }
+    h+=`</div></div>`;
+  }
+  const sp=sponsorTotals(yp);
+  if(sp.length){
+    h+=`<div class="acc open"><div class="acc-head" onclick="toggleAcc(this)"><div class="t">🤝 Sponsors — ${MV.y}</div><div class="cnt">${sp.length}</div><div class="chev">▶</div></div><div class="acc-body">`;
+    sp.forEach(function(s){
+      h+=`<div class="sp-row"><div class="sp-n">${esc(s.name)}${s.count>1?` <span class="sp-c">${s.count}×</span>`:""}</div>`+
+         `<div class="sp-a"><span class="pos">${fmtAmt(s.year)}</span>${s.all>s.year+0.001?`<span class="sp-all">all-time ${fmtAmt(s.all)}</span>`:""}</div></div>`;
+    });
+    const spTot=sp.reduce(function(a,b){return a+b.year;},0);
+    h+=`<div class="sp-tot">Total from sponsors in ${MV.y}: <span class="pos">${fmtAmt(spTot)}</span></div>`;
     h+=`</div></div>`;
   }
   const list=MS.entries.filter(e=>e.date&&e.date.indexOf(mp)===0).sort(function(a,b){ return a.date<b.date?1:a.date>b.date?-1:b.id-a.id; });
