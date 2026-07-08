@@ -184,6 +184,8 @@
   .m-btns{display:flex; gap:10px; margin:0 0 12px;}
   .m-add{flex:1 1 0; border:none; border-radius:12px; font-size:15px; font-weight:800; padding:16px 4px; color:#14101f;}
   .m-add.exp{background:#ff9aa8;} .m-add.inc{background:var(--green);}
+  .m-add.merch{width:100%; background:var(--yellow); margin:2px 0 12px;}
+  .ms-hint{font-size:11.5px; color:var(--muted); margin-top:8px; line-height:1.4;}
   .m-add:active{filter:brightness(.92);}
   .m-form{background:var(--card); border:1px solid var(--purple); border-radius:14px; padding:14px; margin:0 0 12px;}
   .m-ft{font-size:15px; font-weight:800; color:var(--yellow); margin-bottom:6px;}
@@ -848,6 +850,32 @@ function moneyForm(){
     `<div class="m-fbtns"><button class="m-save ${isInc?"inc":"exp"}" onclick="moneySave()">Save</button>`+
     `<button class="m-cancel" onclick="moneyCancel()">Cancel</button></div></div>`;
 }
+function moneyMerchForm(){
+  const merch=(typeof STK!=="undefined"&&STK&&STK.items)?STK.items.filter(i=>i.cat==="Merch"):[];
+  const opts=merch.map(m=>`<option value="${m.id}">${esc(m.name)} (have ${m.qty})</option>`).join("")+`<option value="other">Other merch</option>`;
+  return `<div class="m-form"><div class="m-ft">👕 Record a Merch Sale</div>`+
+    `<label>What sold</label><select id="ms-item">${opts}</select>`+
+    `<label>How many</label><input id="ms-qty" type="number" inputmode="numeric" min="1" step="1" value="1">`+
+    `<label>Price each ($)</label><input id="ms-price" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00">`+
+    `<label>Date</label><input id="ms-date" type="date" value="${todayStr()}">`+
+    `<div class="m-fbtns"><button class="m-save inc" onclick="moneySellSave()">Save Sale</button><button class="m-cancel" onclick="moneyCancel()">Cancel</button></div>`+
+    `<div class="ms-hint">This adds the cash to your income (Merch Sales) <b>and</b> drops the count in your Inventory.</div></div>`;
+}
+function moneySellSave(){
+  const sel=document.getElementById("ms-item");
+  const qty=Math.max(1, parseInt(document.getElementById("ms-qty").value,10)||1);
+  const pel=document.getElementById("ms-price"), price=parseFloat(pel.value);
+  if(isNaN(price)||price<0){ pel.style.borderColor="#ff6b6b"; pel.focus(); return; }
+  const total=Math.round(price*qty*100)/100;
+  const date=document.getElementById("ms-date").value||todayStr();
+  let itemName="Merch", stockItem=null;
+  if(sel.value!=="other" && typeof STK!=="undefined" && STK){ stockItem=STK.items.find(x=>String(x.id)===sel.value); if(stockItem) itemName=stockItem.name; }
+  else if(sel.value==="other"){ itemName="Other merch"; }
+  MS.entries.push({id:Date.now(), type:"inc", amount:total, cat:"Merch Sales", note:qty+" × "+itemName, date:date});
+  saveMS();
+  if(stockItem){ stockItem.qty=Math.max(0,(stockItem.qty||0)-qty); saveSTK(); }
+  MADD=null; renderMoney();
+}
 function renderMoney(){
   const main=document.getElementById("main");
   const mp=ymP(MV.y,MV.m), yp=String(MV.y);
@@ -857,8 +885,9 @@ function renderMoney(){
   h+=`<div class="m-nav"><button onclick="moveMonth(-1)">‹</button><div class="m-title">${MONTHS[MV.m-1]} ${MV.y}</div><button onclick="moveMonth(1)">›</button></div>`;
   h+=moneyCard("This Month",mo);
   h+=moneyCard(MV.y+" — Year to Date",yr);
-  if(MADD) h+=moneyForm();
-  else h+=`<div class="m-btns"><button class="m-add exp" onclick="moneyAdd('exp')">− Add Expense</button><button class="m-add inc" onclick="moneyAdd('inc')">+ Money In</button></div>`;
+  if(MADD==="merch") h+=moneyMerchForm();
+  else if(MADD) h+=moneyForm();
+  else h+=`<div class="m-btns"><button class="m-add exp" onclick="moneyAdd('exp')">− Add Expense</button><button class="m-add inc" onclick="moneyAdd('inc')">+ Money In</button></div><button class="m-add merch" onclick="moneyAdd('merch')">👕 Sold Merch (shirts, etc.)</button>`;
   const ib=catBreak(mp,"inc"), eb=catBreak(mp,"exp");
   if(ib.length||eb.length){
     h+=`<div class="acc open"><div class="acc-head" onclick="toggleAcc(this)"><div class="t">📊 ${MONTHS[MV.m-1]} breakdown</div><div class="chev">▶</div></div><div class="acc-body">`;
