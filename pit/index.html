@@ -112,9 +112,9 @@
   /* Bottom tab bar */
   nav{position:fixed; left:0; right:0; bottom:0; z-index:25; background:#171021;
     border-top:1px solid var(--line); display:flex; padding-bottom:var(--safe-b);}
-  .tab{flex:1 1 0; background:none; border:none; color:var(--muted); padding:9px 1px 8px; white-space:nowrap;
-    display:flex; flex-direction:column; align-items:center; gap:3px; font-size:10px; font-weight:700;}
-  .tab .ic{font-size:19px; line-height:1;}
+  .tab{flex:1 1 0; background:none; border:none; color:var(--muted); padding:9px 0 8px; white-space:nowrap;
+    display:flex; flex-direction:column; align-items:center; gap:2px; font-size:9px; font-weight:700;}
+  .tab .ic{font-size:18px; line-height:1;}
   .tab.active{color:var(--yellow);}
   .tab.active .ic{transform:translateY(-1px);}
 
@@ -171,6 +171,40 @@
   .lt-sess-h{font-size:14px;} .lt-sess-h b{color:var(--text);}
   .lt-sess-x{float:right; color:var(--muted); font-size:20px; padding:0 6px; margin-top:-2px;}
   .lt-sess-s{font-size:12.5px; color:var(--muted); margin-top:3px;}
+  /* Money */
+  .m-nav{display:flex; align-items:center; justify-content:space-between; gap:10px; margin:0 0 12px;}
+  .m-nav button{width:46px; height:42px; border-radius:10px; border:1px solid var(--line); background:var(--card2); color:var(--text); font-size:22px; font-weight:800;}
+  .m-title{flex:1 1 auto; text-align:center; font-size:17px; font-weight:800;}
+  .m-card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin:0 0 10px;}
+  .m-ct{font-size:12px; font-weight:800; color:var(--purpleB); text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px;}
+  .m-crow{display:flex; justify-content:space-between; font-size:15px; padding:4px 0;}
+  .m-crow.net{border-top:1px solid var(--line); margin-top:4px; padding-top:8px; font-size:18px; font-weight:800;}
+  .pos{color:var(--green); font-variant-numeric:tabular-nums;}
+  .neg{color:var(--red); font-variant-numeric:tabular-nums;}
+  .m-btns{display:flex; gap:10px; margin:0 0 12px;}
+  .m-add{flex:1 1 0; border:none; border-radius:12px; font-size:15px; font-weight:800; padding:16px 4px; color:#14101f;}
+  .m-add.exp{background:#ff9aa8;} .m-add.inc{background:var(--green);}
+  .m-add:active{filter:brightness(.92);}
+  .m-form{background:var(--card); border:1px solid var(--purple); border-radius:14px; padding:14px; margin:0 0 12px;}
+  .m-ft{font-size:15px; font-weight:800; color:var(--yellow); margin-bottom:6px;}
+  .m-form label{display:block; font-size:12px; color:var(--muted); margin:9px 0 3px;}
+  .m-form input, .m-form select{width:100%; font-size:16px; padding:11px 12px; border-radius:10px; border:1px solid var(--line); background:#160f26; color:var(--text); font-family:inherit;}
+  .m-fbtns{display:flex; gap:10px; margin-top:13px;}
+  .m-save{flex:1 1 0; border:none; border-radius:10px; font-size:16px; font-weight:800; padding:14px 0; color:#14101f;}
+  .m-save.inc{background:var(--green);} .m-save.exp{background:#ff9aa8;}
+  .m-cancel{flex:0 0 auto; background:var(--card2); border:1px solid var(--line); color:var(--text); font-weight:800; font-size:15px; padding:14px 18px; border-radius:10px;}
+  .m-bsec{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin:8px 0 2px;}
+  .m-brow{display:flex; justify-content:space-between; font-size:14px; padding:6px 2px; border-top:1px solid var(--line);}
+  .m-lh{font-size:13px; color:var(--muted); margin:10px 2px 8px; font-weight:700;}
+  .m-empty{color:var(--muted); font-size:14px; padding:14px; text-align:center; background:var(--card2); border:1px dashed var(--line); border-radius:12px; line-height:1.4;}
+  .m-row{display:flex; align-items:center; gap:10px; padding:11px 10px; border:1px solid var(--line); border-radius:10px; margin:0 0 6px; background:var(--card);}
+  .m-rl{flex:1 1 auto; min-width:0;}
+  .m-rc{font-size:15px; font-weight:700;}
+  .m-rn{font-size:12.5px; color:var(--muted); margin-top:1px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .m-rd{font-size:11.5px; color:var(--muted); margin-top:2px;}
+  .m-ra{flex:0 0 auto; font-size:16px; font-weight:800; font-variant-numeric:tabular-nums;}
+  .m-all{margin-top:12px; padding:12px; background:var(--card2); border:1px solid var(--line); border-radius:12px; font-size:13px; color:var(--muted); text-align:center; line-height:1.5;}
+  .m-all span{font-weight:800;}
   .hidden{display:none !important;}
 </style>
 </head>
@@ -201,6 +235,7 @@
   <button class="tab" data-tab="laps"><span class="ic">⏱️</span>Laps</button>
   <button class="tab" data-tab="setup"><span class="ic">🏁</span>Setup</button>
   <button class="tab" data-tab="fix"><span class="ic">🩺</span>Fix</button>
+  <button class="tab" data-tab="money"><span class="ic">💰</span>Money</button>
 </nav>
 
 <script>
@@ -500,6 +535,7 @@ function refFmt(s){ const i=s.indexOf(" — "); if(i<0) return esc(s);
 let CUR="shop";
 function render(){
   if(CUR==="laps"){ renderLaps(true); return; }
+  if(CUR==="money"){ renderMoney(); return; }
   const main=document.getElementById("main");
   const isRef = REF[CUR]!==undefined;
   const grp = isRef?REF[CUR]:CHECK[CUR];
@@ -734,6 +770,90 @@ function renderLaps(scroll){
   }
   main.innerHTML=h;
   if(scroll) window.scrollTo(0,0);
+}
+
+/* ---------------- MONEY / EXPENSES ---------------- */
+const MKEY="rr_money_v1";
+let MS = loadMoney();
+function loadMoney(){ try{return JSON.parse(localStorage.getItem(MKEY))||{entries:[]}}catch(e){return {entries:[]}} }
+function saveMS(){ try{localStorage.setItem(MKEY, JSON.stringify(MS))}catch(e){} }
+MS.entries = MS.entries||[];
+const _mnow = new Date();
+let MV = { y:_mnow.getFullYear(), m:_mnow.getMonth()+1 };
+let MADD = null;
+const MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const EXP_CATS=["Tires","Parts","Engine / Oil","Fuel","Entry / Pit Fees","Travel / Gas","Tools","Merch / Promo","Other"];
+const INC_CATS=["Sponsor","Winnings / Payout","Merch Sales","Donation","Other"];
+function fmtAmt(n){ return "$"+Math.abs(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function ymP(y,m){ return y+"-"+String(m).padStart(2,"0"); }
+function todayStr(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function mdFmt(s){ const p=s.split("-"); return (MONTHS[(+p[1])-1]||"?")+" "+(+p[2]); }
+function sumFor(prefix){ let inc=0,exp=0; MS.entries.forEach(e=>{ if(e.date&&e.date.indexOf(prefix)===0){ if(e.type==="inc") inc+=e.amount; else exp+=e.amount; } }); return {inc:inc,exp:exp,net:inc-exp}; }
+function catBreak(prefix,type){ const map={}; MS.entries.forEach(e=>{ if(e.type===type&&e.date&&e.date.indexOf(prefix)===0) map[e.cat]=(map[e.cat]||0)+e.amount; }); return Object.entries(map).sort((a,b)=>b[1]-a[1]); }
+function moveMonth(d){ let m=MV.m+d,y=MV.y; if(m<1){m=12;y--;} if(m>12){m=1;y++;} MV.m=m;MV.y=y; MADD=null; renderMoney(); }
+function moneyAdd(t){ MADD=t; renderMoney(); setTimeout(()=>{const a=document.getElementById("m-amt"); if(a)a.focus();},40); }
+function moneyCancel(){ MADD=null; renderMoney(); }
+function moneySave(){
+  const ael=document.getElementById("m-amt"), amt=parseFloat(ael.value);
+  if(isNaN(amt)||amt<=0){ ael.style.borderColor="#ff6b6b"; ael.focus(); return; }
+  const cat=document.getElementById("m-cat").value;
+  const note=document.getElementById("m-note").value.trim();
+  const date=document.getElementById("m-date").value||todayStr();
+  MS.entries.push({id:Date.now(), type:MADD, amount:Math.round(amt*100)/100, cat:cat, note:note, date:date});
+  saveMS(); MADD=null; renderMoney();
+}
+function moneyDel(id){ MS.entries=MS.entries.filter(e=>e.id!==id); saveMS(); renderMoney(); }
+function moneyCard(title,s){
+  const nc=s.net>=0?"pos":"neg";
+  return `<div class="m-card"><div class="m-ct">${esc(title)}</div>`+
+    `<div class="m-crow"><span>Sponsors / money in</span><span class="pos">+${fmtAmt(s.inc)}</span></div>`+
+    `<div class="m-crow"><span>Expenses / money out</span><span class="neg">−${fmtAmt(s.exp)}</span></div>`+
+    `<div class="m-crow net"><span>Net</span><span class="${nc}">${s.net<0?"−":""}${fmtAmt(s.net)}</span></div></div>`;
+}
+function moneyForm(){
+  const isInc=MADD==="inc"; const cats=isInc?INC_CATS:EXP_CATS;
+  const opts=cats.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("");
+  return `<div class="m-form"><div class="m-ft">${isInc?"➕ Add Sponsor / Money In":"➖ Add Expense"}</div>`+
+    `<label>Amount ($)</label><input id="m-amt" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00">`+
+    `<label>${isInc?"Where from":"Category"}</label><select id="m-cat">${opts}</select>`+
+    `<label>Note ${isInc?"(sponsor name, etc.)":"(what was it?)"}</label>`+
+    `<input id="m-note" type="text" placeholder="${isInc?"e.g. Bubba&#39;s Hot Dogs":"e.g. rear tires from BMI"}">`+
+    `<label>Date</label><input id="m-date" type="date" value="${todayStr()}">`+
+    `<div class="m-fbtns"><button class="m-save ${isInc?"inc":"exp"}" onclick="moneySave()">Save</button>`+
+    `<button class="m-cancel" onclick="moneyCancel()">Cancel</button></div></div>`;
+}
+function renderMoney(){
+  const main=document.getElementById("main");
+  const mp=ymP(MV.y,MV.m), yp=String(MV.y);
+  const mo=sumFor(mp), yr=sumFor(yp), all=sumFor("");
+  let h=`<div class="tabtitle"><h2>Money</h2></div>`;
+  h+=`<div class="note">Track what you spend and what sponsors chip in. Totals roll up by month and year.</div>`;
+  h+=`<div class="m-nav"><button onclick="moveMonth(-1)">‹</button><div class="m-title">${MONTHS[MV.m-1]} ${MV.y}</div><button onclick="moveMonth(1)">›</button></div>`;
+  h+=moneyCard("This Month",mo);
+  h+=moneyCard(MV.y+" — Year to Date",yr);
+  if(MADD) h+=moneyForm();
+  else h+=`<div class="m-btns"><button class="m-add exp" onclick="moneyAdd('exp')">− Add Expense</button><button class="m-add inc" onclick="moneyAdd('inc')">+ Add Sponsor $</button></div>`;
+  const ib=catBreak(mp,"inc"), eb=catBreak(mp,"exp");
+  if(ib.length||eb.length){
+    h+=`<div class="acc open"><div class="acc-head" onclick="toggleAcc(this)"><div class="t">📊 ${MONTHS[MV.m-1]} breakdown</div><div class="chev">▶</div></div><div class="acc-body">`;
+    if(ib.length){ h+=`<div class="m-bsec">Money in</div>`; ib.forEach(function(p){ h+=`<div class="m-brow"><span>${esc(p[0])}</span><span class="pos">+${fmtAmt(p[1])}</span></div>`; }); }
+    if(eb.length){ h+=`<div class="m-bsec">Money out</div>`; eb.forEach(function(p){ h+=`<div class="m-brow"><span>${esc(p[0])}</span><span class="neg">−${fmtAmt(p[1])}</span></div>`; }); }
+    h+=`</div></div>`;
+  }
+  const list=MS.entries.filter(e=>e.date&&e.date.indexOf(mp)===0).sort(function(a,b){ return a.date<b.date?1:a.date>b.date?-1:b.id-a.id; });
+  h+=`<div class="m-lh">${MONTHS[MV.m-1]} ${MV.y} · ${list.length} ${list.length===1?"entry":"entries"}</div>`;
+  if(!list.length) h+=`<div class="m-empty">Nothing logged this month yet. Tap a button above to add an expense or sponsor money.</div>`;
+  list.forEach(function(e){
+    const inc=e.type==="inc";
+    h+=`<div class="m-row"><div class="m-rl"><div class="m-rc">${esc(e.cat)}</div>`+
+       (e.note?`<div class="m-rn">${esc(e.note)}</div>`:"")+
+       `<div class="m-rd">${mdFmt(e.date)}</div></div>`+
+       `<div class="m-ra ${inc?"pos":"neg"}">${inc?"+":"−"}${fmtAmt(e.amount)}</div>`+
+       `<div class="del" onclick="moneyDel(${e.id})">×</div></div>`;
+  });
+  if(MS.entries.length) h+=`<div class="m-all">All time: <span class="pos">+${fmtAmt(all.inc)}</span> in · <span class="neg">−${fmtAmt(all.exp)}</span> out · Net <span class="${all.net>=0?"pos":"neg"}">${all.net<0?"−":""}${fmtAmt(all.net)}</span></div>`;
+  main.innerHTML=h;
+  window.scrollTo(0,0);
 }
 
 render();
