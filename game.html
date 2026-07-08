@@ -276,6 +276,8 @@ footer a { color:var(--yellow); text-decoration:none; }
         </div>
         <div class="hub">
             <button id="hubNight"><span class="ico">🏁</span>RACE NIGHT<small>Qualify · Heat · Feature — full payout</small></button>
+            <button id="hubCareer"><span class="ico">🏆</span>CHAMPIONSHIP<small id="hubCareerSub">Points seasons — win the title</small></button>
+            <button id="hubMP"><span class="ico">👥</span>RACE A FRIEND<small>Share a code, race together online</small></button>
             <button id="hubQuick"><span class="ico">⚡</span>QUICK RACE<small>Pick laps &amp; kart count — half pay</small></button>
             <button id="hubGarage"><span class="ico">🔧</span>GARAGE<small>Design your kart &amp; number</small></button>
             <button id="hubShop"><span class="ico">🛒</span>UPGRADE SHOP<small>Motors · gears · new karts</small></button>
@@ -285,7 +287,7 @@ footer a { color:var(--yellow); text-decoration:none; }
         <button class="btn ghost sm" id="switchBtn">↩ Switch Driver</button>
         <p class="keys">Drive with <b>&#8593;</b> gas <b>&#8595;</b> brake <b>&#8592;</b><b>&#8594;</b> steer (or <b>W</b><b>A</b><b>S</b><b>D</b>) · hold <b>SPACE</b> to power-slide · <b>C</b> camera · <b>M</b> mute</p>
         <p class="keys">🔧 Worn tires get slippery — dive low onto the front-stretch pit road to bolt on fresh ones!</p>
-        <p class="keys" style="color:#FFD400; font-weight:700;">GAME VERSION 18</p>
+        <p class="keys" style="color:#FFD400; font-weight:700;">GAME VERSION 19</p>
     </div>
 
     <!-- ===== GARAGE ===== -->
@@ -344,6 +346,20 @@ footer a { color:var(--yellow); text-decoration:none; }
         <p class="keys">Quick races pay half tokens and no bonus awards — race night pays full.</p>
     </div>
 
+    <!-- ===== CHAMPIONSHIP / CAREER ===== -->
+    <div id="career" class="overlay hidden">
+        <button class="backbtn" data-back>‹ Back</button>
+        <h2>🏆 <span>CHAMPIONSHIP</span></h2>
+        <div id="careerBody" style="display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;"></div>
+    </div>
+
+    <!-- ===== RACE A FRIEND (online) ===== -->
+    <div id="mp" class="overlay hidden">
+        <button class="backbtn" data-back>‹ Back</button>
+        <h2>👥 RACE A <span>FRIEND</span></h2>
+        <div id="mpBody" style="display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;"></div>
+    </div>
+
     <!-- ===== SETTINGS ===== -->
     <div id="settings" class="overlay hidden">
         <button class="backbtn" data-back>‹ Back</button>
@@ -373,6 +389,7 @@ footer a { color:var(--yellow); text-decoration:none; }
         <table class="results" id="resultsTable"></table>
         <p class="sub" id="bestLapLine"></p>
         <div class="row">
+            <button class="btn gold hidden" id="finStandings">Championship Standings ▸</button>
             <button class="btn" id="againBtn">Race Again</button>
             <button class="btn ghost" id="finHome">Garage &amp; Shop</button>
         </div>
@@ -431,20 +448,43 @@ const DIFFS = {
     legend: { name:'Legend', ai:1.030, note:'The touring pros are in town. Good luck.' }
 };
 const TRACKS = [
-    { id:'rainey',   name:'Rainey Speedway',      len:'1/5 MILE', size:'short', featureKarts:15, wear:0.9,
-      A:225, R:190, halfW:68,  dirt:'#8a6238', dirt2:'#825c33', edge:'#4a331e', groove:'rgba(90,60,32,0.55)',
-      infield:'#20301c', sign:'RAINEY RACING', blurb:'The home bullring. Tight, tacky, elbows up.' },
-    { id:'boone',    name:'Boone County Bullring', len:'1/4 MILE', size:'short', featureKarts:15, wear:1.0,
-      A:300, R:230, halfW:78,  dirt:'#9a5533', dirt2:'#8f4e30', edge:'#5a3620', groove:'rgba(84,44,24,0.5)',
-      infield:'#243a1f', sign:'BOONE COUNTY', blurb:'Red-clay quarter mile with room to slide.' },
+    { id:'rainey',   name:'Rainey Speedway',      len:'1/4 MILE', size:'short', featureKarts:15, wear:0.9,
+      A:270, R:215, halfW:84,  dirt:'#8a6238', dirt2:'#825c33', edge:'#4a331e', groove:'rgba(90,60,32,0.55)',
+      infield:'#20301c', sign:'RAINEY RACING', blurb:'The home track — big, wide, and tacky. Elbows up.' },
+    { id:'camden',   name:'Camden Speedway',       len:'1/4 MILE', size:'short', featureKarts:15, wear:1.0,
+      A:300, R:235, halfW:80,  dirt:'#96522f', dirt2:'#8b4a2c', edge:'#57331d', groove:'rgba(80,42,22,0.5)',
+      infield:'#22371e', sign:'CAMDEN SPEEDWAY', blurb:'Sunday-night red clay. Race it like you own it.' },
+    { id:'boone',    name:'Boone County Bullring', len:'5/16 MILE', size:'short', featureKarts:15, wear:1.05,
+      A:330, R:245, halfW:82,  dirt:'#9a5533', dirt2:'#8f4e30', edge:'#5a3620', groove:'rgba(84,44,24,0.5)',
+      infield:'#243a1f', sign:'BOONE COUNTY', blurb:'Rough-and-tumble bullring with room to slide.' },
+    { id:'paperclip',name:'Hairpin Holler',        len:'PAPERCLIP', size:'short', featureKarts:15, wear:1.2,
+      A:560, R:165, halfW:76,  dirt:'#7d5a36', dirt2:'#745332', edge:'#46311c', groove:'rgba(66,44,24,0.5)',
+      infield:'#1f301b', sign:'HAIRPIN HOLLER', blurb:'Two drag strips and two hairpins. Brakes and bravery.' },
     { id:'thunder',  name:'Thunder Valley',        len:'3/8 MILE', size:'big',   featureKarts:20, wear:1.15,
       A:430, R:300, halfW:88,  dirt:'#6e4a2c', dirt2:'#654427', edge:'#3c2a16', groove:'rgba(40,26,14,0.5)',
       infield:'#1f2e1b', sign:'THUNDER VALLEY', blurb:'Dark loam 3/8 — momentum is everything. Gear tall!' },
     { id:'sandview', name:'Sandview Half-Mile',    len:'1/2 MILE', size:'big',   featureKarts:20, wear:1.25,
       A:580, R:390, halfW:102, dirt:'#a3805a', dirt2:'#997754', edge:'#5f4830', groove:'rgba(110,80,48,0.45)',
-      infield:'#22331d', sign:'SANDVIEW SPEEDWAY', blurb:'The sandy half-mile monster. Wide open and wicked fast.' }
+      infield:'#22331d', sign:'SANDVIEW SPEEDWAY', blurb:'The sandy half-mile monster. Wide open and wicked fast.' },
+    { id:'monster',  name:'Dirt Monster Mile',     len:'1 MILE',   size:'big',   featureKarts:20, wear:1.35,
+      A:660, R:420, halfW:108, dirt:'#6a4f38', dirt2:'#614834', edge:'#3a2c1d', groove:'rgba(46,32,20,0.5)',
+      infield:'#1d2c1a', sign:'DIRT MONSTER', blurb:'A full mile of dirt. Tall gear, big motor, no lifting.' }
 ];
 const FEATURE_LAP_CHOICES = [5, 8, 10, 15, 20, 25];
+
+// ---- Championship series (career mode) ----
+const SERIES = [
+    { id:'rookie',    name:'Rookie Cup',            ico:'🥉', laps:8,
+      races:['rainey','camden','boone','rainey'], reward:200, needs:null,
+      desc:'4 short-track nights. Win the cup, bank the tokens.' },
+    { id:'sportsman', name:'Sportsman Series',      ico:'🥈', laps:10,
+      races:['camden','boone','paperclip','thunder','rainey','thunder'], reward:400, needs:'rookie',
+      desc:'6 races — the big tracks join the fight.' },
+    { id:'king',      name:'King of Dirt',          ico:'👑', laps:12,
+      races:['rainey','boone','camden','paperclip','thunder','sandview','monster','sandview'], reward:800, needs:'sportsman',
+      desc:'8 races. Every track. One king.' }
+];
+function seriesPoints(pos) { return pos === 1 ? 55 : Math.max(5, 50 - (pos - 1) * 3); }
 
 // CPU driver pool — the best 14 or 19 of these fill out the field
 const RIVAL_POOL = [
@@ -497,7 +537,8 @@ function newProfile(name, num) {
         owned: { cls:{ boxstock:true }, motor:0, gears:{ standard:true } },
         gear: 'standard',
         tokens: 60,                                // starter money for the first gear set
-        stats: { races:0, wins:0, heatWins:0, hardChargers:0, fastLaps:0, tokensEarned:0, bestLap:{} },
+        stats: { races:0, wins:0, heatWins:0, hardChargers:0, fastLaps:0, tokensEarned:0, championships:0, bestLap:{} },
+        career: { active:null, completed:{} },
         settings: { diff:'racer', featureLaps:10, trackId:'rainey', quickLaps:8, quickKarts:10 }
     };
 }
@@ -511,8 +552,9 @@ function patchProfile(p) {
     if (!CLASSES[p.cls] || !p.owned.cls[p.cls]) p.cls = 'boxstock';
     if (!GEARS[p.gear] || !p.owned.gears[p.gear]) p.gear = 'standard';
     if (typeof p.tokens !== 'number') p.tokens = 0;
-    p.stats = Object.assign({ races:0, wins:0, heatWins:0, hardChargers:0, fastLaps:0, tokensEarned:0 }, p.stats);
+    p.stats = Object.assign({ races:0, wins:0, heatWins:0, hardChargers:0, fastLaps:0, tokensEarned:0, championships:0 }, p.stats);
     p.stats.bestLap = p.stats.bestLap || {};
+    p.career = Object.assign({ active:null, completed:{} }, p.career);
     p.settings = Object.assign({ diff:'racer', featureLaps:10, trackId:'rainey', quickLaps:8, quickKarts:10 }, p.settings);
     if (!TRACKS.some(t => t.id === p.settings.trackId)) p.settings.trackId = 'rainey';
     if (!DIFFS[p.settings.diff]) p.settings.diff = 'racer';
@@ -521,7 +563,7 @@ function patchProfile(p) {
 function curTrack() { return TRACKS.find(t => t.id === (P ? P.settings.trackId : 'rainey')) || TRACKS[0]; }
 
 // ==================== SCREEN MANAGER ====================
-const SCREEN_IDS = ['login','home','garage','shop','tracks','quick','settings','grid','finish'];
+const SCREEN_IDS = ['login','home','garage','shop','tracks','quick','settings','grid','finish','career','mp'];
 function showScreen(id) {
     SCREEN_IDS.forEach(s => $(s).classList.toggle('hidden', s !== id));
     $('quitBtn').classList.toggle('hidden', id !== null);
@@ -584,19 +626,21 @@ function buildScenery() {
         { t:'flag',   x: cx + 56,     y: cy + R + hw + 20 },
         { t:'pole',   x: cx-(A+R-40), y: cy-(R+54) }, { t:'pole', x: cx+(A+R-40), y: cy-(R+54) },
         { t:'pole',   x: cx-(A+R-40), y: cy+(R+54) }, { t:'pole', x: cx+(A+R-40), y: cy+(R+54) },
-        { t:'tree',   x: cx - A*0.9,  y: cy-(R+80) }, { t:'tree', x: cx - A*0.35, y: cy-(R+88) },
-        { t:'tree',   x: cx + A*0.35, y: cy-(R+88) }, { t:'tree', x: cx + A*0.9,  y: cy-(R+80) },
+        { t:'tree',   x: cx - A*0.9,  y: cy-(R+hw+26) }, { t:'tree', x: cx - A*0.35, y: cy-(R+hw+36) },
+        { t:'tree',   x: cx + A*0.35, y: cy-(R+hw+36) }, { t:'tree', x: cx + A*0.9,  y: cy-(R+hw+26) },
         { t:'hauler', x: cx - A*0.45, y: cy - (R-hw)*0.62, c:'#FFD400', c2:'#7C3AED', label:'RAINEY' },
         { t:'hauler', x: cx + A*0.32, y: cy - (R-hw)*0.62, c:'#2563EB', c2:'#FFD400', label:'RACING' },
         { t:'tires',  x: cx - A*0.10, y: cy - (R-hw)*0.58 },
         { t:'tires',  x: cx - A*0.76, y: cy - (R-hw)*0.60 },
-        { t:'bubbas', x: cx,          y: cy - (R-hw)*0.72 }
+        { t:'bubbas', x: cx,          y: cy - (R-hw)*0.72 },
+        { t:'booth',  x: cx - 210,    y: cy + R + hw + 34 }     // announcer's box by the stripe
     ];
     if (TRK.def.size === 'big') {   // the big joints get a backstretch grandstand too
-        s.push({ t:'stand', x: cx - A*0.4, y: cy - (R + hw + 6) });
-        s.push({ t:'stand', x: cx + A*0.4, y: cy - (R + hw + 6) });
-        s.push({ t:'tree',  x: cx - (A+R-30), y: cy - 40 });
-        s.push({ t:'tree',  x: cx + (A+R-30), y: cy + 40 });
+        s.push({ t:'stand', x: cx - A*0.4, y: cy - (R + hw + 14) });
+        s.push({ t:'stand', x: cx + A*0.4, y: cy - (R + hw + 14) });
+        // trees OUTSIDE the turns, well clear of the racing surface
+        s.push({ t:'tree',  x: cx - (A + R + hw + 60), y: cy - 40 });
+        s.push({ t:'tree',  x: cx + (A + R + hw + 60), y: cy + 40 });
     }
     SCENERY = s;
 }
@@ -630,6 +674,7 @@ let field = [], karts = [], player = null, particles = [];
 let state = 'menu';            // menu | qualify | gridready | countdown | race | done
 let session = 'feature';       // qualify | heat | feature
 let raceMode = 'night';        // night (full payout) | quick (half payout)
+let raceContext = 'free';      // free | career (career features score championship points)
 let gridNextAction = 'feature';
 let countStart = 0, raceStart = 0, raceTime = 0;
 let finishOrder = [];
@@ -641,7 +686,9 @@ const PACE_SPEED = 85;
 let caution = null, banner = { text:'', color:'', until:0 };
 function resetCaution() {
     caution = { active:false, phase:'', order:[], startMs:0, cooldownUntil:0, leadPrevD:null,
-                warned:false, violateSince:0, speedSince:0, pitted:false };
+                warned:false, violateSince:0, speedSince:0, pitted:false,
+                single:false, gap:SLOT_GAP, pace:150, leaderCross:0, crossPrevD:null,
+                hinted:false, playerEndQueued:false };
 }
 resetCaution();
 function cautionActive() { return caution.active; }
@@ -661,19 +708,41 @@ const PHYS = {
     steer: 3.2, grip: 12,
     wallBounce: 0.35
 };
-function tireGrip(k)  { return 0.78 + 0.22 * k.tires; }   // worn tires slide
-function tireSpeed(k) { return 0.93 + 0.07 * k.tires; }   // ...and scrub speed
+function tireGrip(k)  { return (0.78 + 0.22 * k.tires) * (k.flat ? 0.6 : 1); }   // worn tires slide, a flat is worse
+function tireSpeed(k) { return (0.93 + 0.07 * k.tires) * (k.flat ? 0.58 : 1); }  // ...and scrub speed
+function motorHealth(k) { return 1 - 0.18 * Math.min(1, k.damage || 0); }        // a beat-up motor loses steam
 
-function playerPerf() {
-    const cls = CLASSES[P.cls], mot = MOTORS[P.owned.motor], gr = GEARS[P.gear];
+// the moment a motor lets go: bang, fire, smoke, done for the night
+function blowMotor(k) {
+    if (k.dead) return;
+    k.dead = true; k.dnf = true; k.damage = 1;
+    beep(90, 0.7);
+    for (let i = 0; i < 30; i++) {
+        const fire = i < 12;
+        particles.push({ kind: fire ? 'fire' : 'smoke', x:k.x, y:k.y, z:4,
+            vx:(Math.random()-0.5)*(fire?150:60), vy:(Math.random()-0.5)*(fire?150:60),
+            vz: 60 + Math.random()*(fire?160:90),
+            life: fire ? 0.5+Math.random()*0.3 : 1.4+Math.random()*1.2, age:0,
+            size: fire ? 2.5+Math.random()*3 : 4+Math.random()*5 });
+    }
+    showBanner(k.isPlayer ? '💥 YOUR MOTOR LET GO — DAY IS DONE!' : `💥 #${k.num} ${k.name} BLOWS A MOTOR!`, '#7a1f1f', 3.5);
+    if (k.isPlayer) k.deadAt = performance.now();
+}
+
+function perfFrom(clsId, motorLvl, gearId) {
+    const cls = CLASSES[clsId] || CLASSES.boxstock;
+    const mot = MOTORS[motorLvl] || MOTORS[0];
+    const gr  = GEARS[gearId] || GEARS.standard;
+    const cid = CLASSES[clsId] ? clsId : 'boxstock';
     return {
-        cls: P.cls,
+        cls: cid,
         top: PHYS.maxSpeed * cls.speed * mot.speed * gr.top,
         acc: PHYS.accel   * cls.accel * mot.accel * gr.accel,
         gripM: cls.grip,
-        wearM: P.cls === 'sprint' ? 1.12 : P.cls === 'champ' ? 1.0 : 0.94
+        wearM: cid === 'sprint' ? 1.12 : cid === 'champ' ? 1.0 : 0.94
     };
 }
+function playerPerf() { return perfFrom(P.cls, P.owned.motor, P.gear); }
 // The competition steps up as you upgrade (about half as much as you do),
 // and the difficulty setting sets how hard they race.
 function aiPerf(skill) {
@@ -706,6 +775,7 @@ function resetRaceFields(k) {
     k.lap = 0; k.lapStart = 0; k.bestLap = null; k.done = false; k.finishTime = 0;
     k.slowTime = 0; k.steerVal = 0;
     k.tires = 1; k.pitting = false; k.pitUntil = 0; k.inPits = false; k.pitStops = 0;
+    k.damage = 0; k.flat = false; k.dead = false; k.dnf = false; k.towing = false;
 }
 function makeKart(info, isPlayer, gridSlot, perf) {
     const k = {
@@ -716,6 +786,7 @@ function makeKart(info, isPlayer, gridSlot, perf) {
         lap:0, lapStart:0, bestLap:null, done:false, finishTime:0,
         slowTime:0, steerVal:0, parked:false, qualTime:null, startPos:gridSlot,
         tires:1, pitting:false, pitUntil:0, inPits:false, pitStops:0,
+        damage:0, flat:false, dead:false, dnf:false, towing:false,
         aiOffset: (Math.random()*2-1) * TRK.halfW*0.38, aiWobble: Math.random()*10
     };
     gridPlace(k, gridSlot);
@@ -745,6 +816,7 @@ function hideOverlays() { showScreen(null); }
 function beginCountdown() {
     particles = []; finishOrder = [];
     resetCaution();
+    TOW.active = false; TOW.phase = ''; TOW.k = null;   // tow truck back in its spot
     countdownPrevD = null;
     banner = { text:'', color:'', until:0 };
     raceTime = 0;
@@ -755,17 +827,29 @@ function beginCountdown() {
 }
 
 // ==================== RACE MODES ====================
-function featureLapsWanted() { return P.settings.featureLaps; }
+function activeSeries() { return (P && P.career.active) ? SERIES.find(s => s.id === P.career.active.seriesId) : null; }
+function featureLapsWanted() {
+    if (raceContext === 'career' && activeSeries()) return activeSeries().laps;
+    return P.settings.featureLaps;
+}
 function heatLapsWanted() { return Math.max(4, Math.min(8, Math.round(featureLapsWanted()/2.5))); }
 
 function startRaceNight() {
-    raceMode = 'night';
+    raceMode = 'night'; raceContext = 'free';
     applyTrack(curTrack());
     buildField(curTrack().featureKarts);
     startQualify();
 }
+function startCareerRace() {
+    raceMode = 'night'; raceContext = 'career';
+    const S = activeSeries(), act = P.career.active;
+    const trk = TRACKS.find(t => t.id === S.races[act.raceIdx]) || TRACKS[0];
+    applyTrack(trk);
+    buildField(trk.featureKarts);
+    startQualify();
+}
 function startQuickRace() {
-    raceMode = 'quick';
+    raceMode = 'quick'; raceContext = 'free';
     applyTrack(curTrack());
     LAPS = P.settings.quickLaps; session = 'feature';
     buildField(Math.min(P.settings.quickKarts, curTrack().featureKarts + 5, 20));
@@ -880,7 +964,8 @@ function startFeature() {
 const PAY_FEATURE = [50, 35, 25, 20, 16, 13, 11, 10, 9, 8];
 function endRace() {
     state = 'done';
-    const rest = karts.filter(k => !finishOrder.includes(k)).sort((a,b) => b.progress - a.progress);
+    const rest = karts.filter(k => !finishOrder.includes(k))
+        .sort((a,b) => (b.dnf ? b.progress - 1e6 : b.progress) - (a.dnf ? a.progress - 1e6 : a.progress));
     const order = [...finishOrder, ...rest];
     const place = order.indexOf(player) + 1;
     const sfx = p => p===1?'st':p===2?'nd':p===3?'rd':'th';
@@ -910,8 +995,31 @@ function endRace() {
     P.stats.races++;
     if (place === 1 && raceMode === 'night') P.stats.wins++;
     if (player.bestLap !== null) {
-        const tid = curTrack().id;
+        const tid = TRK.def.id;
         if (!P.stats.bestLap[tid] || player.bestLap < P.stats.bestLap[tid]) P.stats.bestLap[tid] = player.bestLap;
+    }
+    // ----- championship points (career features) -----
+    let careerLine = '';
+    if (raceContext === 'career' && P.career.active && session === 'feature') {
+        const act = P.career.active, S = activeSeries();
+        order.forEach((k, i) => {
+            const pts = seriesPoints(i + 1);
+            act.points[k.name] = (act.points[k.name] || 0) + pts;
+            if (k.isPlayer) careerLine = `Championship points earned: +${pts}`;
+        });
+        act.raceIdx++;
+        if (act.raceIdx >= S.races.length) {          // season's over — crown the champ
+            const table = Object.entries(act.points).sort((a,b) => b[1] - a[1]);
+            const pPos = table.findIndex(e => e[0] === P.name) + 1;
+            const reward = pPos === 1 ? S.reward
+                        : pPos === 2 ? Math.round(S.reward * 0.6)
+                        : pPos === 3 ? Math.round(S.reward * 0.4)
+                        : Math.round(S.reward * 0.25);
+            act.summary = { pPos, reward, champ: table[0][0] };
+            P.tokens += reward; P.stats.tokensEarned += reward;
+            if (pPos === 1) P.stats.championships++;
+            P.career.completed[S.id] = true;
+        }
     }
     saveDB();
 
@@ -923,13 +1031,26 @@ function endRace() {
     lines.forEach(([txt, amt]) => {
         payHtml += `<div class="line"><span>${txt}</span><b>${amt > 0 ? '+' + amt + ' ⛁' : ''}</b></div>`;
     });
+    if (careerLine) payHtml += `<div class="line"><span>🏆 ${careerLine}</span><b></b></div>`;
+    if (raceContext === 'career' && P.career.active && P.career.active.summary)
+        payHtml += `<div class="line"><span>🏁 SEASON COMPLETE — check the standings!</span><b></b></div>`;
     payHtml += `<div class="line total"><span>Tokens earned</span><b>+${total} ⛁</b></div>`;
     payHtml += `<div class="line total"><span>Your bank</span><b>⛁ ${P.tokens}</b></div>`;
+    $('finStandings').classList.toggle('hidden', !(raceContext === 'career' && session === 'feature'));
+    $('againBtn').classList.toggle('hidden', raceContext === 'career' || (MP.role === 'host' && MP.conns.length > 0));
+    // send friends their finish
+    if (MP.role === 'host' && MP.conns.length) {
+        const places = order.map(k => ({ name:k.name, num:k.num, dnf:!!k.dnf }));
+        MP.lobby.forEach(g => {
+            const pos = order.findIndex(k => k.remoteId === g.conn.peer) + 1;
+            try { g.conn.send({ t:'finish', places, youPos: pos || order.length }); } catch(e) {}
+        });
+    }
     $('payBox').innerHTML = payHtml;
     $('payBox').classList.remove('hidden');
     let rows = '<tr><th>Pos</th><th>Driver</th><th>Kart</th><th>Best Lap</th></tr>';
     order.forEach((k,i) => {
-        rows += `<tr${k.isPlayer?' class="you"':''}><td>${i+1}</td><td>${k.name}${k.pitStops ? ' 🔧' : ''}</td><td>#${k.num}</td><td>${k.bestLap ? k.bestLap.toFixed(2)+'s' : '—'}</td></tr>`;
+        rows += `<tr${k.isPlayer?' class="you"':''}><td>${k.dnf ? 'DNF' : i+1}</td><td>${k.name}${k.pitStops ? ' 🔧' : ''}${k.dnf ? ' 💥' : ''}</td><td>#${k.num}</td><td>${k.bestLap ? k.bestLap.toFixed(2)+'s' : '—'}</td></tr>`;
     });
     $('resultsTable').innerHTML = rows;
     $('bestLapLine').textContent =
@@ -1013,6 +1134,16 @@ function rescueKart(k) {
 // ==================== PHYSICS ====================
 function stepKart(k, dt) {
     if (k.pitting) { k.vx = 0; k.vy = 0; return; }        // crew's got the wrenches out
+    if (k.dead) {                                          // motor's gone — coast, smoke, wait for the hook
+        const dk = Math.exp(-2.2*dt);
+        k.vx *= dk; k.vy *= dk;
+        k.x += k.vx*dt; k.y += k.vy*dt;
+        k.prevPhi = polar(k.x, k.y).phi;
+        if (!k.parked && Math.random() < 6*dt) particles.push({ kind:'smoke', x:k.x, y:k.y, z:4,
+            vx:(Math.random()-0.5)*30, vy:(Math.random()-0.5)*30, vz: 50+Math.random()*50,
+            life: 1.2+Math.random(), age:0, size: 3.5+Math.random()*4 });
+        return;
+    }
 
     const fwdX = Math.cos(k.heading), fwdY = Math.sin(k.heading);
     const speed = k.vx*fwdX + k.vy*fwdY;
@@ -1023,20 +1154,24 @@ function stepKart(k, dt) {
         steer = aiSteer(k);
     } else if (k.done) {
         throttle = 0.25; steer = aiSteer(k);
-    } else if (cautionActive() && state === 'race' && !k.isPlayer) {
-        // yellow: the CPU field lines up behind the pace leader.
+    } else if (cautionActive() && state === 'race' && !k.isPlayer && !k.human) {
+        // yellow: the CPU field lines up behind the pace leader — double file
+        // (two lanes) on normal restarts, single file late in the feature.
         // The PLAYER keeps the wheel — but no passing and no speeding, or it's the rear.
         const pol0 = polar(k.x, k.y);
-        steer = steerToward(k, ...(p => [p.x, p.y])(pointOnRing(pol0.phi - 0.35, 0)));
         const idx = caution.order.indexOf(k);
+        const laneOff = (caution.single || idx < 0) ? 0
+                      : (idx % 2 ? TRK.halfW * 0.32 : -TRK.halfW * 0.32);
+        steer = steerToward(k, ...(p => [p.x, p.y])(pointOnRing(pol0.phi - 0.35, laneOff)));
+        const pace = caution.pace || 150;
         if (idx <= 0) {
-            throttle = speed < 120 ? 0.4 : 0;
+            throttle = speed < pace ? 0.45 : 0;
         } else {
             const lp = polar(caution.order[0].x, caution.order[0].y);
-            const err = angDiff(pol0.phi, lp.phi + idx * SLOT_GAP);
-            if (err > 0.05) throttle = speed < 260 ? 0.9 : 0;
+            const err = angDiff(pol0.phi, lp.phi + cautionRowOf(idx) * caution.gap);
+            if (err > 0.05) throttle = speed < pace * 1.9 ? 0.9 : 0;
             else if (err < -0.05) throttle = 0;
-            else throttle = speed < 120 ? 0.4 : 0;
+            else throttle = speed < pace ? 0.45 : 0;
         }
     } else if (k.isPlayer && (state === 'race' || state === 'qualify')) {
         if (input.up) throttle = 1;
@@ -1045,20 +1180,31 @@ function stepKart(k, dt) {
         const rate = (target !== 0 ? 4.5 : 10) * dt;
         k.steerVal += Math.max(-rate, Math.min(rate, target - k.steerVal));
         steer = k.steerVal;
+    } else if (k.human && !k.isPlayer && state === 'race') {
+        // a friend's kart: driven by their controller over the wire
+        const rin = MP.inputs[k.remoteId] || {};
+        if (rin.up) throttle = 1;
+        if (rin.down) throttle = -1;
+        const target = (rin.left ? -1 : 0) + (rin.right ? 1 : 0);
+        const rate = (target !== 0 ? 4.5 : 10) * dt;
+        k.steerVal += Math.max(-rate, Math.min(rate, target - k.steerVal));
+        steer = k.steerVal;
     } else if (!k.isPlayer && (state === 'race' || state === 'done')) {
         steer = aiSteer(k);
         throttle = (k.skill || 1) * (Math.abs(steer) > 0.35 ? 0.5 : 1);
     }
 
-    const sliding = k.isPlayer && input.slide && (state === 'race' || state === 'qualify') && !cautionActive() && !k.done;
+    const humanSlide = k.isPlayer ? input.slide : (k.human ? (MP.inputs[k.remoteId] || {}).slide : false);
+    const sliding = (k.isPlayer || k.human) && humanSlide && (state === 'race' || state === 'qualify') && !cautionActive() && !k.done;
 
     const sf = Math.min(1, (Math.abs(speed) + 45) / 165)
              / (1 + Math.max(0, Math.abs(speed) - 200) / 320)
              * (sliding ? 1.25 : 1);
     k.heading += steer * PHYS.steer * sf * dt * (speed < 0 ? -1 : 1);
+    if (k.flat) k.heading += (Math.random() - 0.5) * 1.5 * dt;   // flat tire hops and darts
 
-    // thrust / brake — motor, gearing and tire wear all live in k.acc / k.top
-    if (throttle > 0 && speed < k.top * tireSpeed(k)) {
+    // thrust / brake — motor, gearing, tire wear and damage all play in
+    if (throttle > 0 && speed < k.top * tireSpeed(k) * motorHealth(k)) {
         k.vx += fwdX * k.acc * throttle * dt;
         k.vy += fwdY * k.acc * throttle * dt;
     } else if (throttle < 0) {
@@ -1084,7 +1230,20 @@ function stepKart(k, dt) {
         const wear = (slide/380*1.2 + Math.abs(steer)*(spd0/PHYS.maxSpeed) + (sliding ? 0.5 : 0))
                    * 0.008 * TRK.def.wear * k.wearM * dt;
         k.tires = Math.max(0, k.tires - wear);
+        // run them down to the cords and one WILL let go
+        if (k.tires <= 0.04 && !k.flat && Math.random() < dt * 0.18) {
+            k.flat = true;
+            if (k.isPlayer) { showBanner('💥 BLOWN TIRE — LIMP IT TO THE PITS!', '#7a1f1f', 3.5); beep(150, 0.5); }
+        }
     }
+    // a hurt motor trails smoke, and can only take so much
+    if (k.damage > 0.45 && state === 'race' && Math.random() < k.damage * 2.2 * dt) {
+        particles.push({ kind:'smoke', x:k.x - fwdX*10, y:k.y - fwdY*10, z:3,
+            vx:(Math.random()-0.5)*30 - fwdX*20, vy:(Math.random()-0.5)*30 - fwdY*20,
+            vz: 40+Math.random()*40, life: 0.9+Math.random()*0.8, age:0, size: 3+Math.random()*3.5 });
+    }
+    if (k.damage >= 1 && !k.dead) blowMotor(k);
+    if (!k.isPlayer && k.damage > 0.7 && state === 'race' && Math.random() < dt * 0.012 * k.damage) blowMotor(k);
 
     // rooster tail
     const spd = Math.hypot(k.vx, k.vy);
@@ -1105,7 +1264,7 @@ function stepKart(k, dt) {
     // ---- pit road: the player may duck under the inner wall at the front-stretch gate ----
     const tn = trackNormal(k.x, k.y);
     const lim = TRK.halfW - 9;
-    const pitEligible = k.isPlayer && state === 'race' && PIT &&
+    const pitEligible = (k.isPlayer || k.human) && state === 'race' && PIT &&
         k.y > TRK.cy && k.x > PIT.gateX1 && k.x < PIT.gateX2 && tn.off < 0;
 
     if (pitEligible && tn.off < -lim) {
@@ -1135,6 +1294,8 @@ function stepKart(k, dt) {
             const vn = k.vx*nx + k.vy*ny;
             if (Math.sign(vn) === Math.sign(tn.off)) {
                 const vmag = Math.hypot(k.vx, k.vy);
+                // a hard shot into the wall bends things
+                if (Math.abs(vn) > 250 && state === 'race') k.damage = Math.min(1, k.damage + (Math.abs(vn) - 250) / 1500);
                 k.vx -= nx * vn; k.vy -= ny * vn;
                 const tSpd = Math.hypot(k.vx, k.vy);
                 if (tSpd > 30) {
@@ -1223,7 +1384,7 @@ function collideKarts() {
     const R = 15;
     for (let i=0;i<karts.length;i++) for (let j=i+1;j<karts.length;j++) {
         const a = karts[i], b = karts[j];
-        if (a.parked || b.parked || a.pitting || b.pitting || a.inPits || b.inPits) continue;
+        if (a.parked || b.parked || a.pitting || b.pitting || a.inPits || b.inPits || a.towing || b.towing) continue;
         const dx = b.x-a.x, dy = b.y-a.y, dist = Math.hypot(dx,dy);
         if (dist > 0 && dist < R*2) {
             const nx = dx/dist, ny = dy/dist, push = (R*2 - dist)/2;
@@ -1232,6 +1393,19 @@ function collideKarts() {
             if (rel < 0) {
                 const imp = rel * 0.75;
                 a.vx += nx*imp; a.vy += ny*imp; b.vx -= nx*imp; b.vy -= ny*imp;
+                // contact bends parts — hit hard enough and tires pop, motors die
+                if (state === 'race' && -rel > 200) {
+                    const dmg = (-rel - 200) / 1600;
+                    a.damage = Math.min(1, a.damage + dmg);
+                    b.damage = Math.min(1, b.damage + dmg * 1.2);
+                    if (-rel > 320 && Math.random() < 0.06) {
+                        const fk = Math.random() < 0.5 ? a : b;
+                        if (!fk.flat) {
+                            fk.flat = true;
+                            if (fk.isPlayer) { showBanner('💥 THAT HIT CUT A TIRE DOWN!', '#7a1f1f', 3); beep(150, 0.5); }
+                        }
+                    }
+                }
                 // hard shot: somebody's getting spun
                 if (state === 'race' && -rel > 240 && !caution.active && Math.random() < 0.55) {
                     const victim = (a.progress > b.progress) ? a : b;
@@ -1247,6 +1421,93 @@ function collideKarts() {
             }
         }
     }
+}
+
+// ==================== TOW TRUCK: hooks dead karts under the yellow ====================
+let TOW = { active:false, phase:'', x:0, y:0, ang:0, k:null, t:0 };
+function towHome() { return { x: TRK.cx - TRK.A*0.62, y: TRK.cy - (TRK.R - TRK.halfW)*0.4 }; }
+function updateTow(dt, now) {
+    if (!TOW.active) {
+        if (!caution.active || state !== 'race') return;
+        const deadK = karts.find(k => k.dead && !k.parked && !k.towing);
+        if (deadK) {
+            TOW.active = true; TOW.phase = 'out'; TOW.k = deadK; deadK.towing = true;
+            const h = towHome(); TOW.x = h.x; TOW.y = h.y; TOW.ang = 0;
+            showBanner('🚛 TOW TRUCK ROLLING — HOLD THE PACE', '#a08300', 3);
+        }
+        return;
+    }
+    const k = TOW.k;
+    const step = (tx, ty, spd) => {
+        const dx = tx - TOW.x, dy = ty - TOW.y, d = Math.hypot(dx, dy);
+        if (d < spd * dt + 2) { TOW.x = tx; TOW.y = ty; return true; }
+        TOW.ang = Math.atan2(dy, dx);
+        TOW.x += dx / d * spd * dt; TOW.y += dy / d * spd * dt;
+        return false;
+    };
+    if (TOW.phase === 'out') {
+        if (step(k.x - 20, k.y, 165)) { TOW.phase = 'hook'; TOW.t = now + 1400; }
+    } else if (TOW.phase === 'hook') {
+        if (now > TOW.t) TOW.phase = 'back';
+    } else if (TOW.phase === 'back') {
+        const h = towHome();
+        const arrived = step(h.x, h.y, 130);
+        // the dead kart drags along behind the hook
+        k.x = TOW.x - Math.cos(TOW.ang) * 26;
+        k.y = TOW.y - Math.sin(TOW.ang) * 26;
+        k.heading = TOW.ang;
+        k.vx = 0; k.vy = 0;
+        if (arrived) {
+            k.parked = true; k.towing = false;
+            TOW.active = false; TOW.k = null;
+            showBanner('🚛 #' + k.num + ' is loaded up — cleanup done', '#565b66', 2.5);
+        }
+    }
+}
+function drawTowTruck() {
+    if (!TOW.active) return;
+    cx2d.save();
+    cx2d.translate(TOW.x, TOW.y);
+    cx2d.rotate(TOW.ang);
+    cx2d.fillStyle = 'rgba(0,0,0,0.35)';
+    cx2d.beginPath(); cx2d.ellipse(0, 2, 17, 9, 0, 0, 2*Math.PI); cx2d.fill();
+    cx2d.fillStyle = '#111';                                  // wheels
+    cx2d.fillRect(-13, -10, 6, 4); cx2d.fillRect(-13, 6, 6, 4);
+    cx2d.fillRect(7, -10, 6, 4); cx2d.fillRect(7, 6, 6, 4);
+    cx2d.fillStyle = '#8f949e';                               // flatbed
+    cx2d.beginPath(); cx2d.roundRect(-16, -7.5, 22, 15, 2); cx2d.fill();
+    cx2d.strokeStyle = '#5a5f68'; cx2d.lineWidth = 1;
+    cx2d.strokeRect(-15, -6.5, 20, 13);
+    cx2d.fillStyle = '#f5a800';                               // cab
+    cx2d.beginPath(); cx2d.roundRect(6, -7.5, 11, 15, 2.5); cx2d.fill();
+    cx2d.fillStyle = '#1a2030';                               // windshield
+    cx2d.fillRect(7.5, -5.5, 3, 11);
+    cx2d.strokeStyle = '#3a3a44'; cx2d.lineWidth = 1.6;       // boom + hook
+    cx2d.beginPath(); cx2d.moveTo(-14, 0); cx2d.lineTo(-20, 0); cx2d.stroke();
+    const blink = Math.floor(performance.now() / 250) % 2;    // amber beacon
+    cx2d.fillStyle = blink ? '#ffb400' : '#7a5600';
+    cx2d.beginPath(); cx2d.arc(11.5, 0, 2.6, 0, 2*Math.PI); cx2d.fill();
+    cx2d.fillStyle = '#15151a';
+    cx2d.font = 'bold 7px Bahnschrift, Arial Narrow, sans-serif';
+    cx2d.textAlign = 'center';
+    cx2d.fillText('TOW', -5, 2.5);
+    cx2d.restore();
+}
+function drawTowSprite(pr) {
+    const s = Math.min(pr.s, 8), x = pr.x, y = pr.y;
+    cx2d.save();
+    cx2d.fillStyle = 'rgba(0,0,0,0.35)';
+    cx2d.beginPath(); cx2d.ellipse(x, y, 16*s, 5*s, 0, 0, 2*Math.PI); cx2d.fill();
+    cx2d.fillStyle = '#111';
+    cx2d.fillRect(x - 13*s, y - 8*s, 6*s, 9*s); cx2d.fillRect(x + 7*s, y - 8*s, 6*s, 9*s);
+    cx2d.fillStyle = '#8f949e';
+    cx2d.beginPath(); cx2d.roundRect(x - 14*s, y - 15*s, 28*s, 13*s, 2*s); cx2d.fill();
+    cx2d.fillStyle = '#f5a800';
+    cx2d.beginPath(); cx2d.roundRect(x - 9*s, y - 22*s, 18*s, 8*s, 2*s); cx2d.fill();
+    const blink = Math.floor(performance.now() / 250) % 2;
+    cx2d.fillStyle = blink ? '#ffb400' : '#7a5600';
+    cx2d.beginPath(); cx2d.arc(x, y - 24*s, 2.4*s, 0, 2*Math.PI); cx2d.fill();
+    cx2d.restore();
 }
 
 // ==================== RACE CONTROL: strict yellows, penalties, pit traffic ====================
@@ -1272,24 +1533,35 @@ function sendPlayerToRear(msg) {
     beep(220, 0.5);
 }
 
+function cautionRowOf(i) { return caution.single ? i : Math.floor(i / 2); }
 function startCaution(now) {
     caution.active = true; caution.phase = 'form';
     caution.startMs = now; caution.leadPrevD = null;
     caution.warned = false; caution.violateSince = 0; caution.speedSince = 0;
     caution.pitted = false; caution.hinted = false;
-    caution.order = [...karts].filter(k => !k.done && !k.pitting && !k.inPits)
+    caution.leaderCross = 0; caution.crossPrevD = null;
+    caution.order = [...karts].filter(k => !k.done && !k.pitting && !k.inPits && !k.dead)
                               .sort((a,b) => b.progress - a.progress);
-    showBanner('🟡 CAUTION — NO PASSING, NO SPEEDING', '#a08300', 4);
+    // double file every restart — single file when it's crunch time in the feature
+    const maxLap = Math.max(0, ...karts.filter(k => !k.dnf).map(k => k.lap));
+    const remaining = LAPS - maxLap;
+    const lateThresh = LAPS >= 15 ? 10 : Math.ceil(LAPS / 3);
+    caution.single = session === 'feature' && remaining <= lateThresh;
+    caution.gap = SLOT_GAP * (caution.single ? 1 : 1.25);
+    caution.pace = Math.max(140, perimeter() / 16);
+    showBanner(caution.single
+        ? `🟡 CAUTION — SINGLE FILE, ${remaining} TO GO`
+        : '🟡 CAUTION — DOUBLE FILE, TWO PACE LAPS', '#a08300', 4);
     beep(330, 0.35);
-    // pits are open: CPU karts on shot tires dive in (they restart from the rear)
-    const pitters = caution.order.slice(1).filter(k => !k.isPlayer && k.tires < 0.55);
+    // pits are open: CPU karts on shot tires or flats dive in (they restart from the rear)
+    const pitters = caution.order.slice(1).filter(k => !k.isPlayer && (k.tires < 0.55 || k.flat));
     if (pitters.length) {
         pitters.forEach(k => {
             const i = caution.order.indexOf(k);
             if (i >= 0) caution.order.splice(i, 1);
         });
-        pitters.forEach(k => { k.tires = 1; k.pitStops++; caution.order.push(k); });
-        showBanner('🟡 CAUTION — 🔧 #' + pitters.map(k=>k.num).join(', #') + ' hit pit road for tires', '#a08300', 4);
+        pitters.forEach(k => { k.tires = 1; k.flat = false; k.damage *= 0.4; k.pitStops++; caution.order.push(k); });
+        showBanner('🟡 CAUTION — 🔧 #' + pitters.map(k=>k.num).join(', #') + ' hit pit road', '#a08300', 4);
     }
 }
 
@@ -1297,9 +1569,20 @@ function raceControl(now, dt) {
     if (state !== 'race') return;
 
     // finish the player's pit stop
+    // a visiting friend's pit stop finishes the same way
+    for (const k of karts) {
+        if (k.human && !k.isPlayer && k.pitting && now >= k.pitUntil) {
+            k.pitting = false; k.tires = 1; k.flat = false;
+            k.damage = Math.max(0, k.damage * 0.4); k.pitStops++;
+            k.heading = 0.22;
+            k.vx = Math.cos(k.heading) * 95; k.vy = Math.sin(k.heading) * 95;
+        }
+    }
     if (player.pitting && now >= player.pitUntil) {
         player.pitting = false;
         player.tires = 1; player.pitStops++;
+        player.flat = false;                          // fresh rubber all around
+        player.damage = Math.max(0, player.damage * 0.4);   // crew patches what they can
         player.heading = 0.22;                       // rolling out toward the track
         player.vx = Math.cos(player.heading)*95; player.vy = Math.sin(player.heading)*95;
         player.slowTime = 0;
@@ -1329,36 +1612,51 @@ function raceControl(now, dt) {
     }
 
     // stuck karts bring out the yellow (push truck quietly rescues them)
-    const stuck = karts.filter(k => !k.done && !k.pitting && k.slowTime > (k.inPits ? 2.2 : 1.0));
+    const stuck = karts.filter(k => !k.done && !k.pitting && !k.dead && k.slowTime > (k.inPits ? 2.2 : 1.0));
     if (stuck.length) {
         stuck.forEach(rescueKart);
         if (!caution.active && now > caution.cooldownUntil && player.lap < LAPS - 1 && !player.done) {
             startCaution(now);
         }
     }
+    // a dead kart on the track ALWAYS brings out the yellow (no cooldown excuse)
+    if (!caution.active && karts.some(k => k.dead && !k.parked) && player.lap < LAPS - 1 && !player.done) {
+        startCaution(now);
+    }
+    updateTow(dt, now);
+    // player's motor is gone: once the hook has them (or 8s pass), the night is scored
+    if (player.dead && !caution.playerEndQueued) {
+        if (player.parked || now > (player.deadAt || now) + 8000) {
+            caution.playerEndQueued = true;
+            if (session === 'heat') finishHeat(); else endRace();
+            return;
+        }
+    }
 
     if (!caution.active) return;
 
     // ---- strict yellow-flag rules for the player ----
-    if (!player.done && !player.pitting && !player.inPits) {
+    if (!player.done && !player.pitting && !player.inPits && !player.dead) {
         const sp = Math.hypot(player.vx, player.vy);
         // pit hint
-        if (!caution.hinted && player.tires < 0.6) {
+        if (!caution.hinted && (player.tires < 0.6 || player.flat || player.damage > 0.5)) {
             caution.hinted = true;
-            showBanner('🔧 PITS OPEN — DUCK LOW ON THE FRONT STRETCH FOR TIRES', '#2563EB', 3.5);
+            showBanner('🔧 PITS OPEN — DUCK LOW ON THE FRONT STRETCH', '#2563EB', 3.5);
         }
         // speeding
-        if (sp > 215) caution.speedSince += dt; else caution.speedSince = Math.max(0, caution.speedSince - dt*2);
+        const speedLimit = (caution.pace || 150) + 90;
+        if (sp > speedLimit) caution.speedSince += dt; else caution.speedSince = Math.max(0, caution.speedSince - dt*2);
         if (caution.speedSince > 1.1 && !caution.warned) {
             caution.warned = true;
             showBanner('⚠ SLOW DOWN — SPEEDING UNDER YELLOW!', '#a05a00', 2.5);
             beep(300, 0.3);
         }
         if (caution.speedSince > 3.2) sendPlayerToRear('🏴 SPEEDING UNDER CAUTION — TO THE REAR!');
-        // passing
+        // passing — the kart ahead in YOUR lane (double file = two slots up)
         const idx = caution.order.indexOf(player);
-        if (idx > 0) {
-            const ahead = caution.order[idx - 1];
+        const step = caution.single ? 1 : 2;
+        if (idx >= step) {
+            const ahead = caution.order[idx - step];
             if (player.progress > ahead.progress + 0.012) {
                 caution.violateSince += dt;
                 if (!caution.warned && caution.violateSince > 0.4) {
@@ -1374,22 +1672,31 @@ function raceControl(now, dt) {
         }
     }
 
-    // ---- form up, then throw the green off turn 4 ----
+    // ---- pace 'em: form up, run the pace laps, green off turn 4 ----
     const lead = caution.order[0];
     if (!lead) { caution.active = false; return; }
     const lp = polar(lead.x, lead.y);
+    // count the leader's pace laps (stripe crossings under yellow)
+    const dStripe = angDiff(lp.phi, Math.PI/2);
+    if (caution.crossPrevD !== null && caution.crossPrevD > 0 && dStripe <= 0 && caution.crossPrevD < 1.5) caution.leaderCross++;
+    caution.crossPrevD = dStripe;
+
     if (caution.phase === 'form') {
-        const formed = now - caution.startMs > 6500 ||
+        const formed = now - caution.startMs > 9000 ||
             caution.order.every((k, i) => i === 0 || k.isPlayer ||
-                Math.abs(angDiff(polar(k.x, k.y).phi, lp.phi + i * SLOT_GAP)) < 0.12);
-        if (formed) {
+                Math.abs(angDiff(polar(k.x, k.y).phi, lp.phi + cautionRowOf(i) * caution.gap)) < 0.14);
+        // pace lap 1 to line up; "one to go" only once they're stacked
+        if (formed && caution.leaderCross >= 1) {
             caution.phase = 'armed';
-            showBanner('🟡 ONE TO GO — GREEN OFF TURN 4!', '#a08300', 3);
+            showBanner(caution.single ? '🟡 ONE TO GO — SINGLE FILE!' : '🟡 ONE TO GO — DOUBLE FILE!', '#a08300', 3);
             beep(440, 0.2);
         }
     } else if (caution.phase === 'armed') {
         const d = angDiff(lp.phi, Math.PI/2);
-        if (caution.leadPrevD !== null && caution.leadPrevD > TURN4_EXIT && d <= TURN4_EXIT && d > 0) {
+        // hold the green while the tow truck works or a dead kart sits on track
+        const clear = !TOW.active && !karts.some(k => k.dead && !k.parked);
+        if (clear && caution.leaderCross >= 2 &&
+            caution.leadPrevD !== null && caution.leadPrevD > TURN4_EXIT && d <= TURN4_EXIT && d > 0) {
             // still holding a spot you stole? You restart from the rear.
             if (caution.violateSince > 0.3) sendPlayerToRear('🏴 NEVER GAVE IT BACK — RESTART AT THE REAR!');
             caution.active = false; caution.cooldownUntil = now + 15000;
@@ -1494,7 +1801,11 @@ function frame(now) {
 
     if (state === 'race' || state === 'done' || state === 'qualify') raceTime = (now - raceStart) / 1000;
 
-    if (state === 'qualify') {
+    if (MP.role === 'guest') {
+        // friend's screen: the host simulates — we mirror and send our inputs
+        if (state !== 'menu' && state !== 'gridready') mpGuestApply(now);
+        mpGuestSend(now);
+    } else if (state === 'qualify') {
         stepKart(player, dt);
         if (raceTime > 90) finishQualify();
     } else if (state !== 'menu' && state !== 'gridready') {
@@ -1502,7 +1813,7 @@ function frame(now) {
         collideKarts();
     }
 
-    raceControl(now, dt);
+    if (MP.role !== 'guest') { raceControl(now, dt); mpHostTick(now); }
     updateEngine();
 
     for (let i = particles.length - 1; i >= 0; i--) {
@@ -1528,11 +1839,14 @@ function frame(now) {
             const a = 1 - p.age/p.life;
             const lift = (p.z || 0) * 0.4;
             if (p.kind === 'clod') cx2d.fillStyle = `rgba(74,51,30,${(0.65*a).toFixed(3)})`;
+            else if (p.kind === 'smoke') cx2d.fillStyle = `rgba(95,95,108,${(0.45*a).toFixed(3)})`;
+            else if (p.kind === 'fire') cx2d.fillStyle = `rgba(255,${Math.round(90+120*a)},30,${(0.85*a).toFixed(3)})`;
             else cx2d.fillStyle = `rgba(200,168,124,${(0.5*a).toFixed(3)})`;
             cx2d.beginPath(); cx2d.arc(p.x, p.y - lift, p.size*(1+p.age*2), 0, 2*Math.PI); cx2d.fill();
         }
         if (state !== 'menu') {
             [...karts].reverse().forEach(drawKart);
+            drawTowTruck();
         }
         cx2d.restore();
         if (state !== 'menu') drawKartTags();
@@ -1547,7 +1861,7 @@ function frame(now) {
     cx2d.textAlign = 'right';
     cx2d.font = 'bold 12px Bahnschrift, Arial Narrow, sans-serif';
     cx2d.fillStyle = 'rgba(255,212,0,0.55)';
-    cx2d.fillText('v18', W - 10, H - 10);
+    cx2d.fillText('v19', W - 10, H - 10);
 
     requestAnimationFrame(frame);
 }
@@ -1590,12 +1904,60 @@ function drawSceneryItem(s, x, y, sc) {
                 cx2d.closePath();
                 cx2d.fill();
             }
-            for (let r = 0; r < 2; r++) for (let c = 0; c < 26; c++) {
-                cx2d.fillStyle = CROWD_COLORS[(r*26 + c*7) % CROWD_COLORS.length];
+            // three rows of fans — they bob and wave when the racing's good
+            const tNow = performance.now();
+            for (let r = 0; r < 3; r++) for (let c = 0; c < 32; c++) {
+                const seed = r*32 + c;
+                const bob = Math.sin(tNow/420 + seed*1.7) * 1.1*sc;
+                const fx0 = x - w/2 + (c + 0.5) * w/32;
+                const fy0 = y - h + (r + 0.62) * h/3.4 + bob;
+                cx2d.fillStyle = CROWD_COLORS[(seed*7) % CROWD_COLORS.length];
                 cx2d.beginPath();
-                cx2d.arc(x - w/2 + (c + 0.5) * w/26, y - h + (r + 0.55) * h/2.4, 2.4*sc, 0, 2*Math.PI);
+                cx2d.arc(fx0, fy0, 2.1*sc, 0, 2*Math.PI);
                 cx2d.fill();
+                if (seed % 9 === 0) {              // a few wave team pennants
+                    const wv = Math.sin(tNow/240 + seed) * 3*sc;
+                    cx2d.strokeStyle = '#c9c4dd'; cx2d.lineWidth = Math.max(0.5, 0.7*sc);
+                    cx2d.beginPath(); cx2d.moveTo(fx0, fy0 - 1.5*sc); cx2d.lineTo(fx0 + wv, fy0 - 6*sc); cx2d.stroke();
+                    cx2d.fillStyle = seed % 18 ? '#FFD400' : '#7C3AED';
+                    cx2d.fillRect(fx0 + wv - 1.6*sc, y - h + (r + 0.62) * h/3.4 - 7.4*sc + bob, 3.2*sc, 2.2*sc);
+                }
             }
+        }
+    } else if (s.t === 'booth') {
+        // the announcer's box: elevated booth, big window, announcer on the mic
+        const bw = 62*sc, bh = 30*sc, legs = 26*sc;
+        cx2d.fillStyle = '#3a3444';
+        cx2d.fillRect(x - bw/2 + 5*sc, y - legs, 4*sc, legs);
+        cx2d.fillRect(x + bw/2 - 9*sc, y - legs, 4*sc, legs);
+        cx2d.fillStyle = '#221c3c';
+        cx2d.fillRect(x - bw/2, y - legs - bh, bw, bh);
+        cx2d.strokeStyle = '#FFD400'; cx2d.lineWidth = Math.max(1, 1.5*sc);
+        cx2d.strokeRect(x - bw/2, y - legs - bh, bw, bh);
+        cx2d.fillStyle = '#7C3AED';
+        cx2d.fillRect(x - bw/2, y - legs - bh - 5*sc, bw, 5*sc);
+        // window
+        cx2d.fillStyle = '#101020';
+        cx2d.fillRect(x - bw/2 + 6*sc, y - legs - bh + 6*sc, bw - 12*sc, bh - 12*sc);
+        // the announcer: headset, waving arm working the call
+        const ax = x - 8*sc, ay = y - legs - bh + 16*sc;
+        cx2d.fillStyle = '#e8b88a';
+        cx2d.beginPath(); cx2d.arc(ax, ay - 6*sc, 3.4*sc, 0, 2*Math.PI); cx2d.fill();
+        cx2d.strokeStyle = '#111'; cx2d.lineWidth = Math.max(0.6, 1.1*sc);
+        cx2d.beginPath(); cx2d.arc(ax, ay - 6*sc, 3.6*sc, Math.PI*1.1, Math.PI*1.9); cx2d.stroke();   // headset band
+        cx2d.fillStyle = '#c0392b';
+        cx2d.fillRect(ax - 3.4*sc, ay - 2.5*sc, 6.8*sc, 6*sc);                                        // shirt
+        const wave = Math.sin(performance.now()/300) * 0.5 + 0.6;
+        cx2d.strokeStyle = '#e8b88a'; cx2d.lineWidth = Math.max(0.8, 1.6*sc);
+        cx2d.beginPath(); cx2d.moveTo(ax + 3*sc, ay - 1*sc);
+        cx2d.lineTo(ax + 7*sc, ay - (1 + 6*wave)*sc); cx2d.stroke();                                  // arm up on a big call
+        cx2d.fillStyle = '#111';
+        cx2d.fillRect(ax + 5.4*sc, ay - 4.4*sc, 1.8*sc, 3*sc);                                        // the mic
+        if (sc > 0.45) {
+            cx2d.fillStyle = '#FFD400';
+            cx2d.font = `bold ${Math.max(7, Math.round(9*sc))}px Bahnschrift, Arial Narrow, sans-serif`;
+            cx2d.textAlign = 'center';
+            cx2d.fillText('🎙 ANNOUNCER', x, y - legs - bh - 8*sc);
         }
     } else if (s.t === 'flag') {
         cx2d.fillStyle = '#221c3c';
@@ -1764,6 +2126,33 @@ function drawTrack() {
         cx2d.fillStyle = (r + c) % 2 ? '#ffffff' : '#111111';
         cx2d.fillRect(TRK.cx - 7 + r*7, lineTop + c*lineH, 7, lineH);
     }
+    // restart zone painted off turn 4 — the green flies inside this box
+    const zoneA = Math.PI/2 + TURN4_EXIT + 0.02, zoneB = Math.PI/2 + Math.max(0.10, TURN4_EXIT - 0.20);
+    cx2d.strokeStyle = 'rgba(255,255,255,0.65)';
+    cx2d.lineWidth = 4;
+    for (const zp of [zoneA, zoneB]) {
+        const pIn = pointOnRing(zp, -TRK.halfW + 6), pOut = pointOnRing(zp, TRK.halfW - 6);
+        cx2d.beginPath(); cx2d.moveTo(pIn.x, pIn.y); cx2d.lineTo(pOut.x, pOut.y); cx2d.stroke();
+    }
+    cx2d.lineWidth = 2.5;
+    cx2d.strokeStyle = 'rgba(255,212,0,0.55)';
+    for (const off of [-TRK.halfW + 6, TRK.halfW - 6]) {     // rails joining the two lines
+        cx2d.beginPath();
+        for (let i = 0; i <= 6; i++) {
+            const p = pointOnRing(zoneA + (zoneB - zoneA) * i/6, off);
+            i ? cx2d.lineTo(p.x, p.y) : cx2d.moveTo(p.x, p.y);
+        }
+        cx2d.stroke();
+    }
+    const zc = pointOnRing((zoneA + zoneB)/2, 0);
+    cx2d.save();
+    cx2d.translate(zc.x, zc.y);
+    cx2d.rotate(travelHeadingAt(zc.x, zc.y));
+    cx2d.fillStyle = 'rgba(255,255,255,0.5)';
+    cx2d.font = 'bold 13px Bahnschrift, Arial Narrow, sans-serif';
+    cx2d.textAlign = 'center';
+    cx2d.fillText('RESTART ZONE', 0, 4);
+    cx2d.restore();
     cx2d.textAlign = 'center';
     cx2d.fillStyle = 'rgba(255,212,0,0.18)';
     cx2d.font = 'bold 44px Bahnschrift, Arial Narrow, sans-serif';
@@ -1774,61 +2163,172 @@ function drawTrack() {
     for (const s of SCENERY) drawSceneryItem(s, s.x, s.y, 1);
 }
 
-// ==================== KARTS (top-down, one body style per class) ====================
+// ==================== KARTS (top-down, detailed per class) ====================
 function drawKartBody(k) {
+    const numTxt = (k.num || '').length > 2 ? String(k.num).slice(0,3) : String(k.num || '');
     // shadow
     cx2d.fillStyle = 'rgba(0,0,0,0.35)';
-    cx2d.beginPath(); cx2d.ellipse(-1, 2, 14, 10, 0, 0, 2*Math.PI); cx2d.fill();
-    // tires
-    cx2d.fillStyle = '#111';
-    cx2d.fillRect(-12, -11, 7, 5); cx2d.fillRect(-12, 6, 7, 5);
-    cx2d.fillRect(6, -9, 5, 4); cx2d.fillRect(6, 5, 5, 4);
-    cx2d.fillStyle = '#22222a';
-    cx2d.fillRect(-6, -10.5, 9, 2.5);
-    cx2d.fillRect(-6, 8, 9, 2.5);
-    cx2d.fillRect(12.5, -4, 2, 8);
+    cx2d.beginPath(); cx2d.ellipse(-1, 2, 15, 10, 0, 0, 2*Math.PI); cx2d.fill();
+
     if (k.cls === 'champ') {
-        // full-body champ kart with a caged roof
-        cx2d.fillStyle = k.body;
-        cx2d.beginPath(); cx2d.roundRect(-12, -8, 26, 16, 5); cx2d.fill();
-        cx2d.strokeStyle = k.trim; cx2d.lineWidth = 1.5; cx2d.stroke();
-        cx2d.fillStyle = k.wing || k.trim;
-        cx2d.beginPath(); cx2d.roundRect(-7, -6, 11, 12, 3); cx2d.fill();
-        cx2d.strokeStyle = '#15151a'; cx2d.lineWidth = 1.2;
+        // ---- champ kart: full body, caged roof, number on top ----
+        cx2d.fillStyle = '#111';                                    // wheels poking out
+        cx2d.beginPath(); cx2d.roundRect(-13, -12, 8, 5, 1.5); cx2d.fill();
+        cx2d.beginPath(); cx2d.roundRect(-13, 7, 8, 5, 1.5); cx2d.fill();
+        cx2d.beginPath(); cx2d.roundRect(7, -10.5, 6, 4, 1.5); cx2d.fill();
+        cx2d.beginPath(); cx2d.roundRect(7, 6.5, 6, 4, 1.5); cx2d.fill();
+        cx2d.fillStyle = '#22222a';                                 // rear bumper + nerfs
+        cx2d.fillRect(-15, -7, 2.5, 14);
+        cx2d.fillRect(-4, -11, 9, 2);
+        cx2d.fillRect(-4, 9, 9, 2);
+        cx2d.fillStyle = k.body;                                    // body shell
         cx2d.beginPath();
-        cx2d.moveTo(-7, -6); cx2d.lineTo(4, -6);
-        cx2d.moveTo(-7, 6);  cx2d.lineTo(4, 6);
+        cx2d.moveTo(15, -3); cx2d.quadraticCurveTo(15.5, 0, 15, 3);
+        cx2d.lineTo(8, 8); cx2d.lineTo(-10, 8.5);
+        cx2d.quadraticCurveTo(-13.5, 8.5, -13.5, 5);
+        cx2d.lineTo(-13.5, -5);
+        cx2d.quadraticCurveTo(-13.5, -8.5, -10, -8.5);
+        cx2d.lineTo(8, -8); cx2d.closePath();
+        cx2d.fill();
+        cx2d.strokeStyle = k.trim; cx2d.lineWidth = 1.4; cx2d.stroke();
+        cx2d.strokeStyle = 'rgba(0,0,0,0.35)'; cx2d.lineWidth = 1;  // hood + tail seams
+        cx2d.beginPath(); cx2d.moveTo(8, -8); cx2d.lineTo(8, 8); cx2d.moveTo(-9, -8.5); cx2d.lineTo(-9, 8.5); cx2d.stroke();
+        cx2d.fillStyle = '#0f0f16';                                 // windshield
+        cx2d.beginPath();
+        cx2d.moveTo(7.5, -6); cx2d.lineTo(4.5, -5); cx2d.lineTo(4.5, 5); cx2d.lineTo(7.5, 6); cx2d.closePath();
+        cx2d.fill();
+        cx2d.fillStyle = k.wing || k.trim;                          // caged roof
+        cx2d.beginPath(); cx2d.roundRect(-8, -6.5, 12, 13, 3); cx2d.fill();
+        cx2d.strokeStyle = '#15151a'; cx2d.lineWidth = 1.3; cx2d.stroke();
+        cx2d.beginPath();                                           // cage X-braces
+        cx2d.moveTo(-8, -6.5); cx2d.lineTo(4, 6.5);
+        cx2d.moveTo(-8, 6.5); cx2d.lineTo(4, -6.5);
         cx2d.stroke();
+        if (numTxt) {                                               // roof number
+            cx2d.fillStyle = k.numColor || '#fff';
+            cx2d.font = 'bold 8px Bahnschrift, Arial Narrow, sans-serif';
+            cx2d.textAlign = 'center';
+            cx2d.save(); cx2d.translate(-2, 0); cx2d.rotate(Math.PI/2);
+            cx2d.strokeStyle = 'rgba(0,0,0,0.6)'; cx2d.lineWidth = 2;
+            cx2d.strokeText(numTxt, 0, 3); cx2d.fillText(numTxt, 0, 3);
+            cx2d.restore();
+        }
     } else if (k.cls === 'sprint') {
-        // mini sprint: body plus the big top wing
-        cx2d.fillStyle = k.body;
+        // ---- winged mini sprint: open wheels, rails, big top wing ----
+        cx2d.fillStyle = '#111';                                    // big rear tires, small fronts
+        cx2d.beginPath(); cx2d.roundRect(-13, -13, 9, 6, 2); cx2d.fill();
+        cx2d.beginPath(); cx2d.roundRect(-13, 7, 9, 6, 2); cx2d.fill();
+        cx2d.beginPath(); cx2d.roundRect(9, -10, 5.5, 4, 1.5); cx2d.fill();
+        cx2d.beginPath(); cx2d.roundRect(9, 6, 5.5, 4, 1.5); cx2d.fill();
+        cx2d.fillStyle = '#3a3a44';                                 // axles
+        cx2d.fillRect(-10.5, -8, 3, 16);
+        cx2d.fillRect(10, -7, 2.5, 14);
+        cx2d.fillStyle = k.body;                                    // narrow chassis + tail tank
         cx2d.beginPath();
-        cx2d.moveTo(14, 0); cx2d.lineTo(5, -6); cx2d.lineTo(-12, -5);
-        cx2d.lineTo(-12, 5); cx2d.lineTo(5, 6); cx2d.closePath();
+        cx2d.moveTo(14, -1.5); cx2d.lineTo(14, 1.5); cx2d.lineTo(5, 4.5);
+        cx2d.lineTo(-8, 4); cx2d.lineTo(-12, 2.5); cx2d.lineTo(-12, -2.5);
+        cx2d.lineTo(-8, -4); cx2d.lineTo(5, -4.5); cx2d.closePath();
         cx2d.fill();
-        cx2d.strokeStyle = k.trim; cx2d.lineWidth = 1.5; cx2d.stroke();
-        cx2d.fillStyle = k.trim;
-        cx2d.beginPath(); cx2d.arc(0, 0, 3.5, 0, 2*Math.PI); cx2d.fill();
-        // wing with side boards
+        cx2d.strokeStyle = k.trim; cx2d.lineWidth = 1.2; cx2d.stroke();
+        cx2d.fillStyle = '#22222a';                                 // engine block right side
+        cx2d.fillRect(-2, 4.5, 6, 3.5);
+        cx2d.strokeStyle = '#15151a'; cx2d.lineWidth = 1.4;         // exhaust
+        cx2d.beginPath(); cx2d.moveTo(2, 7.5); cx2d.lineTo(-9, 8.5); cx2d.stroke();
+        cx2d.fillStyle = k.trim;                                    // driver helmet
+        cx2d.beginPath(); cx2d.arc(-1, 0, 3.4, 0, 2*Math.PI); cx2d.fill();
+        cx2d.fillStyle = '#0f0f16';
+        cx2d.fillRect(0.4, -2, 1.6, 4);                             // visor
+        // front wing with boards
         cx2d.fillStyle = k.wing || '#ffffff';
-        cx2d.beginPath(); cx2d.roundRect(-13, -9, 13, 18, 2); cx2d.fill();
-        cx2d.strokeStyle = 'rgba(0,0,0,0.4)'; cx2d.lineWidth = 1; cx2d.stroke();
-        cx2d.fillStyle = k.trim;
-        cx2d.fillRect(-14, -11, 15, 2.6);
-        cx2d.fillRect(-14, 8.4, 15, 2.6);
-        // front wing
+        cx2d.fillRect(11.5, -7.5, 3.5, 15);
+        cx2d.fillStyle = 'rgba(0,0,0,0.35)';
+        cx2d.fillRect(11, -8.5, 4.5, 1.4); cx2d.fillRect(11, 7.1, 4.5, 1.4);
+        // THE top wing (drawn last, sits over everything)
         cx2d.fillStyle = k.wing || '#ffffff';
-        cx2d.fillRect(10, -6, 3.5, 12);
+        cx2d.beginPath(); cx2d.roundRect(-13.5, -10, 15, 20, 2); cx2d.fill();
+        cx2d.strokeStyle = 'rgba(0,0,0,0.45)'; cx2d.lineWidth = 1; cx2d.stroke();
+        cx2d.beginPath();                                           // wing panel ribs
+        cx2d.moveTo(-8.5, -10); cx2d.lineTo(-8.5, 10);
+        cx2d.moveTo(-3.5, -10); cx2d.lineTo(-3.5, 10);
+        cx2d.stroke();
+        cx2d.fillStyle = k.trim;                                    // side boards
+        cx2d.fillRect(-14.5, -12.2, 17, 2.6);
+        cx2d.fillRect(-14.5, 9.6, 17, 2.6);
+        if (numTxt) {                                               // number on the wing
+            cx2d.fillStyle = k.numColor || '#fff';
+            cx2d.font = 'bold 9px Bahnschrift, Arial Narrow, sans-serif';
+            cx2d.textAlign = 'center';
+            cx2d.save(); cx2d.translate(-6, 0); cx2d.rotate(Math.PI/2);
+            cx2d.strokeStyle = 'rgba(0,0,0,0.6)'; cx2d.lineWidth = 2;
+            cx2d.strokeText(numTxt, 0, 3.2); cx2d.fillText(numTxt, 0, 3.2);
+            cx2d.restore();
+        }
     } else {
-        // box stock flat kart
-        cx2d.fillStyle = k.body;
+        // ---- box stock flat kart: pan, seat, motor, driver at the wheel ----
+        cx2d.fillStyle = '#111';                                    // rear slicks + fronts
+        cx2d.beginPath(); cx2d.roundRect(-12.5, -12, 8, 5.5, 2); cx2d.fill();
+        cx2d.beginPath(); cx2d.roundRect(-12.5, 6.5, 8, 5.5, 2); cx2d.fill();
+        cx2d.beginPath(); cx2d.roundRect(7, -10, 5, 4, 1.5); cx2d.fill();
+        cx2d.beginPath(); cx2d.roundRect(7, 6, 5, 4, 1.5); cx2d.fill();
+        cx2d.fillStyle = '#555';                                    // hubs
+        cx2d.fillRect(-9.5, -10, 2, 1.6); cx2d.fillRect(-9.5, 8.4, 2, 1.6);
+        cx2d.fillStyle = '#3a3a44';                                 // rear axle
+        cx2d.fillRect(-9.5, -8, 2.5, 16);
+        cx2d.fillStyle = '#22222a';                                 // nerf bars + front bumper
+        cx2d.fillRect(-4, -10.7, 10, 2);
+        cx2d.fillRect(-4, 8.7, 10, 2);
+        cx2d.fillRect(13, -4.5, 1.8, 9);
+        cx2d.fillStyle = k.body;                                    // floor pan
         cx2d.beginPath();
-        cx2d.moveTo(13, 0); cx2d.lineTo(4, -7); cx2d.lineTo(-11, -6);
-        cx2d.lineTo(-11, 6); cx2d.lineTo(4, 7); cx2d.closePath();
+        cx2d.moveTo(13.5, -2); cx2d.quadraticCurveTo(14.5, 0, 13.5, 2);
+        cx2d.lineTo(6, 7.5); cx2d.lineTo(-4, 7.5); cx2d.lineTo(-11, 6);
+        cx2d.lineTo(-11, -6); cx2d.lineTo(-4, -7.5); cx2d.lineTo(6, -7.5);
+        cx2d.closePath();
         cx2d.fill();
-        cx2d.strokeStyle = k.trim; cx2d.lineWidth = 1.5; cx2d.stroke();
-        cx2d.fillStyle = k.trim;
-        cx2d.beginPath(); cx2d.arc(-2, 0, 4, 0, 2*Math.PI); cx2d.fill();
+        cx2d.strokeStyle = k.trim; cx2d.lineWidth = 1.3; cx2d.stroke();
+        cx2d.fillStyle = '#8a8a96';                                 // the Predator motor, right side
+        cx2d.beginPath(); cx2d.roundRect(-7, 3.2, 6.5, 5, 1); cx2d.fill();
+        cx2d.fillStyle = '#c8c8d2';
+        cx2d.beginPath(); cx2d.arc(-3.8, 5.7, 1.6, 0, 2*Math.PI); cx2d.fill();   // pull start
+        cx2d.strokeStyle = '#15151a'; cx2d.lineWidth = 1.4;
+        cx2d.beginPath(); cx2d.moveTo(-6.5, 7); cx2d.lineTo(-13, 8); cx2d.stroke(); // exhaust
+        cx2d.fillStyle = '#1a1a22';                                 // seat
+        cx2d.beginPath(); cx2d.roundRect(-8, -5, 6.5, 8, 2); cx2d.fill();
+        cx2d.fillStyle = '#26262e';                                 // driver shoulders
+        cx2d.beginPath(); cx2d.roundRect(-6, -4.2, 5, 8.4, 2); cx2d.fill();
+        cx2d.strokeStyle = '#26262e'; cx2d.lineWidth = 1.6;         // arms to the wheel
+        cx2d.beginPath(); cx2d.moveTo(-2.5, -3.2); cx2d.lineTo(3, -1.6); cx2d.stroke();
+        cx2d.beginPath(); cx2d.moveTo(-2.5, 3.2); cx2d.lineTo(3, 1.6); cx2d.stroke();
+        cx2d.strokeStyle = '#0f0f16'; cx2d.lineWidth = 1.4;         // steering wheel
+        cx2d.beginPath(); cx2d.arc(3.6, 0, 2.3, 0, 2*Math.PI); cx2d.stroke();
+        cx2d.fillStyle = k.trim;                                    // helmet
+        cx2d.beginPath(); cx2d.arc(-2.2, 0, 3.2, 0, 2*Math.PI); cx2d.fill();
+        cx2d.fillStyle = '#0f0f16';
+        cx2d.fillRect(-0.9, -1.9, 1.5, 3.8);                        // visor
+        cx2d.strokeStyle = 'rgba(0,0,0,0.3)'; cx2d.lineWidth = 0.8; // helmet stripe
+        cx2d.beginPath(); cx2d.moveTo(-5.2, 0); cx2d.lineTo(0.8, 0); cx2d.stroke();
+        if (numTxt) {                                               // nose number plate
+            cx2d.fillStyle = '#f4f2fa';
+            cx2d.beginPath(); cx2d.roundRect(7.2, -4.2, 5.6, 8.4, 1.5); cx2d.fill();
+            cx2d.strokeStyle = '#15151a'; cx2d.lineWidth = 0.8; cx2d.stroke();
+            cx2d.fillStyle = k.numColor && k.numColor !== '#ffffff' ? k.numColor : '#15151a';
+            cx2d.font = 'bold 6.5px Bahnschrift, Arial Narrow, sans-serif';
+            cx2d.textAlign = 'center';
+            cx2d.save(); cx2d.translate(10, 0); cx2d.rotate(Math.PI/2);
+            cx2d.fillText(numTxt, 0, 2.4);
+            cx2d.restore();
+        }
+    }
+    // battle damage: scuffs, then smoke comes off a hurt motor (drawn by particles)
+    if (k.damage > 0.25) {
+        cx2d.fillStyle = `rgba(20,16,14,${Math.min(0.55, k.damage*0.5).toFixed(2)})`;
+        cx2d.beginPath(); cx2d.arc(6, -4, 2.6, 0, 2*Math.PI); cx2d.fill();
+        cx2d.beginPath(); cx2d.arc(-8, 5, 2.2, 0, 2*Math.PI); cx2d.fill();
+        cx2d.beginPath(); cx2d.arc(0, -6.5, 1.8, 0, 2*Math.PI); cx2d.fill();
+    }
+    if (k.flat) {                                                   // shredded right-rear
+        cx2d.strokeStyle = '#000'; cx2d.lineWidth = 1.4;
+        cx2d.beginPath(); cx2d.moveTo(-12, 8); cx2d.lineTo(-6, 11); cx2d.moveTo(-11, 11); cx2d.lineTo(-7, 8); cx2d.stroke();
     }
 }
 function drawKart(k) {
@@ -1942,6 +2442,22 @@ function drawHUD() {
     cx2d.fillStyle = '#f4f2fa';
     cx2d.fillText(speed + ' mph', W - 200, 27);
     drawTireGauge(W - 178, 21);
+    // kart-health gauge appears once you've got damage
+    if (player.damage > 0.05) {
+        const hp = 1 - player.damage;
+        cx2d.fillStyle = 'rgba(13,11,24,0.75)';
+        cx2d.fillRect(W - 182, 44, 122, 22);
+        cx2d.fillStyle = '#a9a3c4';
+        cx2d.font = 'bold 12px Bahnschrift, Arial Narrow, sans-serif';
+        cx2d.textAlign = 'left';
+        cx2d.fillText('KART', W - 176, 59);
+        cx2d.fillStyle = 'rgba(255,255,255,0.15)';
+        cx2d.fillRect(W - 134, 49, 64, 12);
+        cx2d.fillStyle = hp > 0.6 ? '#3AAE5C' : hp > 0.3 ? '#FFD400' : '#E14D4D';
+        cx2d.fillRect(W - 134, 49, 64 * hp, 12);
+        cx2d.strokeStyle = 'rgba(255,255,255,0.4)'; cx2d.lineWidth = 1;
+        cx2d.strokeRect(W - 134, 49, 64, 12);
+    }
     // flag box
     const fx = 400, fy = 11, fw = 26, fh = 18;
     drawFlagRect(fx, fy, fw, fh);
@@ -2151,12 +2667,18 @@ function drawCockpitView() {
         const pr = proj(k.x, k.y);
         if (pr) items.push({ v: pr.v, draw: () => drawKartSprite(k, pr) });
     }
+    if (TOW.active) {
+        const pr = proj(TOW.x, TOW.y);
+        if (pr) items.push({ v: pr.v, draw: () => drawTowSprite(pr) });
+    }
     for (const p of particles) {
         const pr = proj(p.x, p.y);
         if (pr) items.push({ v: pr.v, draw: () => {
             const al = 1 - p.age/p.life;
             const yy = pr.y - Math.min(((p.z||0) + 5) * pr.s, 150);
             if (p.kind === 'clod') cx2d.fillStyle = `rgba(74,51,30,${(0.75*al).toFixed(3)})`;
+            else if (p.kind === 'smoke') cx2d.fillStyle = `rgba(95,95,108,${(0.5*al).toFixed(3)})`;
+            else if (p.kind === 'fire') cx2d.fillStyle = `rgba(255,${Math.round(90+120*al)},30,${(0.85*al).toFixed(3)})`;
             else cx2d.fillStyle = `rgba(200,168,124,${(0.5*al).toFixed(3)})`;
             cx2d.beginPath();
             cx2d.arc(pr.x, yy, Math.min(p.size*(1+p.age*2)*pr.s, 60), 0, 2*Math.PI);
@@ -2175,38 +2697,96 @@ function drawKartSprite(k, pr) {
     if (pr.v < 90) cx2d.globalAlpha = Math.max(0, (pr.v - 40) / 50);
     cx2d.fillStyle = 'rgba(0,0,0,0.35)';
     cx2d.beginPath(); cx2d.ellipse(x, y, 15*s, 5*s, 0, 0, 2*Math.PI); cx2d.fill();
-    cx2d.fillStyle = '#111';
-    cx2d.fillRect(x - 14*s, y - 9*s, 6*s, 10*s);
-    cx2d.fillRect(x + 8*s, y - 9*s, 6*s, 10*s);
-    cx2d.fillStyle = k.body;
-    cx2d.beginPath();
-    cx2d.roundRect(x - 10*s, y - 12*s, 20*s, 12*s, 3*s);
-    cx2d.fill();
-    cx2d.strokeStyle = k.trim; cx2d.lineWidth = Math.max(1, 1.5*s); cx2d.stroke();
+
     if (k.cls === 'champ') {
-        cx2d.fillStyle = k.wing || k.trim;
-        cx2d.beginPath(); cx2d.roundRect(x - 7*s, y - 21*s, 14*s, 10*s, 2*s); cx2d.fill();
+        // rear tires half-hidden by the body
+        cx2d.fillStyle = '#111';
+        cx2d.beginPath(); cx2d.roundRect(x - 14*s, y - 9*s, 6*s, 10*s, 1.5*s); cx2d.fill();
+        cx2d.beginPath(); cx2d.roundRect(x + 8*s, y - 9*s, 6*s, 10*s, 1.5*s); cx2d.fill();
+        cx2d.fillStyle = k.body;                        // tail panel
+        cx2d.beginPath(); cx2d.roundRect(x - 10*s, y - 13*s, 20*s, 13*s, 3*s); cx2d.fill();
+        cx2d.strokeStyle = k.trim; cx2d.lineWidth = Math.max(1, 1.5*s); cx2d.stroke();
+        cx2d.fillStyle = '#0f0f16';                     // rear window
+        cx2d.beginPath(); cx2d.roundRect(x - 5*s, y - 11.5*s, 10*s, 5*s, s); cx2d.fill();
+        cx2d.fillStyle = '#22222a';                     // bumper bar
+        cx2d.fillRect(x - 10*s, y - 3*s, 20*s, 1.6*s);
+        cx2d.fillStyle = k.wing || k.trim;              // caged roof
+        cx2d.beginPath(); cx2d.roundRect(x - 7.5*s, y - 21*s, 15*s, 9*s, 2*s); cx2d.fill();
         cx2d.strokeStyle = '#15151a'; cx2d.lineWidth = Math.max(1, s); cx2d.stroke();
+        cx2d.beginPath();                               // cage posts
+        cx2d.moveTo(x - 6.5*s, y - 12.5*s); cx2d.lineTo(x - 6.5*s, y - 20*s);
+        cx2d.moveTo(x + 6.5*s, y - 12.5*s); cx2d.lineTo(x + 6.5*s, y - 20*s);
+        cx2d.stroke();
+        if (s > 0.6) {
+            cx2d.fillStyle = k.numColor || '#fff';
+            cx2d.font = `bold ${Math.max(7, 6*s)}px Bahnschrift, Arial Narrow, sans-serif`;
+            cx2d.textAlign = 'center';
+            cx2d.fillText(k.num, x, y - 15*s);
+        }
     } else if (k.cls === 'sprint') {
-        cx2d.fillStyle = k.trim;
-        cx2d.beginPath(); cx2d.arc(x, y - 16*s, 4*s, 0, 2*Math.PI); cx2d.fill();
-        cx2d.fillStyle = '#26262e';
-        cx2d.fillRect(x - 1.4*s, y - 25*s, 2.8*s, 10*s);
-        cx2d.fillStyle = k.wing || '#ffffff';
-        cx2d.beginPath(); cx2d.roundRect(x - 13*s, y - 29*s, 26*s, 5*s, s); cx2d.fill();
-        cx2d.fillRect(x - 14.5*s, y - 32*s, 3*s, 10*s);
-        cx2d.fillRect(x + 11.5*s, y - 32*s, 3*s, 10*s);
+        cx2d.fillStyle = '#111';                        // wide rear slicks
+        cx2d.beginPath(); cx2d.roundRect(x - 15*s, y - 10*s, 7*s, 11*s, 2*s); cx2d.fill();
+        cx2d.beginPath(); cx2d.roundRect(x + 8*s, y - 10*s, 7*s, 11*s, 2*s); cx2d.fill();
+        cx2d.fillStyle = '#3a3a44';                     // axle
+        cx2d.fillRect(x - 9*s, y - 6*s, 18*s, 2*s);
+        cx2d.fillStyle = k.body;                        // tail tank
+        cx2d.beginPath(); cx2d.roundRect(x - 5*s, y - 12*s, 10*s, 11*s, 3.5*s); cx2d.fill();
+        cx2d.strokeStyle = k.trim; cx2d.lineWidth = Math.max(1, 1.2*s); cx2d.stroke();
+        cx2d.fillStyle = k.trim;                        // helmet peeking over the tank
+        cx2d.beginPath(); cx2d.arc(x, y - 14.5*s, 3.6*s, 0, 2*Math.PI); cx2d.fill();
+        cx2d.fillStyle = '#26262e';                     // wing posts
+        cx2d.fillRect(x - 5*s, y - 26*s, 2*s, 12*s);
+        cx2d.fillRect(x + 3*s, y - 26*s, 2*s, 12*s);
+        cx2d.fillStyle = k.wing || '#ffffff';           // top wing + boards
+        cx2d.beginPath(); cx2d.roundRect(x - 13*s, y - 30*s, 26*s, 6*s, s); cx2d.fill();
         cx2d.strokeStyle = 'rgba(0,0,0,0.4)'; cx2d.lineWidth = 1;
-        cx2d.strokeRect(x - 13*s, y - 29*s, 26*s, 5*s);
-    } else {
+        cx2d.strokeRect(x - 13*s, y - 30*s, 26*s, 6*s);
         cx2d.fillStyle = k.trim;
-        cx2d.beginPath(); cx2d.arc(x, y - 16*s, 5*s, 0, 2*Math.PI); cx2d.fill();
+        cx2d.fillRect(x - 15*s, y - 33.5*s, 3*s, 11*s);
+        cx2d.fillRect(x + 12*s, y - 33.5*s, 3*s, 11*s);
+        if (s > 0.6) {
+            cx2d.fillStyle = k.numColor || '#fff';
+            cx2d.font = `bold ${Math.max(7, 5.5*s)}px Bahnschrift, Arial Narrow, sans-serif`;
+            cx2d.textAlign = 'center';
+            cx2d.fillText(k.num, x, y - 25.5*s);
+        }
+    } else {
+        // flat kart from behind: slicks, axle, seat back, helmet, motor
+        cx2d.fillStyle = '#111';
+        cx2d.beginPath(); cx2d.roundRect(x - 14*s, y - 9.5*s, 6.5*s, 10.5*s, 2*s); cx2d.fill();
+        cx2d.beginPath(); cx2d.roundRect(x + 7.5*s, y - 9.5*s, 6.5*s, 10.5*s, 2*s); cx2d.fill();
+        cx2d.strokeStyle = '#2c2c34'; cx2d.lineWidth = Math.max(0.5, 0.8*s);   // tread grooves
+        cx2d.beginPath();
+        cx2d.moveTo(x - 10.8*s, y - 9*s); cx2d.lineTo(x - 10.8*s, y - 0.5*s);
+        cx2d.moveTo(x + 10.8*s, y - 9*s); cx2d.lineTo(x + 10.8*s, y - 0.5*s);
+        cx2d.stroke();
+        cx2d.fillStyle = '#3a3a44';                     // axle
+        cx2d.fillRect(x - 8*s, y - 5.5*s, 16*s, 1.8*s);
+        cx2d.fillStyle = k.body;                        // pan edge
+        cx2d.beginPath(); cx2d.roundRect(x - 8.5*s, y - 4*s, 17*s, 3.4*s, s); cx2d.fill();
+        cx2d.strokeStyle = k.trim; cx2d.lineWidth = Math.max(1, s); cx2d.stroke();
+        cx2d.fillStyle = '#1a1a22';                     // seat back
+        cx2d.beginPath(); cx2d.roundRect(x - 4.5*s, y - 13*s, 9*s, 9.5*s, 2*s); cx2d.fill();
+        cx2d.fillStyle = '#8a8a96';                     // motor, driver's right
+        cx2d.beginPath(); cx2d.roundRect(x + 4.5*s, y - 8*s, 6*s, 5*s, s); cx2d.fill();
+        cx2d.fillStyle = k.trim;                        // helmet
+        cx2d.beginPath(); cx2d.arc(x, y - 15.5*s, 4.6*s, 0, 2*Math.PI); cx2d.fill();
+        cx2d.strokeStyle = 'rgba(0,0,0,0.3)'; cx2d.lineWidth = Math.max(0.6, 0.8*s);
+        cx2d.beginPath(); cx2d.moveTo(x - 4*s, y - 15.5*s); cx2d.lineTo(x + 4*s, y - 15.5*s); cx2d.stroke();
+        if (s > 0.6) {                                  // number plate on the seat back
+            cx2d.fillStyle = '#f4f2fa';
+            cx2d.beginPath(); cx2d.roundRect(x - 3.4*s, y - 11.8*s, 6.8*s, 5.4*s, s); cx2d.fill();
+            cx2d.fillStyle = (k.numColor && k.numColor !== '#ffffff') ? k.numColor : '#15151a';
+            cx2d.font = `bold ${Math.max(6, 4.4*s)}px Bahnschrift, Arial Narrow, sans-serif`;
+            cx2d.textAlign = 'center';
+            cx2d.fillText(k.num, x, y - 7.8*s);
+        }
     }
     if (pr.s > 0.35 && pr.s < 6) {
         cx2d.fillStyle = 'rgba(255,255,255,0.9)';
         cx2d.font = `bold ${Math.min(24, Math.max(9, Math.round(11*pr.s)))}px Bahnschrift, Arial Narrow, sans-serif`;
         cx2d.textAlign = 'center';
-        cx2d.fillText('#' + k.num, x, y - (k.cls === 'sprint' ? 35 : k.cls === 'champ' ? 28 : 24)*s);
+        cx2d.fillText('#' + k.num, x, y - (k.cls === 'sprint' ? 37 : k.cls === 'champ' ? 25 : 22)*s);
     }
     cx2d.restore();
 }
@@ -2315,6 +2895,11 @@ function signIn(p) {
     saveDB();
     applyTrack(curTrack());
     renderHome();
+    if (MP.pendingJoin) {              // they tapped a friend's race link
+        const c = MP.pendingJoin; MP.pendingJoin = null;
+        renderMP(); showScreen('mp'); mpJoin(c);
+        return;
+    }
     showScreen('home');
 }
 $('createBtn').onclick = () => {
@@ -2339,11 +2924,18 @@ function renderHome() {
     $('homeName').textContent = `${P.name} · #${P.num}`;
     $('homeTokens').textContent = `⛁ ${P.tokens} TOKENS`;
     $('homeRide').textContent = `${CLASSES[P.cls].name} · ${MOTORS[P.owned.motor].name} · ${GEARS[P.gear].name}`;
-    $('homeTroph').textContent = `🏆 ${P.stats.wins} wins · 🚀 ${P.stats.hardChargers} hard charger · ⚡ ${P.stats.fastLaps} fast laps`;
+    $('homeTroph').textContent = `👑 ${P.stats.championships} titles · 🏆 ${P.stats.wins} wins · 🚀 ${P.stats.hardChargers} hard charger · ⚡ ${P.stats.fastLaps} fast laps`;
     $('hubTrackName').textContent = `${curTrack().name} (${curTrack().len})`;
+    const act = P.career.active, actS = activeSeries();
+    $('hubCareerSub').textContent = act && actS
+        ? (act.summary ? 'Season finished — collect your prize!' : `${actS.name}: race ${act.raceIdx + 1} of ${actS.races.length}`)
+        : 'Points seasons — win the title';
     previewKart($('homePrev'), 3.2);
 }
 $('hubNight').onclick = () => startRaceNight();
+$('hubCareer').onclick = () => { renderCareer(); showScreen('career'); };
+$('hubMP').onclick = () => { renderMP(); showScreen('mp'); };
+$('finStandings').onclick = () => { $('payBox').classList.add('hidden'); renderCareer(); showScreen('career'); };
 $('hubQuick').onclick = () => { renderQuick(); showScreen('quick'); };
 $('hubGarage').onclick = () => { renderGarage(); showScreen('garage'); };
 $('hubShop').onclick = () => { renderShop(); showScreen('shop'); };
@@ -2532,6 +3124,316 @@ function renderSettings() {
     });
 }
 
+// ==================== UI: CHAMPIONSHIP / CAREER ====================
+function careerStandingsHtml(points) {
+    const table = Object.entries(points).sort((a,b) => b[1] - a[1]);
+    if (!table.length) return '<p class="keys">Green flag drops at race 1 — everybody starts at zero!</p>';
+    let rows = '<tr><th>Pos</th><th>Driver</th><th>Points</th></tr>';
+    table.forEach(([name, pts], i) => {
+        rows += `<tr${name === P.name ? ' class="you"' : ''}><td>${i+1}</td><td>${name}</td><td>${pts}</td></tr>`;
+    });
+    return `<table class="results">${rows}</table>`;
+}
+function renderCareer() {
+    const body = $('careerBody');
+    const act = P.career.active;
+    if (!act) {
+        let html = '<p class="sub">Run a full points season — every feature scores. Most points takes the title and the token prize. Finish a series to unlock the next one.</p><div class="cards">';
+        SERIES.forEach(s => {
+            const locked = s.needs && !P.career.completed[s.needs];
+            const done = P.career.completed[s.id];
+            html += `<button class="card" data-series="${s.id}" ${locked ? 'disabled style="opacity:.45"' : ''}>
+                <span class="big">${s.ico}</span><h3>${s.name}</h3>
+                <small>${s.races.length} races · ${s.laps}-lap features</small>
+                <small>${s.desc}</small>
+                ${done ? '<span class="owned">✓ COMPLETED — run it again!</span>' : ''}
+                ${locked ? `<span class="price">🔒 Finish ${SERIES.find(x=>x.id===s.needs).name} first</span>`
+                         : `<span class="price">🏆 Champion's prize: ⛁${s.reward}</span>`}
+            </button>`;
+        });
+        html += '</div>';
+        body.innerHTML = html;
+        body.querySelectorAll('[data-series]').forEach(b => b.onclick = () => {
+            P.career.active = { seriesId: b.dataset.series, raceIdx: 0, points: {} };
+            saveDB(); renderCareer();
+        });
+    } else if (act.summary) {
+        const S = activeSeries(), sm = act.summary;
+        body.innerHTML = `
+            <h2 style="font-size:1.5rem;">${sm.pPos === 1 ? '👑 YOU ARE THE ' + S.name.toUpperCase() + ' CHAMPION!' : `Season over — you finished <span>P${sm.pPos}</span>`}</h2>
+            <p class="sub">${sm.pPos === 1 ? 'The title is yours. Spend it well, champ.' : `${sm.champ} takes the title. There's always next season.`}</p>
+            <div class="tokens">SEASON PRIZE: +⛁${sm.reward}</div>
+            ${careerStandingsHtml(act.points)}
+            <button class="btn" id="careerDone">Collect &amp; Continue ▸</button>`;
+        $('careerDone').onclick = () => { P.career.active = null; saveDB(); renderCareer(); renderHome(); };
+    } else {
+        const S = activeSeries();
+        const trk = TRACKS.find(t => t.id === S.races[act.raceIdx]);
+        body.innerHTML = `
+            <p class="sectionTitle">${S.ico} ${S.name} — Race ${act.raceIdx + 1} of ${S.races.length}</p>
+            <p class="sub">Next up: <b style="color:var(--yellow)">${trk.name}</b> (${trk.len}) · ${S.laps}-lap feature · ${trk.featureKarts} karts</p>
+            <button class="btn gold" id="careerGo">Start Race Night ▸</button>
+            <p class="sectionTitle">Standings</p>
+            ${careerStandingsHtml(act.points)}
+            <button class="btn ghost sm" id="careerQuit">Quit This Season</button>`;
+        $('careerGo').onclick = () => startCareerRace();
+        $('careerQuit').onclick = () => {
+            if (confirm('Quit this season? The points are lost (no prize).')) {
+                P.career.active = null; saveDB(); renderCareer();
+            }
+        };
+    }
+}
+
+// ==================== MULTIPLAYER: race a friend with a share code ====================
+// Host runs the whole race; friends' karts are driven by their inputs over the wire.
+// Uses the free PeerJS cloud to make the connection — no accounts, just a code.
+const MP = {
+    role: null, peer: null, conns: [], conn: null, code: '',
+    lobby: [], inputs: {}, lastSnap: null, snapAt: 0, sendT: 0, status: '', pendingJoin: null
+};
+function mpStatus(msg) { MP.status = msg; if (!$('mp').classList.contains('hidden')) renderMP(); }
+function loadPeerJS(cb) {
+    if (window.Peer) return cb(true);
+    const s = document.createElement('script');
+    s.src = 'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';
+    s.onload = () => cb(true);
+    s.onerror = () => cb(false);
+    document.head.appendChild(s);
+}
+function mpLeave(silent) {
+    try { if (MP.peer) MP.peer.destroy(); } catch(e) {}
+    MP.role = null; MP.peer = null; MP.conns = []; MP.conn = null;
+    MP.code = ''; MP.lobby = []; MP.inputs = {}; MP.lastSnap = null; MP.status = '';
+    if (!silent) { renderHome(); showScreen('home'); }
+}
+function mpHost() {
+    mpStatus('Setting up your race…');
+    loadPeerJS(ok => {
+        if (!ok) return mpStatus('⚠ Could not reach the online service — check your internet.');
+        const code = Array.from({length:4}, () => 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*31)]).join('');
+        const peer = new Peer('rainey-dirt-v19-' + code);
+        MP.peer = peer;
+        peer.on('open', () => { MP.role = 'host'; MP.code = code; MP.lobby = []; MP.conns = []; MP.status = ''; renderMP(); });
+        peer.on('error', e => {
+            if (e.type === 'unavailable-id') { try { peer.destroy(); } catch(_){} mpHost(); }
+            else mpStatus('⚠ Online trouble (' + e.type + '). Try again.');
+        });
+        peer.on('connection', conn => {
+            conn.on('data', d => hostOnData(conn, d));
+            conn.on('close', () => hostDropGuest(conn));
+        });
+    });
+}
+function hostOnData(conn, d) {
+    if (!d || !d.t) return;
+    if (d.t === 'hello') {
+        if (MP.conns.length >= 3 || state !== 'menu') { try { conn.send({t:'full'}); } catch(e){} return; }
+        MP.conns.push(conn);
+        MP.lobby.push({ conn, prof: d.prof || {} });
+        try { conn.send({t:'lobby-ok'}); } catch(e) {}
+        renderMP();
+    } else if (d.t === 'input') {
+        MP.inputs[conn.peer] = d.in || {};
+    }
+}
+function hostDropGuest(conn) {
+    MP.conns = MP.conns.filter(c => c !== conn);
+    MP.lobby = MP.lobby.filter(g => g.conn !== conn);
+    const k = karts.find(x => x.remoteId === conn.peer);
+    if (k) { k.human = false; k.skill = 0.95; showBanner('📡 #' + k.num + ' lost connection — CPU takes the wheel', '#565b66', 3); }
+    if (!$('mp').classList.contains('hidden')) renderMP();
+}
+function mpJoin(codeRaw) {
+    const code = (codeRaw || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4);
+    if (code.length < 4) return mpStatus('⚠ Type the 4-letter race code.');
+    mpStatus('Looking for race ' + code + '…');
+    loadPeerJS(ok => {
+        if (!ok) return mpStatus('⚠ Could not reach the online service — check your internet.');
+        const peer = new Peer();
+        MP.peer = peer;
+        peer.on('open', () => {
+            const conn = peer.connect('rainey-dirt-v19-' + code, { reliable: false });
+            MP.conn = conn;
+            conn.on('open', () => {
+                MP.role = 'guest';
+                conn.send({ t:'hello', prof: { name:P.name, num:P.num, body:P.colors.body, trim:P.colors.trim,
+                    wing:P.colors.wing, numColor:P.colors.num, cls:P.cls, motor:P.owned.motor, gear:P.gear } });
+                mpStatus('Connected! Waiting in the pits for the host to start…');
+            });
+            conn.on('data', guestOnData);
+            conn.on('close', () => {
+                if (state !== 'menu') { showBanner('📡 LOST THE HOST — RACE OVER', '#7a1f1f', 3); }
+                mpLeave();
+            });
+        });
+        peer.on('error', e => mpStatus(e.type === 'peer-unavailable'
+            ? '⚠ No race found with code ' + code + '. Double-check it!'
+            : '⚠ Online trouble (' + e.type + '). Try again.'));
+    });
+}
+function mpStart() {
+    if (MP.role !== 'host' || !MP.lobby.length) return;
+    raceMode = 'quick'; raceContext = 'free';
+    applyTrack(curTrack());
+    LAPS = P.settings.quickLaps; session = 'feature';
+    buildField(Math.min(Math.max(P.settings.quickKarts, MP.lobby.length + 2), 20));
+    // friends' karts take over the front AI slots, with THEIR saved rides
+    MP.lobby.forEach((g, gi) => {
+        const idx = Math.min(1 + gi, field.length - 1);
+        let num = String(g.prof.num || '?').toUpperCase().slice(0, 3);
+        while (field.some((k, i) => i !== idx && k.num === num)) num += 'J';
+        const k = makeKart({ name: g.prof.name || 'Friend', num,
+            body: g.prof.body || '#E14D4D', trim: g.prof.trim || '#ffffff',
+            wing: g.prof.wing || '#ffffff', numColor: g.prof.numColor || '#ffffff' },
+            false, idx, perfFrom(g.prof.cls, g.prof.motor, g.prof.gear));
+        k.human = true; k.remoteId = g.conn.peer;
+        field[idx] = k;
+    });
+    karts = field;
+    field.forEach((k, i) => { k.parked = false; k.startPos = i; gridPlace(k, i); resetRaceFields(k); });
+    const roster = field.map(k => ({ name:k.name, num:k.num, body:k.body, trim:k.trim,
+        wing:k.wing, numColor:k.numColor, cls:k.cls }));
+    MP.lobby.forEach(g => {
+        try { g.conn.send({ t:'start', trackId: TRK.def.id, laps: LAPS, roster,
+            youIdx: field.findIndex(k => k.remoteId === g.conn.peer) }); } catch(e) {}
+    });
+    beginCountdown();
+    showBanner('👥 FRIENDS RACE — ' + LAPS + ' LAPS', '#2563EB', 2.5);
+}
+// ---- host: broadcast the world ~15x a second ----
+function mpHostTick(now) {
+    if (MP.role !== 'host' || !MP.conns.length || state === 'menu' || state === 'gridready') return;
+    if (now - MP.sendT < 66) return;
+    MP.sendT = now;
+    const snap = {
+        t:'snap', st: state, rt: Math.round(raceTime*100)/100, laps: LAPS, caut: caution.active,
+        ban: banner.text, banC: banner.color, banU: Math.max(0, Math.round(banner.until - now)),
+        tow: TOW.active ? [Math.round(TOW.x), Math.round(TOW.y), Math.round(TOW.ang*100)/100] : null,
+        ks: karts.map(k => [
+            Math.round(k.x*10)/10, Math.round(k.y*10)/10, Math.round(k.heading*100)/100,
+            Math.round(k.vx), Math.round(k.vy), k.lap,
+            Math.round(k.tires*100)/100, Math.round((k.damage||0)*100)/100,
+            (k.flat?1:0) + (k.dead?2:0) + (k.pitting?4:0) + (k.parked?8:0) + (k.done?16:0),
+            Math.round(k.progress*1000)/1000,
+            k.bestLap !== null ? Math.round(k.bestLap*100)/100 : -1,
+            Math.round(k.steerVal*100)/100
+        ])
+    };
+    MP.conns.forEach(c => { try { c.send(snap); } catch(e) {} });
+}
+// ---- guest: mirror the world the host sends ----
+function guestOnData(d) {
+    if (!d || !d.t) return;
+    if (d.t === 'lobby-ok') mpStatus('You are in the lobby! The host picks the track and laps.');
+    else if (d.t === 'full') { mpStatus('⚠ That race is full or already started.'); mpLeave(true); renderMP(); }
+    else if (d.t === 'start') guestStart(d);
+    else if (d.t === 'snap') { MP.lastSnap = d; MP.snapAt = performance.now(); }
+    else if (d.t === 'finish') guestFinish(d);
+}
+function guestStart(d) {
+    if (state !== 'menu') return;      // only jump in from the menus
+    applyTrack(TRACKS.find(t => t.id === d.trackId) || TRACKS[0]);
+    LAPS = d.laps; session = 'feature'; raceMode = 'quick'; raceContext = 'free';
+    field = d.roster.map((r, i) => makeKart({ ...r }, i === d.youIdx, i, perfFrom(r.cls, 0, 'standard')));
+    karts = field; player = field[d.youIdx];
+    particles = []; finishOrder = []; resetCaution();
+    banner = { text:'', color:'', until:0 };
+    camAng = player.heading;
+    startEngine();
+    state = 'countdown'; countStart = performance.now();
+    hideOverlays();
+}
+function mpGuestApply(now) {
+    const s = MP.lastSnap;
+    if (!s) return;
+    const age = Math.min(0.15, (now - MP.snapAt) / 1000);   // light extrapolation smooths the wire
+    state = s.st === 'done' ? 'race' : s.st;                 // guest leaves 'done' to the finish message
+    raceTime = s.rt + age;
+    caution.active = !!s.caut;
+    if (s.ban && s.ban !== banner.text) banner = { text: s.ban, color: s.banC || '#a08300', until: now + s.banU };
+    TOW.active = !!s.tow;
+    if (s.tow) { TOW.x = s.tow[0]; TOW.y = s.tow[1]; TOW.ang = s.tow[2]; }
+    s.ks.forEach((a, i) => {
+        const k = karts[i];
+        if (!k) return;
+        k.x = a[0] + a[3]*age; k.y = a[1] + a[4]*age;
+        k.heading = a[2]; k.vx = a[3]; k.vy = a[4]; k.lap = a[5];
+        k.tires = a[6]; k.damage = a[7];
+        k.flat = !!(a[8] & 1); k.dead = !!(a[8] & 2); k.pitting = !!(a[8] & 4);
+        k.parked = !!(a[8] & 8); k.done = !!(a[8] & 16);
+        k.progress = a[9];
+        k.bestLap = a[10] >= 0 ? a[10] : null;
+        if (k.isPlayer) k.steerVal = a[11];
+        if (k.pitting && !k.pitUntil) k.pitUntil = now + 2000;
+        if (!k.pitting) k.pitUntil = 0;
+    });
+}
+function mpGuestSend(now) {
+    if (MP.role !== 'guest' || !MP.conn || state === 'menu') return;
+    if (now - MP.sendT < 50) return;
+    MP.sendT = now;
+    try { MP.conn.send({ t:'input', in: { up:input.up, down:input.down, left:input.left, right:input.right, slide:input.slide } }); } catch(e) {}
+}
+function guestFinish(d) {
+    state = 'done';
+    const place = d.youPos;
+    const sfx = p => p===1?'st':p===2?'nd':p===3?'rd':'th';
+    let pay = Math.ceil((PAY_FEATURE[place-1] || 6) / 2);
+    P.tokens += pay; P.stats.tokensEarned += pay; P.stats.races++;
+    saveDB();
+    $('finishTitle').innerHTML = place === 1 ? '🏆 YOU WON THE <span>RACE!</span>' : `You finished <span>${place}${sfx(place)}</span>`;
+    $('payBox').innerHTML = `<div class="line"><span>Finish: P${place}</span><b>+${pay} ⛁</b></div>
+        <div class="line total"><span>Your bank</span><b>⛁ ${P.tokens}</b></div>`;
+    $('payBox').classList.remove('hidden');
+    let rows = '<tr><th>Pos</th><th>Driver</th><th>Kart</th></tr>';
+    d.places.forEach((r, i) => {
+        rows += `<tr${r.name === P.name ? ' class="you"' : ''}><td>${r.dnf ? 'DNF' : i+1}</td><td>${r.name}${r.dnf ? ' 💥' : ''}</td><td>#${r.num}</td></tr>`;
+    });
+    $('resultsTable').innerHTML = rows;
+    $('bestLapLine').textContent = '';
+    $('finStandings').classList.add('hidden');
+    $('againBtn').classList.add('hidden');
+    showScreen('finish');
+}
+// ---- the Race A Friend screen ----
+function renderMP() {
+    const body = $('mpBody');
+    if (MP.role === 'host') {
+        const link = location.origin + location.pathname + '?join=' + MP.code;
+        body.innerHTML = `
+            <p class="sub">Your race code — friends tap RACE A FRIEND on <b>raineymotorsports.com</b> and type it in:</p>
+            <div style="font-size:3rem; font-weight:800; letter-spacing:10px; color:var(--yellow); background:var(--carbon-3); border:2px solid var(--yellow); border-radius:14px; padding:8px 26px;">${MP.code}</div>
+            <p class="keys">Or send them this link: <b style="user-select:text;">${link}</b></p>
+            <p class="sectionTitle">In The Pits (${MP.lobby.length}/3)</p>
+            <p class="sub">${MP.lobby.length ? MP.lobby.map(g => `#${g.prof.num} ${g.prof.name}`).join(' · ') : 'Waiting for friends to join…'}</p>
+            <p class="keys">Race: ${curTrack().name} · ${P.settings.quickLaps} laps · ${Math.min(Math.max(P.settings.quickKarts, MP.lobby.length + 2), 20)} karts (change under Tracks / Quick Race)</p>
+            <button class="btn gold" id="mpGo" ${MP.lobby.length ? '' : 'disabled'}>Green Flag ▸</button>
+            <button class="btn ghost sm" id="mpCancel">Cancel</button>`;
+        $('mpGo').onclick = () => mpStart();
+        $('mpCancel').onclick = () => mpLeave();
+    } else if (MP.role === 'guest') {
+        body.innerHTML = `
+            <p class="sub">${MP.status || 'Connected.'}</p>
+            <button class="btn ghost sm" id="mpLeaveBtn">Leave</button>`;
+        $('mpLeaveBtn').onclick = () => mpLeave();
+    } else {
+        body.innerHTML = `
+            <p class="sub">Race your friends for real — one of you hosts, the others join with the code. Everybody drives their own saved kart.</p>
+            <div class="cards">
+                <button class="card" id="mpHostBtn"><span class="big">🏠</span><h3>Host A Race</h3><small>You pick the track &amp; laps and get a 4-letter code to share.</small></button>
+                <div class="card" style="cursor:default;"><span class="big">🎟️</span><h3>Join A Race</h3>
+                    <input type="text" id="mpCode" class="numin" maxlength="4" placeholder="CODE" style="margin:6px 0; text-transform:uppercase;">
+                    <button class="btn sm" id="mpJoinBtn">Join ▸</button></div>
+            </div>
+            <p class="keys" ${MP.status ? '' : 'style="display:none"'}>${MP.status}</p>
+            <p class="keys">Needs internet on both ends. Whoever hosts should have the strongest connection.</p>`;
+        $('mpHostBtn').onclick = () => mpHost();
+        $('mpJoinBtn').onclick = () => mpJoin($('mpCode').value);
+        $('mpCode').addEventListener('keydown', e => { if (e.key === 'Enter') mpJoin($('mpCode').value); });
+    }
+}
+
 // ==================== RACE FLOW BUTTONS ====================
 $('featureBtn').onclick = () => { if (gridNextAction === 'heat') startHeat(); else startFeature(); };
 $('gridQuit').onclick = () => { renderHome(); showScreen('home'); };
@@ -2542,6 +3444,7 @@ $('againBtn').onclick = () => {
 $('finHome').onclick = () => { $('payBox').classList.add('hidden'); renderHome(); showScreen('home'); };
 $('muteBtn').onclick = toggleMute;
 $('quitBtn').onclick = () => {
+    if (MP.role) { mpLeave(); showBanner('', '#000', 0); return; }
     if (state === 'race' || state === 'qualify' || state === 'countdown') {
         renderHome(); showScreen('home');
         showBanner('', '#000', 0);
@@ -2552,6 +3455,10 @@ $('quitBtn').onclick = () => {
 loadDB();
 DB.profiles.forEach(patchProfile);
 applyTrack(TRACKS[0]);
+try {
+    const qJoin = new URLSearchParams(location.search).get('join');
+    if (qJoin) MP.pendingJoin = qJoin;
+} catch (e) {}
 if (DB.profiles.length) {
     const last = DB.profiles.find(p => p.id === DB.last);
     if (last) applyTrack(TRACKS.find(t => t.id === last.settings.trackId) || TRACKS[0]);
