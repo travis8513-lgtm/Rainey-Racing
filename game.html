@@ -294,7 +294,7 @@ footer a { color:var(--yellow); text-decoration:none; }
         <button class="btn ghost sm" id="switchBtn">↩ Switch Driver</button>
         <p class="keys">Drive with <b>&#8593;</b> gas <b>&#8595;</b> brake <b>&#8592;</b><b>&#8594;</b> steer (or <b>W</b><b>A</b><b>S</b><b>D</b>) · hold <b>SPACE</b> to power-slide · <b>C</b> camera · <b>M</b> mute</p>
         <p class="keys">🔧 Worn tires get slippery — dive low onto the front-stretch pit road to bolt on fresh ones!</p>
-        <p class="keys" style="color:#FFD400; font-weight:700;">GAME VERSION 21</p>
+        <p class="keys" style="color:#FFD400; font-weight:700;">GAME VERSION 22</p>
     </div>
 
     <!-- ===== GARAGE ===== -->
@@ -542,6 +542,25 @@ const SERIES = [
       desc:'8 races. Every track. One king.' }
 ];
 function seriesPoints(pos) { return pos === 1 ? 55 : Math.max(5, 50 - (pos - 1) * 3); }
+function careerPlacePts(pos) { return Math.max(6, 46 - (pos - 1) * 4); }
+// ---- Drag racing career (grudge seasons across the strips) ----
+const DRAG_SERIES = [
+    { id:'d_street', name:'Street Series', ico:'🥉', tier:0, reward:250, needs:null,
+      races:['street','quarter','street','quarter'], desc:'4 grudge nights on the short strips.' },
+    { id:'d_pro',    name:'Pro Series',    ico:'🥈', tier:1, reward:550, needs:'d_street',
+      races:['quarter','half','street','half','quarter'], desc:'5 nights — the big strips join in.' },
+    { id:'d_outlaw', name:'Outlaw Nitro',  ico:'👑', tier:2, reward:1200, needs:'d_pro',
+      races:['quarter','half','noprep','half','quarter','half'], desc:'6 nights vs the baddest cars around.' }
+];
+// ---- Demolition derby career (arena seasons) ----
+const DERBY_SERIES = [
+    { id:'de_yard',   name:'Backyard Brawl',   ico:'🥉', tier:0, karts:6,  reward:250, needs:null,
+      races:['small','med','small','med'], desc:'4 pit fights to cut your teeth.' },
+    { id:'de_county', name:'County Circuit',   ico:'🥈', tier:1, karts:8,  reward:600, needs:'de_yard',
+      races:['med','big','junkyard','stadium','med'], desc:'5 arenas, bigger fields.' },
+    { id:'de_king',   name:'Demolition King',  ico:'👑', tier:2, karts:10, reward:1300, needs:'de_county',
+      races:['big','stadium','junkyard','big','stadium','junkyard'], desc:'6 arena wars for the crown.' }
+];
 
 // CPU driver pool — the best 14 or 19 of these fill out the field
 const RIVAL_POOL = [
@@ -599,6 +618,8 @@ function newProfile(name, num) {
         tokens: 60,                                // starter money for the first gear set
         stats: { races:0, wins:0, heatWins:0, hardChargers:0, fastLaps:0, tokensEarned:0, championships:0, dragWins:0, derbyWins:0, bestLap:{} },
         career: { active:null, completed:{} },
+        dragCareer: { active:null, completed:{} },
+        derbyCareer: { active:null, completed:{} },
         settings: { diff:'racer', featureLaps:10, trackId:'rainey', quickLaps:8, quickKarts:10,
                     dragStrip:'quarter', dragEvent:'grudge', derbyKarts:8, derbyArena:'med', derbyTimed:false }
     };
@@ -616,6 +637,8 @@ function patchProfile(p) {
     p.stats = Object.assign({ races:0, wins:0, heatWins:0, hardChargers:0, fastLaps:0, tokensEarned:0, championships:0, dragWins:0, derbyWins:0 }, p.stats);
     p.stats.bestLap = p.stats.bestLap || {};
     p.career = Object.assign({ active:null, completed:{} }, p.career);
+    p.dragCareer = Object.assign({ active:null, completed:{} }, p.dragCareer);
+    p.derbyCareer = Object.assign({ active:null, completed:{} }, p.derbyCareer);
     // drag & derby rides + upgrades
     p.dragCar = p.dragCar || 'streetkart';
     p.ownedDragCars = Object.assign({ streetkart:true }, p.ownedDragCars);
@@ -917,7 +940,7 @@ function startRaceNight() {
     startQualify();
 }
 function startCareerRace() {
-    raceMode = 'night'; raceContext = 'career';
+    raceMode = 'night'; raceContext = 'career'; careerCat = 'oval';
     const S = activeSeries(), act = P.career.active;
     const trk = TRACKS.find(t => t.id === S.races[act.raceIdx]) || TRACKS[0];
     applyTrack(trk);
@@ -1200,6 +1223,7 @@ function worldToScreen(x, y) {
 }
 function toggleCam() {
     if (gameMode === 'drag') { dragCam = dragCam==='tv' ? 'chase' : (dragCam==='chase' ? 'incar' : 'tv'); return; }
+    if (gameMode === 'derby') { derbyCam = derbyCam==='tv' ? 'chase' : (derbyCam==='chase' ? 'cockpit' : 'tv'); return; }
     cam = cam === 'cockpit' ? 'chase' : (cam === 'chase' ? 'tv' : 'cockpit');
 }
 
@@ -1895,7 +1919,7 @@ function drawVersionTag() {
     cx2d.textAlign = 'right';
     cx2d.font = 'bold 12px Bahnschrift, Arial Narrow, sans-serif';
     cx2d.fillStyle = 'rgba(255,212,0,0.55)';
-    cx2d.fillText('v21', W - 10, H - 10);
+    cx2d.fillText('v22', W - 10, H - 10);
 }
 let lastT = performance.now();
 function frame(now) {
@@ -3027,10 +3051,15 @@ function renderHome() {
     $('homeRide').textContent = `${CLASSES[P.cls].name} · ${MOTORS[P.owned.motor].name} · ${GEARS[P.gear].name}`;
     $('homeTroph').textContent = `👑 ${P.stats.championships} titles · 🏆 ${P.stats.wins} wins · 🏎 ${P.stats.dragWins||0} drag · 💥 ${P.stats.derbyWins||0} derby`;
     $('hubTrackName').textContent = `${curTrack().name} (${curTrack().len})`;
-    const act = P.career.active, actS = activeSeries();
-    $('hubCareerSub').textContent = act && actS
-        ? (act.summary ? 'Season finished — collect your prize!' : `${actS.name}: race ${act.raceIdx + 1} of ${actS.races.length}`)
-        : 'Points seasons — win the title';
+    // show whichever career (dirt / drag / derby) is in progress
+    let subShown = 'Dirt · Drag · Derby seasons';
+    for (const cat of ['oval','drag','derby']) {
+        const c = CAREERS[cat].career(), a = c.active;
+        if (a) { const S = seriesById(cat, a.seriesId);
+            subShown = a.summary ? `${CAREERS[cat].tab}: collect your prize!` : `${S.name}: ${CAREERS[cat].unit.toLowerCase()} ${a.raceIdx+1}/${S.races.length}`;
+            break; }
+    }
+    $('hubCareerSub').textContent = subShown;
     previewKart($('homePrev'), 3.2);
 }
 $('hubNight').onclick = () => startRaceNight();
@@ -3231,6 +3260,21 @@ function renderSettings() {
 }
 
 // ==================== UI: CHAMPIONSHIP / CAREER ====================
+// award this event's points (player + rivals via populate), advance, crown the champ at season end
+function advanceCareer(cat, populate) {
+    const C = CAREERS[cat].career(), act = C.active, S = seriesById(cat, act.seriesId);
+    populate(act);
+    act.raceIdx++;
+    if (act.raceIdx >= S.races.length) {
+        const table = Object.entries(act.points).sort((a,b)=>b[1]-a[1]);
+        const pPos = table.findIndex(e=>e[0]===P.name)+1;
+        const reward = pPos===1 ? S.reward : pPos===2 ? Math.round(S.reward*0.6) : pPos===3 ? Math.round(S.reward*0.4) : Math.round(S.reward*0.25);
+        act.summary = { pPos, reward, champ: table[0][0] };
+        P.tokens += reward; P.stats.tokensEarned += reward;
+        if (pPos===1) P.stats.championships++;
+        C.completed[S.id] = true;
+    }
+}
 function careerStandingsHtml(points) {
     const table = Object.entries(points).sort((a,b) => b[1] - a[1]);
     if (!table.length) return '<p class="keys">Green flag drops at race 1 — everybody starts at zero!</p>';
@@ -3240,55 +3284,71 @@ function careerStandingsHtml(points) {
     });
     return `<table class="results">${rows}</table>`;
 }
+let careerCat = 'oval';
+const CAREERS = {
+    oval:  { tab:'🏁 Dirt Track', series:SERIES, career:()=>P.career, start:()=>startCareerRace(),
+             startBtn:'Start Race Night ▸', unit:'Race',
+             intro:'Full points seasons on the dirt ovals — most points takes the title.',
+             nextInfo:(S,i)=>{ const t=TRACKS.find(x=>x.id===S.races[i]); return `${t.name} (${t.len}) · ${S.laps}-lap feature · ${t.featureKarts} karts`; },
+             sub:s=>`${s.races.length} races · ${s.laps}-lap features` },
+    drag:  { tab:'🏎 Drag', series:DRAG_SERIES, career:()=>P.dragCareer, start:()=>startDragCareerRace(),
+             startBtn:'Stage It Up ▸', unit:'Event',
+             intro:'Grudge seasons down the strip — win rounds to rack up points for the title.',
+             nextInfo:(S,i)=>{ const st=DRAG_STRIPS[S.races[i]]; return `${st.name} · grudge race`; },
+             sub:s=>`${s.races.length} grudge nights` },
+    derby: { tab:'💥 Derby', series:DERBY_SERIES, career:()=>P.derbyCareer, start:()=>startDerbyCareerRace(),
+             startBtn:'Fire It Up ▸', unit:'Event',
+             intro:'Arena seasons — outlast the field night after night for the championship.',
+             nextInfo:(S,i)=>{ const ar=DERBY_ARENAS[S.races[i]]; return `${ar.name} · ${S.karts}-car derby`; },
+             sub:s=>`${s.races.length} arenas · ${s.karts} cars` }
+};
+function seriesById(cat, id) { return CAREERS[cat].series.find(s => s.id === id); }
+function dragCareerRoster() {
+    return RIVAL_POOL.filter(r => r.name.toLowerCase() !== P.name.toLowerCase())
+        .sort((a,b)=>b.skill-a.skill).slice(0,5).map(r => ({ name:r.name, skill:r.skill }));
+}
 function renderCareer() {
-    const body = $('careerBody');
-    const act = P.career.active;
+    const cfg = CAREERS[careerCat], body = $('careerBody'), C = cfg.career(), act = C.active;
+    let html = '<div class="row" style="margin-bottom:4px;">' + Object.keys(CAREERS).map(cat =>
+        `<button class="chip${cat===careerCat?' sel':''}" data-cat="${cat}">${CAREERS[cat].tab}</button>`).join('') + '</div>';
     if (!act) {
-        let html = '<p class="sub">Run a full points season — every feature scores. Most points takes the title and the token prize. Finish a series to unlock the next one.</p><div class="cards">';
-        SERIES.forEach(s => {
-            const locked = s.needs && !P.career.completed[s.needs];
-            const done = P.career.completed[s.id];
+        html += `<p class="sub">${cfg.intro} Finish a series to unlock the next one.</p><div class="cards">`;
+        cfg.series.forEach(s => {
+            const locked = s.needs && !C.completed[s.needs], done = C.completed[s.id];
             html += `<button class="card" data-series="${s.id}" ${locked ? 'disabled style="opacity:.45"' : ''}>
-                <span class="big">${s.ico}</span><h3>${s.name}</h3>
-                <small>${s.races.length} races · ${s.laps}-lap features</small>
-                <small>${s.desc}</small>
+                <span class="big">${s.ico}</span><h3>${s.name}</h3><small>${cfg.sub(s)}</small><small>${s.desc}</small>
                 ${done ? '<span class="owned">✓ COMPLETED — run it again!</span>' : ''}
-                ${locked ? `<span class="price">🔒 Finish ${SERIES.find(x=>x.id===s.needs).name} first</span>`
-                         : `<span class="price">🏆 Champion's prize: ⛁${s.reward}</span>`}
+                ${locked ? `<span class="price">🔒 Finish ${seriesById(careerCat,s.needs).name} first</span>` : `<span class="price">🏆 Champion's prize: ⛁${s.reward}</span>`}
             </button>`;
         });
         html += '</div>';
         body.innerHTML = html;
         body.querySelectorAll('[data-series]').forEach(b => b.onclick = () => {
-            P.career.active = { seriesId: b.dataset.series, raceIdx: 0, points: {} };
-            saveDB(); renderCareer();
+            const active = { seriesId: b.dataset.series, raceIdx: 0, points: {} };
+            if (careerCat === 'drag') active.roster = dragCareerRoster();
+            C.active = active; saveDB(); renderCareer();
         });
     } else if (act.summary) {
-        const S = activeSeries(), sm = act.summary;
-        body.innerHTML = `
-            <h2 style="font-size:1.5rem;">${sm.pPos === 1 ? '👑 YOU ARE THE ' + S.name.toUpperCase() + ' CHAMPION!' : `Season over — you finished <span>P${sm.pPos}</span>`}</h2>
-            <p class="sub">${sm.pPos === 1 ? 'The title is yours. Spend it well, champ.' : `${sm.champ} takes the title. There's always next season.`}</p>
+        const S = seriesById(careerCat, act.seriesId), sm = act.summary;
+        html += `<h2 style="font-size:1.4rem;">${sm.pPos===1 ? '👑 '+S.name.toUpperCase()+' CHAMPION!' : `Season over — <span>P${sm.pPos}</span>`}</h2>
+            <p class="sub">${sm.pPos===1 ? 'The title is yours. Spend it well, champ.' : `${sm.champ} takes the title — there's always next season.`}</p>
             <div class="tokens">SEASON PRIZE: +⛁${sm.reward}</div>
             ${careerStandingsHtml(act.points)}
             <button class="btn" id="careerDone">Collect &amp; Continue ▸</button>`;
-        $('careerDone').onclick = () => { P.career.active = null; saveDB(); renderCareer(); renderHome(); };
+        body.innerHTML = html;
+        $('careerDone').onclick = () => { C.active = null; saveDB(); renderCareer(); renderHome(); };
     } else {
-        const S = activeSeries();
-        const trk = TRACKS.find(t => t.id === S.races[act.raceIdx]);
-        body.innerHTML = `
-            <p class="sectionTitle">${S.ico} ${S.name} — Race ${act.raceIdx + 1} of ${S.races.length}</p>
-            <p class="sub">Next up: <b style="color:var(--yellow)">${trk.name}</b> (${trk.len}) · ${S.laps}-lap feature · ${trk.featureKarts} karts</p>
-            <button class="btn gold" id="careerGo">Start Race Night ▸</button>
-            <p class="sectionTitle">Standings</p>
-            ${careerStandingsHtml(act.points)}
+        const S = seriesById(careerCat, act.seriesId);
+        html += `<p class="sectionTitle">${S.ico} ${S.name} — ${cfg.unit} ${act.raceIdx+1} of ${S.races.length}</p>
+            <p class="sub">Next up: <b style="color:var(--yellow)">${cfg.nextInfo(S, act.raceIdx)}</b></p>
+            <button class="btn gold" id="careerGo">${cfg.startBtn}</button>
+            <p class="sectionTitle">Standings</p>${careerStandingsHtml(act.points)}
             <button class="btn ghost sm" id="careerQuit">Quit This Season</button>`;
-        $('careerGo').onclick = () => startCareerRace();
-        $('careerQuit').onclick = () => {
-            if (confirm('Quit this season? The points are lost (no prize).')) {
-                P.career.active = null; saveDB(); renderCareer();
-            }
-        };
+        body.innerHTML = html;
+        $('careerGo').onclick = () => cfg.start();
+        $('careerQuit').onclick = () => { if (confirm('Quit this season? The points are lost (no prize).')) { C.active = null; saveDB(); renderCareer(); } };
     }
+    body.querySelectorAll('[data-cat]').forEach(b => b.onclick = () => { careerCat = b.dataset.cat; renderCareer(); });
 }
 
 // ==================== MULTIPLAYER: race a friend with a share code ====================
@@ -3665,7 +3725,7 @@ function aiDragPerf() {
     const tier = Object.keys(DRAG_CARS);
     const pIdx = Math.max(0, tier.indexOf(P.dragCar));
     const diff = DIFFS[P.settings.diff].ai;
-    let oIdx = pIdx - 1 + (DRAG.event==='bracket' ? DRAG.round : 0);   // grudge ~1 tier down; bracket ramps up
+    let oIdx = pIdx - 1 + (DRAG.event==='bracket' ? DRAG.round : 0) + (DRAG.seriesTier||0);   // grudge ~1 tier down; bracket/career ramp up
     oIdx = Math.max(0, Math.min(tier.length-1, Math.round(oIdx + (diff-0.965)*3)));
     const car = DRAG_CARS[tier[oIdx]];
     return { cls:'drag', top: PHYS.maxSpeed*car.top*(0.97+(diff-0.965)*0.6), acc: PHYS.accel*car.acc*0.98,
@@ -3751,9 +3811,14 @@ function dragOpp(roundIdx) {
     return pool[Math.min(pool.length-1, idx)];
 }
 function newDrag() {
-    const strip = DRAG_STRIPS[P.settings.dragStrip] || DRAG_STRIPS.quarter;
-    return { strip:P.settings.dragStrip, len:strip.len, prep:strip.prep, ground:strip.ground,
-        event:P.settings.dragEvent, round:0, phase:'stage', tPhase:0, greenAt:0,
+    let stripId = P.settings.dragStrip, event = P.settings.dragEvent, tier = 0;
+    if (raceContext==='dragCareer' && P.dragCareer.active) {          // career overrides the strip
+        const S = seriesById('drag', P.dragCareer.active.seriesId);
+        stripId = S.races[P.dragCareer.active.raceIdx]; event = 'grudge'; tier = S.tier;
+    }
+    const strip = DRAG_STRIPS[stripId] || DRAG_STRIPS.quarter;
+    return { strip:stripId, len:strip.len, prep:strip.prep, ground:strip.ground, seriesTier:tier,
+        event, round:0, phase:'stage', tPhase:0, greenAt:0,
         player:null, opp:null, results:false, _advance:false,
         playerRT:null, oppRT:null, playerET:null, oppET:null, playerTrap:0, oppTrap:0,
         playerFoul:false, oppFoul:false, winner:null, oppLeaveDelay:0.25 };
@@ -3785,8 +3850,9 @@ function setupDragPair() {
     DRAG.oppFoul = Math.random() < 0.05;
     player = DRAG.player; karts = [DRAG.player, DRAG.opp];
 }
-function startDrag(keepRound) {
-    gameMode='drag'; raceContext='free'; setBodyMode('drag');
+function startDragCareerRace() { careerCat='drag'; raceContext='dragCareer'; startDrag(false, 'dragCareer'); }
+function startDrag(keepRound, ctx) {
+    gameMode='drag'; raceContext = ctx || 'free'; setBodyMode('drag');
     applyTrack(curTrack());
     if (!keepRound || !DRAG) DRAG = newDrag();
     particles = []; banner = { text:'', color:'', until:0 };
@@ -3906,6 +3972,18 @@ function finishDragScreen(won) {
     }
     if (holeshot) { lines.push([`⚡ HOLESHOT (${DRAG.playerRT.toFixed(3)}s light)`, 5]); total+=5; }
     P.tokens+=total; P.stats.tokensEarned+=total; P.stats.races++;
+    // ----- career points (drag season) -----
+    const career = raceContext==='dragCareer';
+    let seasonDone = false;
+    if (career) {
+        const pp = (won ? 32 : 14) + (holeshot ? 5 : 0);
+        advanceCareer('drag', act => {
+            act.points[P.name] = (act.points[P.name]||0) + pp;
+            act.roster.forEach(r => act.points[r.name] = (act.points[r.name]||0) + Math.max(8, Math.round(15 + (r.skill-0.91)*150 + (Math.random()*10-4))));
+        });
+        seasonDone = !!P.dragCareer.active.summary;
+        lines.push([`🏆 Season points: +${pp}`, 0]);
+    }
     saveDB();
     const champ   = DRAG.event==='bracket' && won && DRAG.round>=2;
     const advance = DRAG.event==='bracket' && won && DRAG.round<2;
@@ -3919,12 +3997,12 @@ function finishDragScreen(won) {
     rows += `<tr class="you"><td>You #${DRAG.player.num}</td><td>${DRAG.playerFoul?'🔴 FOUL':rt(DRAG.playerRT)}</td><td>${DRAG.playerET?DRAG.playerET.toFixed(3):'—'}</td><td>${DRAG.playerTrap||'—'}</td></tr>`;
     rows += `<tr><td>#${DRAG.opp.num} ${DRAG.opp.name}</td><td>${DRAG.oppFoul?'🔴 FOUL':rt(DRAG.oppRT)}</td><td>${DRAG.oppET?DRAG.oppET.toFixed(3):'—'}</td><td>${DRAG.oppTrap||'—'}</td></tr>`;
     $('resultsTable').innerHTML = rows;
-    let pay=''; lines.forEach(([t,a]) => pay += `<div class="line"><span>${t}</span><b>+${a} ⛁</b></div>`);
+    let pay=''; lines.forEach(([t,a]) => pay += `<div class="line"><span>${t}</span><b>${a>0?'+'+a+' ⛁':''}</b></div>`);
     pay += `<div class="line total"><span>Tokens earned</span><b>+${total} ⛁</b></div><div class="line total"><span>Your bank</span><b>⛁ ${P.tokens}</b></div>`;
     $('payBox').innerHTML=pay; $('payBox').classList.remove('hidden');
-    $('bestLapLine').textContent = champ ? 'You ran the table — bracket is yours!' : '';
-    $('finStandings').classList.add('hidden');
-    $('againBtn').classList.remove('hidden');
+    $('bestLapLine').textContent = champ ? 'You ran the table — bracket is yours!' : (career && seasonDone ? '🏁 Season complete — check the standings!' : '');
+    $('finStandings').classList.toggle('hidden', !career);
+    $('againBtn').classList.toggle('hidden', career);
     $('againBtn').textContent = advance ? 'Next Round ▸' : (DRAG.event==='bracket' ? 'New Bracket' : 'Run It Again');
     showScreen('finish');
 }
@@ -4100,13 +4178,21 @@ function drawDragDash(now) {
 
 /* ================= DEMOLITION DERBY ================= */
 let DERBY = null;
+let derbyCam = 'tv';                                 // tv | chase | cockpit
 function derbyPerf(skill) {
     const cls = CLASSES[P.cls];
     return { cls:P.cls, top: PHYS.maxSpeed*0.6*cls.speed, acc: PHYS.accel*0.95*cls.accel*skill, gripM:cls.grip, wearM:0.6 };
 }
+function derbyConfig() {
+    if (raceContext==='derbyCareer' && P.derbyCareer.active) {
+        const S = seriesById('derby', P.derbyCareer.active.seriesId);
+        return { arena: S.races[P.derbyCareer.active.raceIdx], karts: S.karts, timed:false };
+    }
+    return { arena:P.settings.derbyArena, karts:P.settings.derbyKarts, timed:P.settings.derbyTimed };
+}
 function newDerby() {
-    const a = DERBY_ARENAS[P.settings.derbyArena];
-    return { w:a.w, h:a.h, arena:P.settings.derbyArena, timed:P.settings.derbyTimed, limit:90,
+    const cfg = derbyConfig(), a = DERBY_ARENAS[cfg.arena] || DERBY_ARENAS.med;
+    return { w:a.w, h:a.h, arena:cfg.arena, timed:cfg.timed, limit:90,
         startAt:0, phase:'intro', alive:0, order:[], results:false, obstacles:[] };
 }
 function buildDerbyField(n) {
@@ -4138,13 +4224,14 @@ function buildDerbyField(n) {
     if (obsN>=4) DERBY.obstacles.push({x:0,y:-DERBY.h*0.24,r:22}, {x:0,y:DERBY.h*0.24,r:22});
     if (obsN>=6) DERBY.obstacles.push({x:-DERBY.w*0.30,y:-DERBY.h*0.2,r:20}, {x:DERBY.w*0.30,y:DERBY.h*0.2,r:20});
 }
-function startDerby() {
-    gameMode='derby'; raceContext='free'; setBodyMode('derby');
+function startDerbyCareerRace() { careerCat='derby'; startDerby('derbyCareer'); }
+function startDerby(ctx) {
+    gameMode='derby'; raceContext = ctx || 'free'; setBodyMode('derby');
     applyTrack(curTrack());
     DERBY = newDerby();
     particles=[]; banner={text:'',color:'',until:0};
-    buildDerbyField(P.settings.derbyKarts);
-    cam='tv'; startEngine();
+    buildDerbyField(derbyConfig().karts);
+    startEngine();
     state='countdown'; DERBY.phase='intro'; DERBY.startAt=performance.now();
     hideOverlays();
 }
@@ -4275,18 +4362,29 @@ function finishDerby() {
     if (kills>0) { const kb=kills*4; total+=kb; lines.push([`🔨 ${kills} wreck${kills>1?'s':''} (×4)`, kb]); }
     if (won) { total+=25; lines.push(['🏆 LAST ONE RUNNING', 25]); P.stats.derbyWins++; }
     P.tokens+=total; P.stats.tokensEarned+=total; P.stats.races++;
+    // ----- career points (derby season) -----
+    const career = raceContext==='derbyCareer';
+    let seasonDone = false;
+    if (career) {
+        advanceCareer('derby', act => {
+            order.forEach((k,i) => act.points[k.name] = (act.points[k.name]||0) + careerPlacePts(i+1));
+            if (kills>0) act.points[P.name] += kills*2;
+        });
+        seasonDone = !!P.derbyCareer.active.summary;
+        lines.push([`🏆 Season points: +${careerPlacePts(place)+kills*2}`, 0]);
+    }
     saveDB();
     const sfx=p=>p===1?'st':p===2?'nd':p===3?'rd':'th';
     $('finishTitle').innerHTML = won ? '🏆 <span>LAST ONE RUNNING!</span>' : `You finished <span>${place}${sfx(place)}</span>`;
     let rows='<tr><th>Pos</th><th>Driver</th><th>Kart</th><th>Wrecks</th></tr>';
     order.forEach((k,i)=>{ rows += `<tr${k.isPlayer?' class="you"':''}><td>${i+1}</td><td>${k.name}${k.dead?' 💥':' ✅'}</td><td>#${k.num}</td><td>${k.kills||0}</td></tr>`; });
     $('resultsTable').innerHTML=rows;
-    let pay=''; lines.forEach(([t,a])=> pay += `<div class="line"><span>${t}</span><b>+${a} ⛁</b></div>`);
+    let pay=''; lines.forEach(([t,a])=> pay += `<div class="line"><span>${t}</span><b>${a>0?'+'+a+' ⛁':''}</b></div>`);
     pay += `<div class="line total"><span>Tokens earned</span><b>+${total} ⛁</b></div><div class="line total"><span>Your bank</span><b>⛁ ${P.tokens}</b></div>`;
     $('payBox').innerHTML=pay; $('payBox').classList.remove('hidden');
-    $('bestLapLine').textContent = won ? 'You were the last kart moving!' : '';
-    $('finStandings').classList.add('hidden');
-    $('againBtn').classList.remove('hidden'); $('againBtn').textContent='Derby Again';
+    $('bestLapLine').textContent = career && seasonDone ? '🏁 Season complete — check the standings!' : (won ? 'You were the last kart moving!' : '');
+    $('finStandings').classList.toggle('hidden', !career);
+    $('againBtn').classList.toggle('hidden', career); $('againBtn').textContent='Derby Again';
     setTimeout(()=>{ if (state==='done') showScreen('finish'); }, 1600);
 }
 function drawArena(now) {
@@ -4327,6 +4425,9 @@ function drawDerbyHUD(now) {
     cx2d.fillStyle=player.dead?'#7a1f1f':hp>0.6?'#3AAE5C':hp>0.3?'#FFD400':'#E14D4D'; cx2d.fillRect(W-118, 15, 100*Math.max(0,hp), 14);
     cx2d.strokeStyle='rgba(255,255,255,0.4)'; cx2d.lineWidth=1; cx2d.strokeRect(W-118, 15, 100, 14);
     if (player.dead) { cx2d.textAlign='center'; cx2d.fillStyle='#E14D4D'; cx2d.font='bold 30px Bahnschrift, sans-serif'; cx2d.fillText('WRECKED — WATCH IT PLAY OUT', W/2, H*0.5); }
+    // camera hint
+    cx2d.textAlign='center'; cx2d.font='bold 12px Bahnschrift, sans-serif'; cx2d.fillStyle='rgba(255,255,255,0.55)';
+    cx2d.fillText('📷 '+(derbyCam==='tv'?'ARENA':derbyCam==='chase'?'CHASE':'IN-CAR')+' · C', W/2, 52);
 }
 function drawDerbyCountdown(now) {
     const t=(now-DERBY.startAt)/1000, n=Math.ceil(3-t);
@@ -4334,18 +4435,48 @@ function drawDerbyCountdown(now) {
     if (n>=1){ cx2d.font='bold 120px Bahnschrift, sans-serif'; cx2d.fillStyle='#E14D4D'; cx2d.fillText(n, W/2, H/2);
         cx2d.font='bold 26px Bahnschrift, sans-serif'; cx2d.fillStyle='rgba(255,255,255,0.85)'; cx2d.fillText('GET READY TO SMASH', W/2, H/2+56); }
 }
+function drawDerbyHood(now) {
+    // your own hood + roll cage at the bottom to sell the in-car feel
+    const top=H*0.80;
+    cx2d.fillStyle=player.body;
+    cx2d.beginPath(); cx2d.moveTo(0,H); cx2d.lineTo(W*0.12,top); cx2d.lineTo(W*0.88,top); cx2d.lineTo(W,H); cx2d.closePath(); cx2d.fill();
+    cx2d.strokeStyle=player.trim; cx2d.lineWidth=5; cx2d.stroke();
+    cx2d.fillStyle='#15151a'; cx2d.fillRect(W/2-30, top-2, 60, 14);                 // hood scoop
+    cx2d.strokeStyle='#20202a'; cx2d.lineWidth=10; cx2d.beginPath(); cx2d.moveTo(0,44); cx2d.lineTo(W,44); cx2d.stroke();   // cage top bar
+    cx2d.lineWidth=8; cx2d.beginPath(); cx2d.moveTo(46,44); cx2d.lineTo(22,top); cx2d.moveTo(W-46,44); cx2d.lineTo(W-22,top); cx2d.stroke();   // A-pillars
+}
 function drawDerbyFrame(now) {
     cx2d.fillStyle='#17130f'; cx2d.fillRect(0,0,W,H);
-    const S = Math.min(W/(DERBY.w+130), H/(DERBY.h+170))*0.98;
-    cx2d.save();
-    cx2d.translate(W/2, H*0.54); cx2d.scale(S,S);
-    drawArena(now);
-    [...karts].sort((a,b)=>(a.dead?0:1)-(b.dead?0:1)).forEach(drawKart);
-    drawParticlesWorld();
-    if (player && !player.dead) youMarker();
-    cx2d.textAlign='center'; cx2d.font='bold 13px Bahnschrift, sans-serif';
-    for (const k of karts) { cx2d.fillStyle=k.isPlayer?'#FFD400':'rgba(255,255,255,0.8)'; cx2d.fillText('#'+k.num, k.x, k.y-26); }
-    cx2d.restore();
+    if (derbyCam==='tv' || !player) {
+        const S = Math.min(W/(DERBY.w+130), H/(DERBY.h+170))*0.98;
+        cx2d.save();
+        cx2d.translate(W/2, H*0.54); cx2d.scale(S,S);
+        drawArena(now);
+        [...karts].sort((a,b)=>(a.dead?0:1)-(b.dead?0:1)).forEach(drawKart);
+        drawParticlesWorld();
+        if (player && !player.dead) youMarker();
+        cx2d.textAlign='center'; cx2d.font='bold 13px Bahnschrift, sans-serif';
+        for (const k of karts) { cx2d.fillStyle=k.isPlayer?'#FFD400':'rgba(255,255,255,0.8)'; cx2d.fillText('#'+k.num, k.x, k.y-26); }
+        cx2d.restore();
+    } else {
+        // follow cam: player centered + rotated so you always face 'up' (chase = wider, cockpit = tight + hood)
+        const zoom = derbyCam==='cockpit' ? 2.1 : 1.5, anchorY = derbyCam==='cockpit' ? H*0.72 : H*0.58;
+        const rot = -(player.heading + Math.PI/2), c=Math.cos(rot), s=Math.sin(rot);
+        cx2d.save();
+        cx2d.translate(W/2, anchorY); cx2d.scale(zoom,zoom); cx2d.rotate(rot); cx2d.translate(-player.x, -player.y);
+        drawArena(now);
+        [...karts].sort((a,b)=>(a.dead?0:1)-(b.dead?0:1)).forEach(drawKart);
+        drawParticlesWorld();
+        cx2d.restore();
+        cx2d.textAlign='center'; cx2d.font='bold 13px Bahnschrift, sans-serif';   // upright number tags in screen space
+        for (const k of karts) { if (k===player || k.dead) continue;
+            const dx=k.x-player.x, dy=k.y-player.y;
+            const sx=W/2+(dx*c-dy*s)*zoom, sy=anchorY+(dx*s+dy*c)*zoom;
+            if (sx<-30||sx>W+30||sy<-30||sy>H+30) continue;
+            cx2d.fillStyle='rgba(255,255,255,0.85)'; cx2d.fillText('#'+k.num, sx, sy-18);
+        }
+        if (derbyCam==='cockpit') drawDerbyHood(now);
+    }
     drawDerbyHUD(now);
     drawBanner();
     if (state==='countdown') drawDerbyCountdown(now);
