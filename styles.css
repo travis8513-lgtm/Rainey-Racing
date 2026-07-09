@@ -590,6 +590,19 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
     .score-stat span { font-size: 1.6rem; }
 }
 
+/* ===== Sponsor payment (Cash App) ===== */
+.payment-box {
+    max-width: 720px; margin: 34px auto 0; text-align: center;
+    background: var(--carbon-2); border: 1px solid var(--line); border-radius: 12px; padding: 28px 26px;
+}
+.payment-box h3 { color: #fff; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+.payment-box p { color: var(--muted); margin-bottom: 18px; }
+.payment-buttons { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 16px; }
+.btn-cashapp { background: #00D632; color: #000; font-weight: 800; }
+.btn-cashapp:hover { background: #00b82b; color: #000; }
+.payment-note { font-size: .85rem; margin-bottom: 0 !important; }
+.payment-note strong { color: #00D632; }
+
 /* ===== Sponsor spotlight ===== */
 .spotlight {
     max-width: 860px; margin: 0 auto 46px; background: linear-gradient(135deg, var(--carbon-2), var(--carbon-3));
