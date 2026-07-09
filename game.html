@@ -294,7 +294,7 @@ footer a { color:var(--yellow); text-decoration:none; }
         <button class="btn ghost sm" id="switchBtn">↩ Switch Driver</button>
         <p class="keys">Drive with <b>&#8593;</b> gas <b>&#8595;</b> brake <b>&#8592;</b><b>&#8594;</b> steer (or <b>W</b><b>A</b><b>S</b><b>D</b>) · hold <b>SPACE</b> to power-slide · <b>C</b> camera · <b>M</b> mute</p>
         <p class="keys">🔧 Worn tires get slippery — dive low onto the front-stretch pit road to bolt on fresh ones!</p>
-        <p class="keys" style="color:#FFD400; font-weight:700;">GAME VERSION 22</p>
+        <p class="keys" style="color:#FFD400; font-weight:700;">GAME VERSION 23</p>
     </div>
 
     <!-- ===== GARAGE ===== -->
@@ -392,17 +392,28 @@ footer a { color:var(--yellow); text-decoration:none; }
         <h2>💥 DEMOLITION <span>DERBY</span></h2>
         <div class="tokens" id="derbyTokens">⛁ 0</div>
         <p class="sub">Ram the others, take the least damage, be the last one running. Reverse with the brake to line up your hits!</p>
+        <p class="sectionTitle">Event Type</p>
+        <div class="row" id="derbyFormatChips"></div>
+        <p class="keys" id="derbyFormatNote"></p>
         <p class="sectionTitle">Your Car</p>
         <div class="cards" id="derbyCarCards"></div>
         <p class="sectionTitle">Speed Shop — Upgrades</p>
         <div class="cards" id="derbyUpCards"></div>
-        <div class="field"><label>Cars in the pit: <b id="derbyKartsVal">8</b></label><input type="range" id="derbyKarts" min="4" max="12" value="8"></div>
-        <p class="sectionTitle">Arena</p>
-        <div class="row" id="derbyArenaChips"></div>
-        <p class="sectionTitle">Rules</p>
-        <div class="row" id="derbyModeChips"></div>
+        <div class="field"><label>Cars in the field: <b id="derbyKartsVal">8</b></label><input type="range" id="derbyKarts" min="4" max="12" value="8"></div>
+        <div id="derbyDemoOpts">
+            <p class="sectionTitle">Arena</p>
+            <div class="row" id="derbyArenaChips"></div>
+            <p class="sectionTitle">Rules</p>
+            <div class="row" id="derbyModeChips"></div>
+        </div>
+        <div id="derbyRaceOpts" class="hidden">
+            <p class="sectionTitle">Figure-8 Track</p>
+            <div class="row" id="fig8TrackChips"></div>
+            <p class="sectionTitle">Laps</p>
+            <div class="row" id="raceLapsChips"></div>
+        </div>
         <button class="btn gold" id="derbyGo">Fire It Up ▸</button>
-        <p class="keys">Wrecks earn tokens (+4 each) and last-one-running pays a bonus. Armor cuts damage taken, ram bars deal more, a bigger engine shoves harder.</p>
+        <p class="keys" id="derbyGoNote">Wrecks earn tokens (+4 each) and last-one-running pays a bonus. Armor cuts damage taken, ram bars deal more, a bigger engine shoves harder.</p>
     </div>
 
     <!-- ===== SETTINGS ===== -->
@@ -621,7 +632,8 @@ function newProfile(name, num) {
         dragCareer: { active:null, completed:{} },
         derbyCareer: { active:null, completed:{} },
         settings: { diff:'racer', featureLaps:10, trackId:'rainey', quickLaps:8, quickKarts:10,
-                    dragStrip:'quarter', dragEvent:'grudge', derbyKarts:8, derbyArena:'med', derbyTimed:false }
+                    dragStrip:'quarter', dragEvent:'grudge', derbyKarts:8, derbyArena:'med', derbyTimed:false,
+                    derbyFormat:'demo', fig8Track:'classic', raceLaps:6 }
     };
 }
 // older saves from this version missing fields (safety net if I add fields later)
@@ -653,6 +665,9 @@ function patchProfile(p) {
     if (p.settings.dragDist && !p.settings.dragStrip) p.settings.dragStrip = p.settings.dragDist==='eighth'?'street':'quarter';
     if (!DRAG_STRIPS[p.settings.dragStrip]) p.settings.dragStrip='quarter';
     if (!DERBY_ARENAS[p.settings.derbyArena]) p.settings.derbyArena='med';
+    if (!DERBY_FORMATS[p.settings.derbyFormat]) p.settings.derbyFormat='demo';
+    if (!FIG8_TRACKS[p.settings.fig8Track]) p.settings.fig8Track='classic';
+    if (!p.settings.raceLaps) p.settings.raceLaps=6;
     if (!TRACKS.some(t => t.id === p.settings.trackId)) p.settings.trackId = 'rainey';
     if (!DIFFS[p.settings.diff]) p.settings.diff = 'racer';
     return p;
@@ -1919,7 +1934,7 @@ function drawVersionTag() {
     cx2d.textAlign = 'right';
     cx2d.font = 'bold 12px Bahnschrift, Arial Narrow, sans-serif';
     cx2d.fillStyle = 'rgba(255,212,0,0.55)';
-    cx2d.fillText('v22', W - 10, H - 10);
+    cx2d.fillText('v23', W - 10, H - 10);
 }
 let lastT = performance.now();
 function frame(now) {
@@ -3686,6 +3701,20 @@ const DERBY_UP = {
                 { label:'Battering Ram',price:950,v:1.7 } ] }
 };
 const DERBY_PAY = [40,26,18,14,11,9,8,7,6,5,4,4];
+// ---- Figure-8 race tracks (two crossing loops — the crossover is the danger) ----
+const FIG8_TRACKS = {
+    classic:   { name:'Classic 8',      A:380, B:255, halfW:56 },
+    crossover: { name:'Crossover Downs', A:470, B:210, halfW:60 }
+};
+// ---- Derby event formats: the arena smash-fest, or racing the 8 with a twist ----
+const DERBY_FORMATS = {
+    demo:    { name:'Demolition',    race:false, ico:'💥', desc:'Free-for-all — last one running wins.' },
+    fig8:    { name:'Figure-8 Race', race:true,  ico:'🏁', desc:'Race the 8 — time the crossover or get T-boned!' },
+    bus:     { name:'Bus Race',      race:true,  ico:'🚌', desc:'School buses on the 8. Huge, slow, brutal.', car:'bus' },
+    chain:   { name:'Chain Race',    race:true,  ico:'⛓️', desc:'Chained in pairs — drag your partner around the 8.', tow:'chain' },
+    trailer: { name:'Trailer Race',  race:true,  ico:'🚚', desc:'Tow a trailer and try to keep it in one piece.', tow:'trailer' }
+};
+const RACE_LAP_CHOICES = [4, 6, 8, 12];
 
 // drop a kart onto a flat surface (no oval grid math)
 function placeFlat(k, x, y, heading) {
@@ -4184,16 +4213,206 @@ function derbyPerf(skill) {
     return { cls:P.cls, top: PHYS.maxSpeed*0.6*cls.speed, acc: PHYS.accel*0.95*cls.accel*skill, gripM:cls.grip, wearM:0.6 };
 }
 function derbyConfig() {
-    if (raceContext==='derbyCareer' && P.derbyCareer.active) {
+    if (raceContext==='derbyCareer' && P.derbyCareer.active) {       // career = the arena demolition
         const S = seriesById('derby', P.derbyCareer.active.seriesId);
-        return { arena: S.races[P.derbyCareer.active.raceIdx], karts: S.karts, timed:false };
+        return { arena: S.races[P.derbyCareer.active.raceIdx], karts: S.karts, timed:false, format:'demo' };
     }
-    return { arena:P.settings.derbyArena, karts:P.settings.derbyKarts, timed:P.settings.derbyTimed };
+    return { arena:P.settings.derbyArena, karts:P.settings.derbyKarts, timed:P.settings.derbyTimed,
+        format:P.settings.derbyFormat, fig8Track:P.settings.fig8Track, laps:P.settings.raceLaps };
 }
+// ---------- Figure-8 race path (Bernoulli lemniscate, sampled into a driveable ribbon) ----------
+function buildFig8(def) {
+    const N=280, pts=[], tan=[];
+    for (let i=0;i<N;i++){ const t=i/N*2*Math.PI, d=1+Math.sin(t)*Math.sin(t);
+        pts.push({ x: def.A*Math.cos(t)/d, y: def.B*Math.sin(t)*Math.cos(t)/d }); }
+    for (let i=0;i<N;i++){ const a=pts[(i+1)%N], b=pts[(i-1+N)%N]; tan.push(Math.atan2(a.y-b.y, a.x-b.x)); }
+    return { pts, tan, N, halfW:def.halfW, A:def.A, B:def.B };
+}
+function fig8Nearest(k) {   // local search around the car's index — key to handling the self-crossing X
+    const Pth=DERBY.path, N=Pth.N, c=k.pathIdx||0; let best=c, bd=1e18;
+    for (let d=-8; d<=26; d++){ const i=((c+d)%N+N)%N; const dx=Pth.pts[i].x-k.x, dy=Pth.pts[i].y-k.y, dd=dx*dx+dy*dy;
+        if (dd<bd){ bd=dd; best=i; } }
+    return { idx:best, dist:Math.sqrt(bd) };
+}
+function attachTow(k, kind) {
+    const L = kind==='chain' ? 42 : 48;
+    k.tow = { kind, x:k.x - Math.cos(k.heading)*L, y:k.y - Math.sin(k.heading)*L,
+        heading:k.heading, hp:1, attached:true, vx:0, vy:0 };
+}
+function updateTow(k, dt) {
+    if (!k.tow || !k.tow.attached) return;
+    const tw=k.tow, L = tw.kind==='chain' ? 42 : 48;
+    const hx = k.x - Math.cos(k.heading)*15, hy = k.y - Math.sin(k.heading)*15;   // hitch just behind the car
+    let dx = tw.x - hx, dy = tw.y - hy, d = Math.hypot(dx,dy)||1;
+    const ox=tw.x, oy=tw.y;
+    tw.x = hx + dx/d * L; tw.y = hy + dy/d * L;
+    tw.heading = Math.atan2(tw.y - hy, tw.x - hx);
+    tw.vx = (tw.x-ox)/Math.max(dt,0.001); tw.vy = (tw.y-oy)/Math.max(dt,0.001);
+}
+function stepFig8Race(now, dt) {
+    if (state==='countdown') {
+        if (now - DERBY.startAt > 3200) { state='race'; DERBY.startAt=now; beepGo(); showBanner('🏁 GO! RACE THE 8 — WATCH THE CROSSOVER!', '#3AAE5C', 2.6); }
+        for (const k of karts) updateTow(k, dt);
+        return;
+    }
+    if (state!=='race') return;
+    const Pth=DERBY.path, N=Pth.N;
+    for (const k of karts) {
+        if (k.dead || k.finished) {
+            k.vx*=Math.exp(-(k.dead?4:1.6)*dt); k.vy*=Math.exp(-(k.dead?4:1.6)*dt); k.x+=k.vx*dt; k.y+=k.vy*dt;
+            if (k.dead && Math.random()<3*dt) particles.push({ kind:'smoke', x:k.x, y:k.y, z:3,
+                vx:(Math.random()*20-10), vy:(Math.random()*20-10), vz:40+Math.random()*40, life:1+Math.random(), age:0, size:3+Math.random()*3 });
+            updateTow(k, dt); continue;
+        }
+        const near = fig8Nearest(k);
+        if (k.pathIdx > N*0.62 && near.idx < N*0.38) {                 // crossed the stripe forward → a lap
+            k.laps++;
+            if (k.isPlayer && k.laps < DERBY.laps) { showBanner('LAP '+(k.laps+1)+' / '+DERBY.laps, '#2563EB', 1.3); beep(660,0.2); }
+        } else if (k.pathIdx < N*0.38 && near.idx > N*0.62) { k.laps=Math.max(0,k.laps-1); }
+        k.pathIdx = near.idx; k.progress = k.laps + k.pathIdx/N;
+        if (k.laps >= DERBY.laps && !k.finished) {
+            k.finished=true; k.finishTime=(now-DERBY.startAt)/1000; DERBY.order.push(k);
+            if (k.isPlayer) { showBanner('🏁 YOU TOOK THE CHECKERS!', '#FFD400', 3); beep(880,0.4); }
+        }
+        // drive
+        let throttle=0, steer=0;
+        if (k.isPlayer) { throttle = input.up?1:(input.down?-1:0); steer = (input.left?-1:0)+(input.right?1:0); }
+        else {
+            const look = Pth.pts[(k.pathIdx + 12) % N];
+            const df = angDiff(Math.atan2(look.y-k.y, look.x-k.x), k.heading);
+            steer = Math.max(-1, Math.min(1, df*2.2));
+            throttle = Math.abs(df) < 0.55 ? 1 : 0.72;
+            if (Math.hypot(k.x,k.y) < 100 && k.cross) throttle *= 0.72;   // some drivers ease at the X
+        }
+        const fwd = k.vx*Math.cos(k.heading)+k.vy*Math.sin(k.heading);
+        k.heading += steer*2.7*dt*(fwd<-2?-1:1);
+        const fx=Math.cos(k.heading), fy=Math.sin(k.heading);
+        if (throttle>0) { k.vx+=fx*k.acc*throttle*dt; k.vy+=fy*k.acc*throttle*dt; }
+        else if (throttle<0) { k.vx+=fx*k.acc*throttle*0.7*dt; k.vy+=fy*k.acc*throttle*0.7*dt; }
+        const f2=k.vx*fx+k.vy*fy, lx=k.vx-fx*f2, ly=k.vy-fy*f2, keep=Math.exp(-7*dt);
+        k.vx=fx*f2+lx*keep; k.vy=fy*f2+ly*keep;
+        k.vx*=Math.exp(-0.5*dt); k.vy*=Math.exp(-0.5*dt);
+        const top=k.top*(k.tow?0.9:1), s2=Math.hypot(k.vx,k.vy); if (s2>top){ k.vx*=top/s2; k.vy*=top/s2; }
+        k.x+=k.vx*dt; k.y+=k.vy*dt;
+        // track limits — soft wall at the ribbon edge
+        if (near.dist > Pth.halfW) { const cp=Pth.pts[near.idx], nx=(k.x-cp.x)/(near.dist||1), ny=(k.y-cp.y)/(near.dist||1);
+            k.x=cp.x+nx*Pth.halfW; k.y=cp.y+ny*Pth.halfW; const vn=k.vx*nx+k.vy*ny; if(vn>0){ k.vx-=nx*vn*1.15; k.vy-=ny*vn*1.15; } }
+        updateTow(k, dt);
+    }
+    derbyCollisions(now);
+    towCollisions(now);
+    const racingLeft = karts.filter(k=>!k.dead && !k.finished).length;
+    if (!DERBY.raceEndAt && (player.finished || player.dead)) DERBY.raceEndAt = now + 1400;
+    const overtime = (now-DERBY.startAt)/1000 > 240;
+    if (racingLeft===0 || overtime || (DERBY.raceEndAt && now >= DERBY.raceEndAt)) finishFig8(now);
+    else DERBY.alive = racingLeft;
+}
+function towCollisions(now) {
+    for (const k of karts) {
+        if (!k.tow || !k.tow.attached) continue;
+        const tw=k.tow, R=30;
+        for (const o of karts) {
+            if (o===k || o.dead) continue;
+            const dx=o.x-tw.x, dy=o.y-tw.y, d=Math.hypot(dx,dy);
+            if (d>0 && d<R) {
+                const nx=dx/d, ny=dy/d, push=(R-d);
+                o.x+=nx*push*0.7; o.y+=ny*push*0.7;
+                const relv=(tw.vx-o.vx)*nx+(tw.vy-o.vy)*ny;
+                if (relv>0){ o.vx+=nx*relv*0.45; o.vy+=ny*relv*0.45; }
+                const spd=Math.hypot(tw.vx,tw.vy);
+                if (spd>190){ o.damage=Math.min(1,o.damage+(spd-190)/5200/(o.armor||1)); if(o.damage>=1)checkDerbyDead(o,now); }
+                if (tw.kind==='trailer' && spd>150){ tw.hp-=0.02; if(tw.hp<=0){ tw.attached=false;
+                    if(k.isPlayer) showBanner('🚚 YOUR TRAILER IS TOAST!', '#a05a00', 2.5);
+                    for(let n=0;n<8;n++) particles.push({kind:'clod',x:tw.x,y:tw.y,z:2,vx:(Math.random()*120-60),vy:(Math.random()*120-60),vz:60+Math.random()*60,life:0.6,age:0,size:2+Math.random()*3}); } }
+            }
+        }
+    }
+}
+function finishFig8(now) {
+    state='done';
+    const finished = DERBY.order.filter(k=>k.finished).sort((a,b)=>a.finishTime-b.finishTime);
+    const rest = karts.filter(k=>!k.finished).sort((a,b)=> (b.dead?-1:0)-(a.dead?-1:0) || (b.progress||0)-(a.progress||0));
+    const order = [...finished, ...rest];
+    const place = order.indexOf(player)+1, won = place===1;
+    let total = DERBY_PAY[place-1]||3; const lines=[[`Finished P${place} of ${order.length}`, total]];
+    if (won) { total+=25; lines.push(['🏁 8-RACE WIN', 25]); P.stats.derbyWins++; }
+    P.tokens+=total; P.stats.tokensEarned+=total; P.stats.races++; saveDB();
+    const sfx=p=>p===1?'st':p===2?'nd':p===3?'rd':'th';
+    const fmt = DERBY_FORMATS[DERBY.format];
+    $('finishTitle').innerHTML = won ? `🏁 <span>${fmt.name.toUpperCase()} WIN!</span>` : `You finished <span>${place}${sfx(place)}</span>`;
+    let rows='<tr><th>Pos</th><th>Driver</th><th>Kart</th><th>Laps</th></tr>';
+    order.forEach((k,i)=>{ rows += `<tr${k.isPlayer?' class="you"':''}><td>${k.dead&&!k.finished?'DNF':i+1}</td><td>${k.name}${k.dead?' 💥':k.finished?' 🏁':''}</td><td>#${k.num}</td><td>${Math.min(DERBY.laps,k.laps)}/${DERBY.laps}</td></tr>`; });
+    $('resultsTable').innerHTML=rows;
+    let pay=''; lines.forEach(([t,a])=> pay += `<div class="line"><span>${t}</span><b>+${a} ⛁</b></div>`);
+    pay += `<div class="line total"><span>Tokens earned</span><b>+${total} ⛁</b></div><div class="line total"><span>Your bank</span><b>⛁ ${P.tokens}</b></div>`;
+    $('payBox').innerHTML=pay; $('payBox').classList.remove('hidden');
+    $('bestLapLine').textContent = won ? 'You raced the 8 and lived!' : '';
+    $('finStandings').classList.add('hidden');
+    $('againBtn').classList.remove('hidden'); $('againBtn').textContent='Race Again';
+    setTimeout(()=>{ if (state==='done') showScreen('finish'); }, 1600);
+}
+function drawFig8Track(now) {
+    const Pth=DERBY.path;
+    cx2d.lineJoin='round'; cx2d.lineCap='round';
+    const trace=()=>{ cx2d.beginPath(); cx2d.moveTo(Pth.pts[0].x,Pth.pts[0].y);
+        for(let i=1;i<Pth.N;i++) cx2d.lineTo(Pth.pts[i].x,Pth.pts[i].y); cx2d.closePath(); };
+    trace(); cx2d.strokeStyle='#4a331e'; cx2d.lineWidth=Pth.halfW*2+14; cx2d.stroke();   // outer wall
+    trace(); cx2d.strokeStyle='#8a6238'; cx2d.lineWidth=Pth.halfW*2;    cx2d.stroke();   // dirt
+    trace(); cx2d.strokeStyle='rgba(90,60,32,0.5)'; cx2d.lineWidth=Pth.halfW*0.8; cx2d.stroke(); // groove
+    // crossover caution box at the middle
+    cx2d.strokeStyle='rgba(255,212,0,0.5)'; cx2d.lineWidth=3; cx2d.setLineDash([10,8]);
+    cx2d.strokeRect(-Pth.halfW*0.9, -Pth.halfW*0.9, Pth.halfW*1.8, Pth.halfW*1.8); cx2d.setLineDash([]);
+    cx2d.fillStyle='rgba(255,212,0,0.16)'; cx2d.font='bold 22px Bahnschrift, sans-serif'; cx2d.textAlign='center';
+    cx2d.fillText('CROSSOVER', 0, 6);
+    // start/finish checkers across the stripe at pts[0]
+    const p0=Pth.pts[0], t0=Pth.tan[0], nx=-Math.sin(t0), ny=Math.cos(t0);
+    for (let s=-1;s<1;s++) for (let r=0;r<2;r++){ cx2d.fillStyle=(s+r)%2? '#fff':'#111';
+        const u=(s+0.5), hwv=Pth.halfW; cx2d.beginPath();
+        const ax=p0.x+nx*u*hwv - Math.cos(t0)*(r*7), ay=p0.y+ny*u*hwv - Math.sin(t0)*(r*7);
+        cx2d.arc(ax,ay,4,0,2*Math.PI); cx2d.fill(); }
+    cx2d.save(); cx2d.translate(p0.x,p0.y); cx2d.rotate(t0);
+    cx2d.fillStyle='#f4f2fa'; cx2d.fillRect(-3,-Pth.halfW,6,Pth.halfW*2);
+    for (let c=0;c<8;c++){ cx2d.fillStyle=c%2?'#fff':'#111'; cx2d.fillRect(-4, -Pth.halfW+c*Pth.halfW*2/8, 8, Pth.halfW*2/8); }
+    cx2d.restore();
+    // stands + lights around the outside
+    const tNow=performance.now();
+    for (let i=0;i<48;i++){ const t=i/48*2*Math.PI, d=1+Math.sin(t)*Math.sin(t);
+        const x=(Pth.A+70)*Math.cos(t)/d*1.15, y=(Pth.B+70)*Math.sin(t)*Math.cos(t)/d*1.15;
+        cx2d.fillStyle=CROWD_COLORS[(i*7)%CROWD_COLORS.length]; cx2d.beginPath(); cx2d.arc(x, y+Math.sin(tNow/400+i)*1.2, 3, 0, 2*Math.PI); cx2d.fill(); }
+}
+function drawTow(k) {
+    if (!k.tow || !k.tow.attached) return;
+    const tw=k.tow;
+    // chain/hitch line
+    cx2d.strokeStyle = tw.kind==='chain' ? '#888' : '#3a3a44'; cx2d.lineWidth=3;
+    cx2d.beginPath(); cx2d.moveTo(k.x - Math.cos(k.heading)*13, k.y - Math.sin(k.heading)*13); cx2d.lineTo(tw.x, tw.y); cx2d.stroke();
+    cx2d.save(); cx2d.translate(tw.x, tw.y); cx2d.rotate(tw.heading);
+    cx2d.fillStyle='rgba(0,0,0,0.3)'; cx2d.beginPath(); cx2d.ellipse(0,2,12,7,0,0,2*Math.PI); cx2d.fill();
+    if (tw.kind==='chain') {                          // a second junk car
+        cx2d.fillStyle='#111'; cx2d.fillRect(-9,-9,4,4); cx2d.fillRect(-9,5,4,4); cx2d.fillRect(5,-9,4,4); cx2d.fillRect(5,5,4,4);
+        cx2d.fillStyle=k.trim; cx2d.beginPath(); cx2d.roundRect(-11,-8,22,16,3); cx2d.fill();
+        cx2d.fillStyle='#15151c'; cx2d.fillRect(-4,-6,8,12);
+    } else {                                          // a trailer
+        cx2d.fillStyle='#111'; cx2d.fillRect(-2,-11,5,4); cx2d.fillRect(-2,7,5,4);
+        cx2d.fillStyle= tw.hp>0.5?'#c8c8d0':'#7a5a3a'; cx2d.beginPath(); cx2d.roundRect(-13,-9,24,18,2); cx2d.fill();
+        cx2d.strokeStyle='#3a3a44'; cx2d.lineWidth=1.4; cx2d.stroke();
+        if (tw.hp<0.6){ cx2d.strokeStyle='rgba(0,0,0,0.5)'; cx2d.beginPath(); cx2d.moveTo(-8,-4); cx2d.lineTo(4,6); cx2d.moveTo(-4,5); cx2d.lineTo(6,-6); cx2d.stroke(); }
+    }
+    cx2d.restore();
+}
+function derbyConfigRace() { return DERBY && DERBY.race; }
 function newDerby() {
-    const cfg = derbyConfig(), a = DERBY_ARENAS[cfg.arena] || DERBY_ARENAS.med;
-    return { w:a.w, h:a.h, arena:cfg.arena, timed:cfg.timed, limit:90,
-        startAt:0, phase:'intro', alive:0, order:[], results:false, obstacles:[] };
+    const cfg = derbyConfig(), fmt = DERBY_FORMATS[cfg.format] || DERBY_FORMATS.demo;
+    const D = { format:cfg.format, race:!!fmt.race, startAt:0, phase:'intro', alive:0, order:[], results:false, obstacles:[], raceEndAt:0 };
+    if (fmt.race) {
+        const t8 = FIG8_TRACKS[cfg.fig8Track] || FIG8_TRACKS.classic;
+        D.path = buildFig8(t8); D.laps = cfg.laps || 6; D.trackName = t8.name;
+        D.fitW = t8.A*2 + t8.halfW*2 + 130; D.fitH = t8.B*2 + t8.halfW*2 + 150;
+    } else {
+        const a = DERBY_ARENAS[cfg.arena] || DERBY_ARENAS.med;
+        D.w=a.w; D.h=a.h; D.arena=cfg.arena; D.timed=cfg.timed; D.limit=90;
+    }
+    return D;
 }
 function buildDerbyField(n) {
     const pcar = DERBY_CARS[P.derbyCar] || DERBY_CARS.beater;
@@ -4209,20 +4428,35 @@ function buildDerbyField(n) {
     pool.forEach((r,i) => { const op = aiDerbyPerf(r.skill);
         const k = makeKart({ ...r, vstyle:'derby', vspec: op.vspec }, false, i+1, op);
         k.armor = op.armor; k.ram = op.ram; field.push(k); });
-    field.forEach((k,i) => {
-        const a = -Math.PI/2 + i/field.length*2*Math.PI;
-        const rx = DERBY.w/2-70, ry = DERBY.h/2-70;
-        const px = Math.cos(a)*rx, py = Math.sin(a)*ry;
-        placeFlat(k, px, py, Math.atan2(-py, -px));   // face the middle
-        k.kills=0; k.lastHitBy=null;
-        k.derbyState='charge'; k.stateT=0; k.jamT=0; k.target=null; k.retarget=0;
+    const fmt = DERBY_FORMATS[DERBY.format] || DERBY_FORMATS.demo;
+    field.forEach(k => {
+        k.kills=0; k.lastHitBy=null; k.derbyState='charge'; k.stateT=0; k.jamT=0; k.target=null; k.retarget=0;
+        k.laps=0; k.pathIdx=0; k.finished=false; k.finishTime=0; k.progress=0; k.tow=null; k.cross=Math.random()<0.5;
+        if (fmt.car==='bus') { k.vspec = DERBY_CARS.bus.vspec; k.top *= 0.82; k.armor = (k.armor||1)*1.6; }
     });
+    if (DERBY.race) {
+        const Pth = DERBY.path, gap = fmt.tow ? 18 : 13;      // extra room so towed cars/trailers don't overlap on the grid
+        field.forEach((k,i) => {
+            const idx = (10 + i*gap) % Pth.N, p = Pth.pts[idx], t = Pth.tan[idx];
+            const nx=-Math.sin(t), ny=Math.cos(t), off=(i%2?1:-1)*Pth.halfW*0.42;
+            placeFlat(k, p.x+nx*off, p.y+ny*off, t);
+            k.pathIdx = idx;
+            if (fmt.tow) attachTow(k, fmt.tow);
+        });
+        DERBY.obstacles = [];
+    } else {
+        field.forEach((k,i) => {
+            const a = -Math.PI/2 + i/field.length*2*Math.PI;
+            const rx = DERBY.w/2-70, ry = DERBY.h/2-70, px = Math.cos(a)*rx, py = Math.sin(a)*ry;
+            placeFlat(k, px, py, Math.atan2(-py, -px));   // face the middle
+        });
+        const obsN = DERBY_ARENAS[DERBY.arena].obs || 2;
+        DERBY.obstacles = [];
+        if (obsN>=2) DERBY.obstacles.push({x:-DERBY.w*0.19,y:0,r:26}, {x:DERBY.w*0.19,y:0,r:26});
+        if (obsN>=4) DERBY.obstacles.push({x:0,y:-DERBY.h*0.24,r:22}, {x:0,y:DERBY.h*0.24,r:22});
+        if (obsN>=6) DERBY.obstacles.push({x:-DERBY.w*0.30,y:-DERBY.h*0.2,r:20}, {x:DERBY.w*0.30,y:DERBY.h*0.2,r:20});
+    }
     player = field[0]; karts = field; DERBY.alive = field.length;
-    const obsN = DERBY_ARENAS[DERBY.arena].obs || 2;
-    DERBY.obstacles = [];
-    if (obsN>=2) DERBY.obstacles.push({x:-DERBY.w*0.19,y:0,r:26}, {x:DERBY.w*0.19,y:0,r:26});
-    if (obsN>=4) DERBY.obstacles.push({x:0,y:-DERBY.h*0.24,r:22}, {x:0,y:DERBY.h*0.24,r:22});
-    if (obsN>=6) DERBY.obstacles.push({x:-DERBY.w*0.30,y:-DERBY.h*0.2,r:20}, {x:DERBY.w*0.30,y:DERBY.h*0.2,r:20});
 }
 function startDerbyCareerRace() { careerCat='derby'; startDerby('derbyCareer'); }
 function startDerby(ctx) {
@@ -4237,6 +4471,7 @@ function startDerby(ctx) {
 }
 function stepDerby(now, dt) {
     if (!DERBY) return;
+    if (DERBY.race) { stepFig8Race(now, dt); return; }
     if (state==='countdown') {
         if (now - DERBY.startAt > 3200) { state='race'; DERBY.startAt=now; DERBY.lastKillAt=now; DERBY.suddenShown=false; beepGo(); showBanner('💥 SMASH ’EM UP — LAST ONE RUNNING WINS!', '#E14D4D', 2.5); }
         return;
@@ -4244,7 +4479,7 @@ function stepDerby(now, dt) {
     if (state!=='race') return;
     const hw=DERBY.w/2, hh=DERBY.h/2;
     // nobody's died in a while → sudden death: everyone's ride starts rusting out
-    const sudden = (now - (DERBY.lastKillAt||DERBY.startAt)) > 14000;
+    const sudden = (now - (DERBY.lastKillAt||DERBY.startAt)) > 20000;
     if (sudden && !DERBY.suddenShown) { DERBY.suddenShown=true; showBanner('⏳ SUDDEN DEATH — RUN ’EM DOWN!', '#a05a00', 3); }
     for (const k of karts) {
         if (k.dead) {
@@ -4294,17 +4529,17 @@ function stepDerby(now, dt) {
         k.vx*=Math.exp(-0.5*dt); k.vy*=Math.exp(-0.5*dt);
         const s2=Math.hypot(k.vx,k.vy); if (s2>k.top) { k.vx*=k.top/s2; k.vy*=k.top/s2; }
         k.x+=k.vx*dt; k.y+=k.vy*dt;
-        const wd = 0.03/(k.armor||1);
-        if (k.x<-hw+16){ k.x=-hw+16; if(k.vx<0){ if(k.vx<-160)k.damage=Math.min(1,k.damage+wd); k.vx*=-0.4; } }
-        if (k.x> hw-16){ k.x= hw-16; if(k.vx>0){ if(k.vx>160)k.damage=Math.min(1,k.damage+wd); k.vx*=-0.4; } }
-        if (k.y<-hh+16){ k.y=-hh+16; if(k.vy<0){ if(k.vy<-160)k.damage=Math.min(1,k.damage+wd); k.vy*=-0.4; } }
-        if (k.y> hh-16){ k.y= hh-16; if(k.vy>0){ if(k.vy>160)k.damage=Math.min(1,k.damage+wd); k.vy*=-0.4; } }
+        const wd = 0.018/(k.armor||1);
+        if (k.x<-hw+16){ k.x=-hw+16; if(k.vx<0){ if(k.vx<-190)k.damage=Math.min(1,k.damage+wd); k.vx*=-0.4; } }
+        if (k.x> hw-16){ k.x= hw-16; if(k.vx>0){ if(k.vx>190)k.damage=Math.min(1,k.damage+wd); k.vx*=-0.4; } }
+        if (k.y<-hh+16){ k.y=-hh+16; if(k.vy<0){ if(k.vy<-190)k.damage=Math.min(1,k.damage+wd); k.vy*=-0.4; } }
+        if (k.y> hh-16){ k.y= hh-16; if(k.vy>0){ if(k.vy>190)k.damage=Math.min(1,k.damage+wd); k.vy*=-0.4; } }
         for (const ob of DERBY.obstacles) {
             const dx=k.x-ob.x, dy=k.y-ob.y, d=Math.hypot(dx,dy);
             if (d<ob.r+15){ const nx=dx/(d||1), ny=dy/(d||1); k.x=ob.x+nx*(ob.r+15); k.y=ob.y+ny*(ob.r+15);
                 const vn=k.vx*nx+k.vy*ny; if(vn<0){ k.vx-=nx*vn*1.3; k.vy-=ny*vn*1.3; } }
         }
-        if (sudden) k.damage = Math.min(1, k.damage + 0.07*dt/(k.armor||1));   // the rust bites everyone
+        if (sudden) k.damage = Math.min(1, k.damage + 0.045*dt/(k.armor||1));   // the rust bites everyone
         if (k.damage>=1) checkDerbyDead(k, now);
     }
     derbyCollisions(now);
@@ -4326,7 +4561,8 @@ function derbyCollisions(now) {
                 const imp=rel*0.7;
                 if (!a.dead){ a.vx+=nx*imp; a.vy+=ny*imp; }
                 if (!b.dead){ b.vx-=nx*imp; b.vy-=ny*imp; }
-                const cs=-rel, base=Math.max(0,(cs-40))/650;
+                const cs=-rel; let base=Math.max(0,(cs-55))/1200;   // gentler damage — cars last longer
+                if (DERBY.race) base *= 0.35;                       // races should mostly finish; only big crossover hits hurt
                 if (base>0) {
                     const aInto=a.vx*nx+a.vy*ny, bInto=-(b.vx*nx+b.vy*ny);
                     const aAgg = aInto>=bInto, agg = aAgg?a:b, vic = aAgg?b:a;
@@ -4414,26 +4650,35 @@ function drawArena(now) {
 function drawDerbyHUD(now) {
     cx2d.fillStyle='rgba(13,11,24,0.82)'; cx2d.fillRect(0,0,W,40);
     cx2d.font='bold 19px Bahnschrift, Arial Narrow, sans-serif';
-    cx2d.textAlign='left'; cx2d.fillStyle='#E14D4D'; cx2d.fillText('💥 DEMOLITION DERBY', 20, 27);
-    cx2d.fillStyle='#f4f2fa'; cx2d.fillText('RUNNING: '+DERBY.alive+'/'+karts.length, 250, 27);
-    cx2d.fillText('WRECKS: '+(player.kills||0), 430, 27);
-    if (DERBY.timed) { const left=Math.max(0, DERBY.limit-(now-DERBY.startAt)/1000); cx2d.textAlign='center'; cx2d.fillStyle='#FFD400'; cx2d.fillText(Math.ceil(left)+'s', W/2, 27); }
+    cx2d.textAlign='left';
+    if (DERBY.race) {
+        const fmt = DERBY_FORMATS[DERBY.format];
+        cx2d.fillStyle='#3AAE5C'; cx2d.fillText(fmt.ico+' '+fmt.name.toUpperCase(), 20, 27);
+        const ranked=[...karts].sort((a,b)=>(b.progress||0)-(a.progress||0)), pos=ranked.indexOf(player)+1;
+        const lap=Math.min(DERBY.laps, player.laps + (player.finished?0:1));
+        cx2d.fillStyle='#f4f2fa'; cx2d.fillText('LAP '+(player.finished?DERBY.laps:lap)+'/'+DERBY.laps, 250, 27);
+        cx2d.fillText('POS '+pos+'/'+karts.length, 400, 27);
+    } else {
+        cx2d.fillStyle='#E14D4D'; cx2d.fillText('💥 DEMOLITION DERBY', 20, 27);
+        cx2d.fillStyle='#f4f2fa'; cx2d.fillText('RUNNING: '+DERBY.alive+'/'+karts.length, 250, 27);
+        cx2d.fillText('WRECKS: '+(player.kills||0), 430, 27);
+        if (DERBY.timed) { const left=Math.max(0, DERBY.limit-(now-DERBY.startAt)/1000); cx2d.textAlign='center'; cx2d.fillStyle='#FFD400'; cx2d.fillText(Math.ceil(left)+'s', W/2, 27); }
+    }
     // your health
     cx2d.textAlign='right'; cx2d.fillStyle='#a9a3c4'; cx2d.fillText('KART', W-140, 27);
     const hp=1-player.damage;
     cx2d.fillStyle='rgba(255,255,255,0.15)'; cx2d.fillRect(W-118, 15, 100, 14);
     cx2d.fillStyle=player.dead?'#7a1f1f':hp>0.6?'#3AAE5C':hp>0.3?'#FFD400':'#E14D4D'; cx2d.fillRect(W-118, 15, 100*Math.max(0,hp), 14);
     cx2d.strokeStyle='rgba(255,255,255,0.4)'; cx2d.lineWidth=1; cx2d.strokeRect(W-118, 15, 100, 14);
-    if (player.dead) { cx2d.textAlign='center'; cx2d.fillStyle='#E14D4D'; cx2d.font='bold 30px Bahnschrift, sans-serif'; cx2d.fillText('WRECKED — WATCH IT PLAY OUT', W/2, H*0.5); }
-    // camera hint
+    if (player.dead) { cx2d.textAlign='center'; cx2d.fillStyle='#E14D4D'; cx2d.font='bold 30px Bahnschrift, sans-serif'; cx2d.fillText(DERBY.race?'WRECKED — OUT OF THE RACE':'WRECKED — WATCH IT PLAY OUT', W/2, H*0.5); }
     cx2d.textAlign='center'; cx2d.font='bold 12px Bahnschrift, sans-serif'; cx2d.fillStyle='rgba(255,255,255,0.55)';
-    cx2d.fillText('📷 '+(derbyCam==='tv'?'ARENA':derbyCam==='chase'?'CHASE':'IN-CAR')+' · C', W/2, 52);
+    cx2d.fillText('📷 '+(derbyCam==='tv'?(DERBY.race?'TRACK':'ARENA'):derbyCam==='chase'?'CHASE':'IN-CAR')+' · C', W/2, 52);
 }
 function drawDerbyCountdown(now) {
     const t=(now-DERBY.startAt)/1000, n=Math.ceil(3-t);
     cx2d.textAlign='center';
-    if (n>=1){ cx2d.font='bold 120px Bahnschrift, sans-serif'; cx2d.fillStyle='#E14D4D'; cx2d.fillText(n, W/2, H/2);
-        cx2d.font='bold 26px Bahnschrift, sans-serif'; cx2d.fillStyle='rgba(255,255,255,0.85)'; cx2d.fillText('GET READY TO SMASH', W/2, H/2+56); }
+    if (n>=1){ cx2d.font='bold 120px Bahnschrift, sans-serif'; cx2d.fillStyle=DERBY.race?'#3AAE5C':'#E14D4D'; cx2d.fillText(n, W/2, H/2);
+        cx2d.font='bold 26px Bahnschrift, sans-serif'; cx2d.fillStyle='rgba(255,255,255,0.85)'; cx2d.fillText(DERBY.race?'GET READY TO RACE':'GET READY TO SMASH', W/2, H/2+56); }
 }
 function drawDerbyHood(now) {
     // your own hood + roll cage at the bottom to sell the in-car feel
@@ -4445,16 +4690,21 @@ function drawDerbyHood(now) {
     cx2d.strokeStyle='#20202a'; cx2d.lineWidth=10; cx2d.beginPath(); cx2d.moveTo(0,44); cx2d.lineTo(W,44); cx2d.stroke();   // cage top bar
     cx2d.lineWidth=8; cx2d.beginPath(); cx2d.moveTo(46,44); cx2d.lineTo(22,top); cx2d.moveTo(W-46,44); cx2d.lineTo(W-22,top); cx2d.stroke();   // A-pillars
 }
+function drawDerbyWorld(now, followMode) {
+    if (DERBY.race) drawFig8Track(now); else drawArena(now);
+    const sorted = [...karts].sort((a,b)=>(a.dead?0:1)-(b.dead?0:1));
+    for (const k of sorted) { if (k.tow) drawTow(k); drawKart(k); }
+    drawParticlesWorld();
+    if (!followMode && player && !player.dead) youMarker();
+}
 function drawDerbyFrame(now) {
     cx2d.fillStyle='#17130f'; cx2d.fillRect(0,0,W,H);
+    const fitW = DERBY.race ? DERBY.fitW : DERBY.w+130, fitH = DERBY.race ? DERBY.fitH : DERBY.h+170;
     if (derbyCam==='tv' || !player) {
-        const S = Math.min(W/(DERBY.w+130), H/(DERBY.h+170))*0.98;
+        const S = Math.min(W/fitW, H/fitH)*0.98;
         cx2d.save();
-        cx2d.translate(W/2, H*0.54); cx2d.scale(S,S);
-        drawArena(now);
-        [...karts].sort((a,b)=>(a.dead?0:1)-(b.dead?0:1)).forEach(drawKart);
-        drawParticlesWorld();
-        if (player && !player.dead) youMarker();
+        cx2d.translate(W/2, DERBY.race?H*0.5:H*0.54); cx2d.scale(S,S);
+        drawDerbyWorld(now, false);
         cx2d.textAlign='center'; cx2d.font='bold 13px Bahnschrift, sans-serif';
         for (const k of karts) { cx2d.fillStyle=k.isPlayer?'#FFD400':'rgba(255,255,255,0.8)'; cx2d.fillText('#'+k.num, k.x, k.y-26); }
         cx2d.restore();
@@ -4464,9 +4714,7 @@ function drawDerbyFrame(now) {
         const rot = -(player.heading + Math.PI/2), c=Math.cos(rot), s=Math.sin(rot);
         cx2d.save();
         cx2d.translate(W/2, anchorY); cx2d.scale(zoom,zoom); cx2d.rotate(rot); cx2d.translate(-player.x, -player.y);
-        drawArena(now);
-        [...karts].sort((a,b)=>(a.dead?0:1)-(b.dead?0:1)).forEach(drawKart);
-        drawParticlesWorld();
+        drawDerbyWorld(now, true);
         cx2d.restore();
         cx2d.textAlign='center'; cx2d.font='bold 13px Bahnschrift, sans-serif';   // upright number tags in screen space
         for (const k of karts) { if (k===player || k.dead) continue;
@@ -4546,10 +4794,29 @@ function renderDerbySetup() {
         b.onclick=()=>{ if(!next) return; if(tryBuy(next.price,$('derbyTokens'),renderDerbySetup)){ P.derbyUp[key]=lvl+1; saveDB(); renderDerbySetup(); } };
         uc.appendChild(b);
     });
-    chipRow($('derbyArenaChips'), Object.keys(DERBY_ARENAS).map(id=>({id})), P.settings.derbyArena,
-        k=>DERBY_ARENAS[k.id].name, id=>{ P.settings.derbyArena=id; saveDB(); renderDerbySetup(); });
-    chipRow($('derbyModeChips'), [{id:'last'},{id:'timed'}], P.settings.derbyTimed?'timed':'last',
-        k=>k.id==='last'?'Last One Running':'90-Second Slam', id=>{ P.settings.derbyTimed=(id==='timed'); saveDB(); renderDerbySetup(); });
+    // event format
+    chipRow($('derbyFormatChips'), Object.keys(DERBY_FORMATS).map(id=>({id})), P.settings.derbyFormat,
+        k=>DERBY_FORMATS[k.id].ico+' '+DERBY_FORMATS[k.id].name, id=>{ P.settings.derbyFormat=id; saveDB(); renderDerbySetup(); });
+    const fmt = DERBY_FORMATS[P.settings.derbyFormat];
+    $('derbyFormatNote').textContent = fmt.desc;
+    const isRace = !!fmt.race;
+    $('derbyDemoOpts').classList.toggle('hidden', isRace);
+    $('derbyRaceOpts').classList.toggle('hidden', !isRace);
+    $('derbyGo').textContent = isRace ? 'Race The 8 ▸' : 'Fire It Up ▸';
+    $('derbyGoNote').textContent = isRace
+        ? 'First to the checkers wins — but the crossover will wreck you if your timing is off. Damage is lighter here so you can finish.'
+        : 'Wrecks earn tokens (+4 each) and last-one-running pays a bonus. Armor cuts damage, ram bars deal more, a bigger engine shoves harder.';
+    if (isRace) {
+        chipRow($('fig8TrackChips'), Object.keys(FIG8_TRACKS).map(id=>({id})), P.settings.fig8Track,
+            k=>FIG8_TRACKS[k.id].name, id=>{ P.settings.fig8Track=id; saveDB(); renderDerbySetup(); });
+        chipRow($('raceLapsChips'), RACE_LAP_CHOICES.map(n=>({id:n})), P.settings.raceLaps,
+            k=>k.id+' laps', id=>{ P.settings.raceLaps=id; saveDB(); renderDerbySetup(); });
+    } else {
+        chipRow($('derbyArenaChips'), Object.keys(DERBY_ARENAS).map(id=>({id})), P.settings.derbyArena,
+            k=>DERBY_ARENAS[k.id].name, id=>{ P.settings.derbyArena=id; saveDB(); renderDerbySetup(); });
+        chipRow($('derbyModeChips'), [{id:'last'},{id:'timed'}], P.settings.derbyTimed?'timed':'last',
+            k=>k.id==='last'?'Last One Running':'90-Second Slam', id=>{ P.settings.derbyTimed=(id==='timed'); saveDB(); renderDerbySetup(); });
+    }
 }
 
 // ==================== BOOT ====================
