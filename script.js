@@ -251,7 +251,8 @@ const ITEM_OPTIONS = {
     'Team Hoodie': ['Small - $55', 'Medium - $55', 'Large - $55', 'X-Large - $55', '2X-Large - $55', '3X-Large - $55'],
     'Team Hat': ['One Size Fits Most - $35'],
     'Drink Koozie': ['Black - $8 (2 for $15)', 'Purple - $8 (2 for $15)'],
-    'Team Decal': ['6 inch - $10', '8 inch - $15']
+    'Team Decal': ['6 inch - $10', '8 inch - $15'],
+    'Team Sticker': ['2 inch - $3 (2 for $5)', '3 inch - $5']
 };
 const orderItemSel = document.getElementById('order-item');
 const orderSizeSel = document.getElementById('order-size');
