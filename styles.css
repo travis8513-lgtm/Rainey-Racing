@@ -598,10 +598,15 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
 .payment-box h3 { color: #fff; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
 .payment-box p { color: var(--muted); margin-bottom: 18px; }
 .payment-buttons { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 16px; }
+.payment-group { margin-bottom: 18px; }
+.payment-app-label { color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; font-size: .78rem; font-weight: 700; margin-bottom: 10px; }
 .btn-cashapp { background: #00D632; color: #000; font-weight: 800; }
 .btn-cashapp:hover { background: #00b82b; color: #000; }
+.btn-venmo { background: #008CFF; color: #fff; font-weight: 800; }
+.btn-venmo:hover { background: #0074d4; color: #fff; }
 .payment-note { font-size: .85rem; margin-bottom: 0 !important; }
-.payment-note strong { color: #00D632; }
+.payment-note .pay-ca { color: #00D632; }
+.payment-note .pay-vm { color: #008CFF; }
 
 /* ===== Sponsor spotlight ===== */
 .spotlight {
