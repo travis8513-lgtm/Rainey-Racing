@@ -157,18 +157,23 @@ input[type=range] { width:230px; accent-color:var(--yellow); }
 .keys { color:var(--muted); font-size:.88rem; }
 .keys b { color:var(--text); background:var(--carbon-3); border:1px solid var(--line); border-radius:6px; padding:1px 8px; }
 /* ---- touch controls ---- */
-#touch { display:none; width:100%; max-width:1000px; justify-content:space-between; padding:8px max(18px, env(safe-area-inset-right)) 14px max(18px, env(safe-area-inset-left)); gap:10px; user-select:none; -webkit-user-select:none; touch-action:none; }
-#touch .tgroup { display:flex; gap:10px; }
-#touch { pointer-events:none; }
-#touch .tgroup { pointer-events:none; }
-#touch button {
+#touch, #touchDrag { display:none; width:100%; max-width:1000px; justify-content:space-between; padding:8px max(18px, env(safe-area-inset-right)) 14px max(18px, env(safe-area-inset-left)); gap:10px; user-select:none; -webkit-user-select:none; touch-action:none; }
+#touch .tgroup, #touchDrag .tgroup { display:flex; gap:10px; }
+#touch, #touchDrag { pointer-events:none; }
+#touch .tgroup, #touchDrag .tgroup { pointer-events:none; }
+#touch button, #touchDrag button {
     width:76px; height:76px; border-radius:50%; border:2px solid var(--line);
     background:var(--carbon-3); color:var(--text); font-size:1.7rem; touch-action:none;
     pointer-events:auto;
 }
-#touch button:active { background:var(--purple); }
+#touch button:active, #touchDrag button:active { background:var(--purple); }
+#touchDrag button.lbl { font-size:1rem; font-weight:800; letter-spacing:.5px; }
+/* by default show the normal pad on touch devices; in drag mode swap to the drag pad */
 @media (pointer:coarse) { #touch { display:flex; } }
-body:has(.overlay:not(.hidden)) #touch { display:none; }
+body.mode-drag #touch { display:none; }
+@media (pointer:coarse) { body.mode-drag #touchDrag { display:flex; } }
+body:has(.overlay:not(.hidden)) #touch,
+body:has(.overlay:not(.hidden)) #touchDrag { display:none; }
 #muteBtn {
     position:absolute; left:10px; bottom:10px; z-index:60;
     width:44px; height:44px; border-radius:50%;
@@ -289,7 +294,7 @@ footer a { color:var(--yellow); text-decoration:none; }
         <button class="btn ghost sm" id="switchBtn">↩ Switch Driver</button>
         <p class="keys">Drive with <b>&#8593;</b> gas <b>&#8595;</b> brake <b>&#8592;</b><b>&#8594;</b> steer (or <b>W</b><b>A</b><b>S</b><b>D</b>) · hold <b>SPACE</b> to power-slide · <b>C</b> camera · <b>M</b> mute</p>
         <p class="keys">🔧 Worn tires get slippery — dive low onto the front-stretch pit road to bolt on fresh ones!</p>
-        <p class="keys" style="color:#FFD400; font-weight:700;">GAME VERSION 20</p>
+        <p class="keys" style="color:#FFD400; font-weight:700;">GAME VERSION 21</p>
     </div>
 
     <!-- ===== GARAGE ===== -->
@@ -366,28 +371,38 @@ footer a { color:var(--yellow); text-decoration:none; }
     <div id="drag" class="overlay hidden">
         <button class="backbtn" data-back>‹ Back</button>
         <h2>🏎 DRAG <span>STRIP</span></h2>
+        <div class="tokens" id="dragTokens">⛁ 0</div>
         <p class="sub" id="dragTrackLine"></p>
-        <p class="sectionTitle">Distance</p>
-        <div class="row" id="dragDistChips"></div>
+        <p class="sectionTitle">Your Car</p>
+        <div class="cards" id="dragCarCards"></div>
+        <p class="sectionTitle">Speed Shop — Upgrades</p>
+        <div class="cards" id="dragUpCards"></div>
+        <p class="sectionTitle">Strip</p>
+        <div class="row" id="dragStripChips"></div>
         <p class="sectionTitle">Event</p>
         <div class="row" id="dragEventChips"></div>
         <p class="keys" id="dragEventNote"></p>
         <button class="btn gold" id="dragGo">Stage It Up ▸</button>
-        <p class="keys">Wait for the last amber, then nail the gas on green — leave too soon and it's a red-light foul. Your motor &amp; gear upgrades are everything here.</p>
+        <p class="keys">🌀 With a turbo: hold <b>TRANS-BRAKE</b> + gas to spool boost, release on green to launch. Hold <b>LAUNCH CONTROL</b> off the line to stop wheelspin. <b>N2O</b> for a shot of extra power. (<b>Space</b>=trans-brake · <b>L</b>=launch · <b>N</b>=nitrous · <b>C</b>=camera)</p>
     </div>
 
     <!-- ===== DEMOLITION DERBY SETUP ===== -->
     <div id="derby" class="overlay hidden">
         <button class="backbtn" data-back>‹ Back</button>
         <h2>💥 DEMOLITION <span>DERBY</span></h2>
-        <p class="sub">Ram the other karts, take the least damage, be the last one running. Reverse with the brake to line up your hits!</p>
-        <div class="field"><label>Karts in the pit: <b id="derbyKartsVal">8</b></label><input type="range" id="derbyKarts" min="4" max="12" value="8"></div>
+        <div class="tokens" id="derbyTokens">⛁ 0</div>
+        <p class="sub">Ram the others, take the least damage, be the last one running. Reverse with the brake to line up your hits!</p>
+        <p class="sectionTitle">Your Car</p>
+        <div class="cards" id="derbyCarCards"></div>
+        <p class="sectionTitle">Speed Shop — Upgrades</p>
+        <div class="cards" id="derbyUpCards"></div>
+        <div class="field"><label>Cars in the pit: <b id="derbyKartsVal">8</b></label><input type="range" id="derbyKarts" min="4" max="12" value="8"></div>
         <p class="sectionTitle">Arena</p>
         <div class="row" id="derbyArenaChips"></div>
         <p class="sectionTitle">Rules</p>
         <div class="row" id="derbyModeChips"></div>
         <button class="btn gold" id="derbyGo">Fire It Up ▸</button>
-        <p class="keys">Wrecks earn tokens (+4 each) and last-one-running pays a bonus. Your kart's toughness scales with your class — sprints are fragile, champ karts take a beating.</p>
+        <p class="keys">Wrecks earn tokens (+4 each) and last-one-running pays a bonus. Armor cuts damage taken, ram bars deal more, a bigger engine shoves harder.</p>
     </div>
 
     <!-- ===== SETTINGS ===== -->
@@ -439,6 +454,18 @@ footer a { color:var(--yellow); text-decoration:none; }
         <button id="tBrake">&#128721;</button>
         <button id="tSlide">&#127744;</button>
         <button id="tGas">&#128293;</button>
+    </div>
+</div>
+
+<div id="touchDrag">
+    <div class="tgroup">
+        <button id="tdLaunch" class="lbl">LC</button>
+        <button id="tdNitro" class="lbl">N2O</button>
+        <button id="tdCam">&#128247;</button>
+    </div>
+    <div class="tgroup">
+        <button id="tdBrake" class="lbl">T-BRK</button>
+        <button id="tdGas">&#128293;</button>
     </div>
 </div>
 
@@ -566,11 +593,14 @@ function newProfile(name, num) {
         cls: 'boxstock',
         owned: { cls:{ boxstock:true }, motor:0, gears:{ standard:true } },
         gear: 'standard',
+        // dedicated drag & derby rides + their upgrade levels
+        dragCar: 'streetkart', ownedDragCars: { streetkart:true }, dragUp: { turbo:0, slicks:0, nitrous:0 },
+        derbyCar: 'beater',    ownedDerbyCars: { beater:true },    derbyUp: { armor:0, engine:0, rambar:0 },
         tokens: 60,                                // starter money for the first gear set
         stats: { races:0, wins:0, heatWins:0, hardChargers:0, fastLaps:0, tokensEarned:0, championships:0, dragWins:0, derbyWins:0, bestLap:{} },
         career: { active:null, completed:{} },
         settings: { diff:'racer', featureLaps:10, trackId:'rainey', quickLaps:8, quickKarts:10,
-                    dragDist:'quarter', dragEvent:'grudge', derbyKarts:8, derbyArena:'med', derbyTimed:false }
+                    dragStrip:'quarter', dragEvent:'grudge', derbyKarts:8, derbyArena:'med', derbyTimed:false }
     };
 }
 // older saves from this version missing fields (safety net if I add fields later)
@@ -586,9 +616,19 @@ function patchProfile(p) {
     p.stats = Object.assign({ races:0, wins:0, heatWins:0, hardChargers:0, fastLaps:0, tokensEarned:0, championships:0, dragWins:0, derbyWins:0 }, p.stats);
     p.stats.bestLap = p.stats.bestLap || {};
     p.career = Object.assign({ active:null, completed:{} }, p.career);
+    // drag & derby rides + upgrades
+    p.dragCar = p.dragCar || 'streetkart';
+    p.ownedDragCars = Object.assign({ streetkart:true }, p.ownedDragCars);
+    p.dragUp = Object.assign({ turbo:0, slicks:0, nitrous:0 }, p.dragUp);
+    p.derbyCar = p.derbyCar || 'beater';
+    p.ownedDerbyCars = Object.assign({ beater:true }, p.ownedDerbyCars);
+    p.derbyUp = Object.assign({ armor:0, engine:0, rambar:0 }, p.derbyUp);
+    if (!DRAG_CARS[p.dragCar] || !p.ownedDragCars[p.dragCar]) p.dragCar='streetkart';
+    if (!DERBY_CARS[p.derbyCar] || !p.ownedDerbyCars[p.derbyCar]) p.derbyCar='beater';
     p.settings = Object.assign({ diff:'racer', featureLaps:10, trackId:'rainey', quickLaps:8, quickKarts:10,
-        dragDist:'quarter', dragEvent:'grudge', derbyKarts:8, derbyArena:'med', derbyTimed:false }, p.settings);
-    if (!DRAG_DISTANCES[p.settings.dragDist]) p.settings.dragDist='quarter';
+        dragStrip:'quarter', dragEvent:'grudge', derbyKarts:8, derbyArena:'med', derbyTimed:false }, p.settings);
+    if (p.settings.dragDist && !p.settings.dragStrip) p.settings.dragStrip = p.settings.dragDist==='eighth'?'street':'quarter';
+    if (!DRAG_STRIPS[p.settings.dragStrip]) p.settings.dragStrip='quarter';
     if (!DERBY_ARENAS[p.settings.derbyArena]) p.settings.derbyArena='med';
     if (!TRACKS.some(t => t.id === p.settings.trackId)) p.settings.trackId = 'rainey';
     if (!DIFFS[p.settings.diff]) p.settings.diff = 'racer';
@@ -849,7 +889,7 @@ function buildField(nKarts) {
 function hideOverlays() { showScreen(null); }
 
 function beginCountdown() {
-    gameMode = 'oval';
+    gameMode = 'oval'; setBodyMode(null);
     particles = []; finishOrder = [];
     resetCaution();
     TOW.active = false; TOW.phase = ''; TOW.k = null;   // tow truck back in its spot
@@ -1097,22 +1137,25 @@ function endRace() {
 }
 
 // ==================== INPUT ====================
-const input = { up:false, down:false, left:false, right:false, slide:false };
+const input = { up:false, down:false, left:false, right:false, slide:false, transbrake:false, launch:false, nitro:false };
 const KEYMAP = {
     ArrowUp:'up', KeyW:'up', ArrowDown:'down', KeyS:'down',
     ArrowLeft:'left', KeyA:'left', ArrowRight:'right', KeyD:'right',
-    Space:'slide', ShiftLeft:'slide', ShiftRight:'slide'
+    Space:'slide', ShiftLeft:'slide', ShiftRight:'slide',
+    KeyL:'launch', KeyN:'nitro'          // drag: launch control / nitrous
 };
 addEventListener('keydown', e => {
     if (e.target && e.target.tagName === 'INPUT') return;   // typing a name, not driving
     const k = KEYMAP[e.code];
-    if (k) { input[k] = true; e.preventDefault(); }
+    if (k) { input[k] = true; if (k==='slide') input.transbrake = true; e.preventDefault(); }   // Space/Shift = slide (oval) AND trans-brake (drag)
     else if (e.code === 'KeyC') toggleCam();
     else if (e.code === 'KeyM') toggleMute();
 });
-addEventListener('keyup', e => { const k = KEYMAP[e.code]; if (k) input[k] = false; });
+addEventListener('keyup', e => { const k = KEYMAP[e.code]; if (k) { input[k] = false; if (k==='slide') input.transbrake = false; } });
 $('tCam').addEventListener('pointerdown', e => { toggleCam(); e.preventDefault(); });
-[['tGas','up'],['tBrake','down'],['tLeft','left'],['tRight','right'],['tSlide','slide']].forEach(([id,k]) => {
+$('tdCam').addEventListener('pointerdown', e => { toggleCam(); e.preventDefault(); });
+[['tGas','up'],['tBrake','down'],['tLeft','left'],['tRight','right'],['tSlide','slide'],
+ ['tdGas','up'],['tdBrake','transbrake'],['tdLaunch','launch'],['tdNitro','nitro']].forEach(([id,k]) => {
     const b = $(id);
     const on  = e => { input[k] = true;  e.preventDefault(); };
     const off = e => { input[k] = false; e.preventDefault(); };
@@ -1121,6 +1164,10 @@ $('tCam').addEventListener('pointerdown', e => { toggleCam(); e.preventDefault()
     b.addEventListener('pointercancel', off);
     b.addEventListener('pointerleave', off);
 });
+function setBodyMode(m) {
+    document.body.classList.remove('mode-drag','mode-derby');
+    if (m) document.body.classList.add('mode-'+m);
+}
 
 // ==================== CAMERA: cockpit / chase / TV ====================
 let cam = 'cockpit';
@@ -1152,6 +1199,7 @@ function worldToScreen(x, y) {
     return { x, y };
 }
 function toggleCam() {
+    if (gameMode === 'drag') { dragCam = dragCam==='tv' ? 'chase' : (dragCam==='chase' ? 'incar' : 'tv'); return; }
     cam = cam === 'cockpit' ? 'chase' : (cam === 'chase' ? 'tv' : 'cockpit');
 }
 
@@ -1847,7 +1895,7 @@ function drawVersionTag() {
     cx2d.textAlign = 'right';
     cx2d.font = 'bold 12px Bahnschrift, Arial Narrow, sans-serif';
     cx2d.fillStyle = 'rgba(255,212,0,0.55)';
-    cx2d.fillText('v20', W - 10, H - 10);
+    cx2d.fillText('v21', W - 10, H - 10);
 }
 let lastT = performance.now();
 function frame(now) {
@@ -2389,7 +2437,7 @@ function drawKart(k) {
     cx2d.save();
     cx2d.translate(k.x, k.y);
     cx2d.rotate(k.heading);
-    drawKartBody(k);
+    if (k.vstyle) drawVehicle(k); else drawKartBody(k);   // drag/derby cars vs oval karts
     cx2d.restore();
 }
 
@@ -3000,7 +3048,7 @@ $('hubShop').onclick = () => { renderShop(); showScreen('shop'); };
 $('hubTracks').onclick = () => { renderTracks(); showScreen('tracks'); };
 $('hubSettings').onclick = () => { renderSettings(); showScreen('settings'); };
 $('switchBtn').onclick = () => { renderLogin(); showScreen('login'); };
-document.querySelectorAll('[data-back]').forEach(b => b.onclick = () => { saveDB(); renderHome(); showScreen('home'); });
+document.querySelectorAll('[data-back]').forEach(b => b.onclick = () => { saveDB(); setBodyMode(null); renderHome(); showScreen('home'); });
 
 // ==================== UI: GARAGE ====================
 function renderGarage() {
@@ -3502,11 +3550,11 @@ $('againBtn').onclick = () => {
     if (gameMode === 'derby') { startDerby(); return; }
     if (raceMode === 'night') startRaceNight(); else startQuickRace();
 };
-$('finHome').onclick = () => { $('payBox').classList.add('hidden'); gameMode='oval'; renderHome(); showScreen('home'); };
+$('finHome').onclick = () => { $('payBox').classList.add('hidden'); gameMode='oval'; setBodyMode(null); renderHome(); showScreen('home'); };
 $('muteBtn').onclick = toggleMute;
 $('quitBtn').onclick = () => {
     if (MP.role) { mpLeave(); showBanner('', '#000', 0); return; }
-    if (gameMode !== 'oval') { gameMode='oval'; renderHome(); showScreen('home'); showBanner('', '#000', 0); return; }
+    if (gameMode !== 'oval') { gameMode='oval'; setBodyMode(null); renderHome(); showScreen('home'); showBanner('', '#000', 0); return; }
     if (state === 'race' || state === 'qualify' || state === 'countdown') {
         renderHome(); showScreen('home');
         showBanner('', '#000', 0);
@@ -3515,14 +3563,67 @@ $('quitBtn').onclick = () => {
 
 // ==================== DRAG STRIP & DEMOLITION DERBY ====================
 // These two modes throw out the oval entirely — their own physics + camera + HUD.
-const DRAG_DISTANCES = {
-    eighth:  { name:'1/8 Mile', len:1750 },
-    quarter: { name:'1/4 Mile', len:3400 }
+// ---- Drag strips (tracks) ----
+const DRAG_STRIPS = {
+    street:  { name:'Rainey 1/8',     len:1750, ground:'#2b2b30', prep:1.00, blurb:'Short & violent. Reaction is everything.' },
+    quarter: { name:'County 1/4',     len:3400, ground:'#2b2b30', prep:1.00, blurb:'The classic quarter mile.' },
+    half:    { name:'Airport 1/2',    len:5600, ground:'#34343c', prep:1.05, blurb:'Half-mile top-end blast — big power wins.' },
+    noprep:  { name:'No-Prep Street', len:2400, ground:'#1e1e22', prep:0.72, blurb:'Slick surface. Good luck hooking it up.' }
 };
+// ---- Drag cars (each ownable with tokens) ----
+const DRAG_CARS = {
+    streetkart: { name:'Street Kart',   ico:'🛞', price:0,    top:1.00, acc:1.00, grip:1.00, vspec:{L:1.0,Wd:1.0,rail:false,wing:false} },
+    gasser:     { name:'Dirt Gasser',   ico:'🚗', price:250,  top:1.12, acc:1.08, grip:1.04, vspec:{L:1.5,Wd:1.15,rail:false,wing:false} },
+    altered:    { name:'Fuel Altered',  ico:'🏎️', price:650,  top:1.26, acc:1.22, grip:1.10, vspec:{L:1.7,Wd:1.0,rail:false,wing:true} },
+    dragster:   { name:'Rail Dragster', ico:'🚀', price:1400, top:1.44, acc:1.40, grip:1.16, vspec:{L:3.2,Wd:0.8,rail:true,wing:true} },
+    topfuel:    { name:'Top Fuel',      ico:'💥', price:3200, top:1.70, acc:1.66, grip:1.24, vspec:{L:3.8,Wd:0.85,rail:true,wing:true} }
+};
+// ---- Drag upgrades (leveled) ----
+const DRAG_UP = {
+    turbo:   { name:'Turbo', ico:'🌀', desc:'Spool it on the trans-brake for a rocket launch.', levels:[
+                 { label:'None',        price:0,    boost:0,   top:1.00, acc:1.00 },
+                 { label:'Single Turbo',price:400,  boost:0.55,top:1.06, acc:1.06 },
+                 { label:'Twin Turbo',  price:950,  boost:0.85,top:1.12, acc:1.11 },
+                 { label:'Big Single',  price:1900, boost:1.20,top:1.20, acc:1.17 } ] },
+    slicks:  { name:'Tires', ico:'🛞', desc:'More rubber = less wheelspin off the line.', levels:[
+                 { label:'Street Tires',   price:0,   hook:0.00 },
+                 { label:'Drag Radials',   price:300, hook:0.50 },
+                 { label:'Full Slicks',    price:850, hook:1.00 } ] },
+    nitrous: { name:'Nitrous', ico:'💨', desc:'Hold the button for a shot of extra power.', levels:[
+                 { label:'None',     price:0,    shot:0,   bottle:0 },
+                 { label:'100 Shot', price:550,  shot:0.45,bottle:2.2 },
+                 { label:'250 Shot', price:1300, shot:0.85,bottle:3.0 } ] }
+};
+// ---- Derby arenas (tracks) ----
 const DERBY_ARENAS = {
-    small: { name:'Backyard Pit',      w:720,  h:470 },
-    med:   { name:'County Fairgrounds', w:960,  h:580 },
-    big:   { name:'Mega Mud Pit',       w:1200, h:700 }
+    small:    { name:'Backyard Pit',       w:720,  h:470,  obs:2 },
+    med:      { name:'County Fairgrounds', w:960,  h:580,  obs:2 },
+    big:      { name:'Mega Mud Pit',       w:1200, h:700,  obs:2 },
+    stadium:  { name:'Stadium Bowl',       w:1040, h:640,  obs:4 },
+    junkyard: { name:'The Junkyard',       w:900,  h:600,  obs:6 }
+};
+// ---- Derby cars (each ownable with tokens) ----
+const DERBY_CARS = {
+    beater: { name:'Beater Sedan', ico:'🚗', price:0,    armor:1.00, power:1.00, ram:1.00, vspec:{L:1.4,Wd:1.1,shape:'sedan'} },
+    wagon:  { name:'Boat Wagon',   ico:'🚙', price:250,  armor:1.28, power:0.96, ram:1.12, vspec:{L:1.7,Wd:1.15,shape:'wagon'} },
+    muscle: { name:'Muscle Car',   ico:'🏎️', price:650,  armor:1.15, power:1.32, ram:1.18, vspec:{L:1.6,Wd:1.15,shape:'sedan'} },
+    pickup: { name:'Pickup Truck', ico:'🛻', price:1200, armor:1.5,  power:1.12, ram:1.34, vspec:{L:1.8,Wd:1.2,shape:'truck'} },
+    bus:    { name:'Armored Bus',  ico:'🚌', price:2600, armor:2.0,  power:0.9,  ram:1.62, vspec:{L:2.6,Wd:1.25,shape:'bus'} }
+};
+// ---- Derby upgrades (leveled) ----
+const DERBY_UP = {
+    armor:  { name:'Armor', ico:'🛡️', desc:'Take less damage when you get hit.', levels:[
+                { label:'Stock',       price:0,   v:1.00 },
+                { label:'Welded Doors',price:400, v:1.30 },
+                { label:'Full Cage',   price:1050,v:1.7 } ] },
+    engine: { name:'Engine', ico:'🔧', desc:'More shove — hit harder, get unstuck faster.', levels:[
+                { label:'Stock',       price:0,   v:1.00 },
+                { label:'Built Motor', price:500, v:1.22 },
+                { label:'Blower',      price:1250,v:1.48 } ] },
+    rambar: { name:'Ram Bar', ico:'🔨', desc:'Deal more damage with every hit.', levels:[
+                { label:'None',        price:0,   v:1.00 },
+                { label:'Front Bar',   price:350, v:1.35 },
+                { label:'Battering Ram',price:950,v:1.7 } ] }
 };
 const DERBY_PAY = [40,26,18,14,11,9,8,7,6,5,4,4];
 
@@ -3551,8 +3652,95 @@ function youMarker() {   // little yellow arrow so you can always spot your kart
     cx2d.restore();
 }
 
+// ---- performance from the dedicated drag / derby cars + their upgrades ----
+function dragCarPerf() {
+    const car = DRAG_CARS[P.dragCar] || DRAG_CARS.streetkart;
+    const tu = DRAG_UP.turbo.levels[P.dragUp.turbo||0];
+    const sl = DRAG_UP.slicks.levels[P.dragUp.slicks||0];
+    const ni = DRAG_UP.nitrous.levels[P.dragUp.nitrous||0];
+    return { cls:'drag', top: PHYS.maxSpeed*car.top*tu.top, acc: PHYS.accel*car.acc*tu.acc,
+        gripM: car.grip, wearM:1, maxBoost: tu.boost, hook: sl.hook, nitrousShot: ni.shot, nitrousBottle: ni.bottle };
+}
+function aiDragPerf() {
+    const tier = Object.keys(DRAG_CARS);
+    const pIdx = Math.max(0, tier.indexOf(P.dragCar));
+    const diff = DIFFS[P.settings.diff].ai;
+    let oIdx = pIdx - 1 + (DRAG.event==='bracket' ? DRAG.round : 0);   // grudge ~1 tier down; bracket ramps up
+    oIdx = Math.max(0, Math.min(tier.length-1, Math.round(oIdx + (diff-0.965)*3)));
+    const car = DRAG_CARS[tier[oIdx]];
+    return { cls:'drag', top: PHYS.maxSpeed*car.top*(0.97+(diff-0.965)*0.6), acc: PHYS.accel*car.acc*0.98,
+        gripM: car.grip, wearM:1, maxBoost: 0.6, hook: 1, nitrousShot: 0, nitrousBottle: 0, vspec: car.vspec };
+}
+function derbyCarPerf() {
+    const car = DERBY_CARS[P.derbyCar] || DERBY_CARS.beater;
+    const en = DERBY_UP.engine.levels[P.derbyUp.engine||0].v;
+    const ar = DERBY_UP.armor.levels[P.derbyUp.armor||0].v;
+    const rb = DERBY_UP.rambar.levels[P.derbyUp.rambar||0].v;
+    return { cls:'derby', top: PHYS.maxSpeed*0.6*car.power*en, acc: PHYS.accel*0.9*car.power*en, gripM:1, wearM:1,
+        armor: car.armor*ar, ram: car.ram*rb };
+}
+function aiDerbyPerf(skill) {
+    const tier = Object.keys(DERBY_CARS);
+    const diff = DIFFS[P.settings.diff].ai;
+    const idx = Math.max(0, Math.min(tier.length-1, Math.round(1 + (diff-0.94)*4 + (Math.random()*1.4-0.4))));
+    const car = DERBY_CARS[tier[idx]];
+    return { cls:'derby', top: PHYS.maxSpeed*0.6*car.power, acc: PHYS.accel*0.9*car.power*skill, gripM:1, wearM:1,
+        armor: car.armor, ram: car.ram, vspec: car.vspec };
+}
+
+// ---- distinct silhouettes for drag & derby cars (local coords, nose = +x) ----
+function drawVehicle(k) {
+    const sp = k.vspec || {}, num = String(k.num||'');
+    cx2d.fillStyle='rgba(0,0,0,0.35)';
+    cx2d.beginPath(); cx2d.ellipse(-1,2, 14*(sp.L||1), 9*(sp.Wd||1), 0,0,2*Math.PI); cx2d.fill();
+    if (k.vstyle==='drag') {
+        const HL=12*(sp.L||1), HW=7*(sp.Wd||1), rail=sp.rail;
+        cx2d.fillStyle='#111';                                        // fat rear slicks
+        cx2d.fillRect(-HL-2, -HW-3, 7, HW*0.95); cx2d.fillRect(-HL-2, HW*0.05, 7, HW*0.95);
+        const fw = rail?3:5;                                          // fronts (skinny on a rail)
+        cx2d.fillRect(HL-2, -HW+1, fw, 3.4); cx2d.fillRect(HL-2, HW-4.4, fw, 3.4);
+        cx2d.fillStyle=k.body;
+        cx2d.beginPath();
+        if (rail) { cx2d.moveTo(HL+5,0); cx2d.lineTo(HL-6,-2.6); cx2d.lineTo(-HL,-HW*0.75); cx2d.lineTo(-HL,HW*0.75); cx2d.lineTo(HL-6,2.6); }
+        else { cx2d.moveTo(HL,0); cx2d.lineTo(HL-4,-HW); cx2d.lineTo(-HL+3,-HW); cx2d.lineTo(-HL,-HW*0.6); cx2d.lineTo(-HL,HW*0.6); cx2d.lineTo(-HL+3,HW); cx2d.lineTo(HL-4,HW); }
+        cx2d.closePath(); cx2d.fill();
+        cx2d.strokeStyle=k.trim; cx2d.lineWidth=1.2; cx2d.stroke();
+        if (!rail) { cx2d.fillStyle='#0f0f16'; cx2d.beginPath(); cx2d.moveTo(HL-5,-HW*0.7); cx2d.lineTo(HL-9,-HW*0.5); cx2d.lineTo(HL-9,HW*0.5); cx2d.lineTo(HL-5,HW*0.7); cx2d.closePath(); cx2d.fill(); }
+        cx2d.fillStyle=k.trim; cx2d.beginPath(); cx2d.arc(-HL*0.42,0, rail?3:3.4, 0,2*Math.PI); cx2d.fill();   // driver
+        if (sp.wing) { cx2d.fillStyle=k.wing||k.trim; cx2d.fillRect(-HL-4, -HW-2.5, 4.5, HW*2+5);
+            cx2d.strokeStyle='rgba(0,0,0,0.4)'; cx2d.lineWidth=0.8; cx2d.strokeRect(-HL-4, -HW-2.5, 4.5, HW*2+5); }
+        if (num) { cx2d.fillStyle=k.numColor||'#fff'; cx2d.font='bold 7px Bahnschrift, sans-serif'; cx2d.textAlign='center';
+            cx2d.save(); cx2d.translate(-HL*0.05,0); cx2d.rotate(Math.PI/2);
+            cx2d.strokeStyle='rgba(0,0,0,0.6)'; cx2d.lineWidth=2; cx2d.strokeText(num,0,2.4); cx2d.fillText(num,0,2.4); cx2d.restore(); }
+    } else {
+        const HL=12*(sp.L||1), HW=8*(sp.Wd||1), shape=sp.shape||'sedan';
+        cx2d.fillStyle='#111';                                        // wheels
+        for (const wx of [-HL+3, HL-6]) { cx2d.fillRect(wx,-HW-2,5,4); cx2d.fillRect(wx,HW-2,5,4); }
+        cx2d.fillStyle=k.body;                                        // body box
+        cx2d.beginPath(); cx2d.roundRect(-HL,-HW,HL*2,HW*2,4); cx2d.fill();
+        cx2d.strokeStyle=k.trim; cx2d.lineWidth=1.3; cx2d.stroke();
+        if (shape==='truck') {
+            cx2d.fillStyle='#0f0f16'; cx2d.fillRect(HL*0.05,-HW+2, HL*0.55, HW*2-4);        // cab glass
+            cx2d.strokeStyle='rgba(0,0,0,0.4)'; cx2d.lineWidth=1;
+            cx2d.strokeRect(-HL+2,-HW+2, HL*0.5, HW*2-4);                                    // bed
+        } else if (shape==='bus') {
+            cx2d.fillStyle='#0f0f16'; for (let i=0;i<4;i++) cx2d.fillRect(-HL+4+i*(HL*2-8)/4, -HW+2, (HL*2-10)/4-2, 3.5);
+            cx2d.fillStyle=k.trim; cx2d.fillRect(-HL,-1.5,HL*2,3);
+        } else {
+            cx2d.fillStyle='#15151c'; cx2d.beginPath(); cx2d.roundRect(-HL*0.5,-HW+1.5, HL*(shape==='wagon'?1.1:0.9), HW*2-3, 3); cx2d.fill();  // cabin
+            cx2d.fillStyle='#0f0f16'; cx2d.fillRect(HL*0.12,-HW+2.5, HL*0.3, HW*2-5);        // windshield
+        }
+        if ((k.ram||1) > 1.2) { cx2d.fillStyle='#8a8a92'; cx2d.fillRect(HL-1,-HW*0.85, 3.5, HW*1.7); }   // ram bar
+        if (num) { cx2d.fillStyle=k.numColor||'#fff'; cx2d.font='bold 9px Bahnschrift, sans-serif'; cx2d.textAlign='center';
+            cx2d.strokeStyle='rgba(0,0,0,0.6)'; cx2d.lineWidth=2.5; cx2d.strokeText(num,-HL*0.02,3.2); cx2d.fillText(num,-HL*0.02,3.2); }
+        if (k.damage>0.25) { cx2d.fillStyle=`rgba(20,16,14,${Math.min(0.6,k.damage*0.55).toFixed(2)})`;
+            cx2d.beginPath(); cx2d.arc(HL*0.4,-HW*0.4,3,0,2*Math.PI); cx2d.arc(-HL*0.5,HW*0.4,2.6,0,2*Math.PI); cx2d.fill(); }
+    }
+}
+
 /* ================= DRAG STRIP ================= */
 let DRAG = null;
+let dragCam = 'tv';                                 // tv | chase | incar
 function dragForward(k) { return -k.vy; }           // forward is -y (up the screen)
 function dragOpp(roundIdx) {
     const pool = RIVAL_POOL.filter(r => r.name.toLowerCase() !== P.name.toLowerCase())
@@ -3563,89 +3751,136 @@ function dragOpp(roundIdx) {
     return pool[Math.min(pool.length-1, idx)];
 }
 function newDrag() {
-    return { dist:P.settings.dragDist, len:DRAG_DISTANCES[P.settings.dragDist].len,
+    const strip = DRAG_STRIPS[P.settings.dragStrip] || DRAG_STRIPS.quarter;
+    return { strip:P.settings.dragStrip, len:strip.len, prep:strip.prep, ground:strip.ground,
         event:P.settings.dragEvent, round:0, phase:'stage', tPhase:0, greenAt:0,
         player:null, opp:null, results:false, _advance:false,
         playerRT:null, oppRT:null, playerET:null, oppET:null, playerTrap:0, oppTrap:0,
         playerFoul:false, oppFoul:false, winner:null, oppLeaveDelay:0.25 };
 }
+function applyDragKit(k, perf) {
+    k.maxBoost=perf.maxBoost||0; k.hook=perf.hook||0;
+    k.nitrousShot=perf.nitrousShot||0; k.nitroLeft=perf.nitrousBottle||0;
+    k.boost=0; k.launched=false; k.launchAt=0; k.transBraked=false; k.spin=false; k._boosting=false;
+}
 function setupDragPair() {
+    const car = DRAG_CARS[P.dragCar] || DRAG_CARS.streetkart;
+    const perf = dragCarPerf();
     const me = { name:P.name, num:(P.num||'X').toUpperCase(),
-        body:P.colors.body, trim:P.colors.trim, wing:P.colors.wing, numColor:P.colors.num };
-    DRAG.player = makeKart(me, true, 0, playerPerf());
+        body:P.colors.body, trim:P.colors.trim, wing:P.colors.wing, numColor:P.colors.num,
+        vstyle:'drag', vspec: car.vspec };
+    DRAG.player = makeKart(me, true, 0, perf);  applyDragKit(DRAG.player, perf);
     const r = dragOpp(DRAG.round);
     const oNum = r.num.toUpperCase()===me.num ? r.num+'J' : r.num;
-    DRAG.opp = makeKart({ ...r, num:oNum, wing:r.trim, numColor:'#ffffff' }, false, 1, aiPerf(r.skill));
+    const operf = aiDragPerf();
+    DRAG.opp = makeKart({ ...r, num:oNum, wing:r.trim, numColor:'#ffffff', vstyle:'drag', vspec: operf.vspec }, false, 1, operf);
+    applyDragKit(DRAG.opp, operf);
+    DRAG.opp._targetBoost = DRAG.opp.maxBoost * (0.55 + Math.random()*0.4);
     placeFlat(DRAG.player, -72, 0, -Math.PI/2);
     placeFlat(DRAG.opp,     72, 0, -Math.PI/2);
     DRAG.player.dragDone=false; DRAG.opp.dragDone=false;
     DRAG.playerRT=null; DRAG.oppRT=null; DRAG.playerET=null; DRAG.oppET=null;
     DRAG.playerFoul=false; DRAG.oppFoul=false; DRAG.playerTrap=0; DRAG.oppTrap=0; DRAG.results=false;
-    // sharper reaction on harder difficulty; small chance the CPU red-lights
     DRAG.oppLeaveDelay = Math.max(0.05, 0.34 - (DIFFS[P.settings.diff].ai-0.93)*1.5 + (Math.random()*0.14));
     DRAG.oppFoul = Math.random() < 0.05;
     player = DRAG.player; karts = [DRAG.player, DRAG.opp];
 }
 function startDrag(keepRound) {
-    gameMode='drag'; raceContext='free';
+    gameMode='drag'; raceContext='free'; setBodyMode('drag');
     applyTrack(curTrack());
     if (!keepRound || !DRAG) DRAG = newDrag();
     particles = []; banner = { text:'', color:'', until:0 };
     setupDragPair();
-    cam='tv'; startEngine();
+    dragCam='tv'; startEngine();
     state='countdown'; DRAG.phase='stage'; DRAG.tPhase=performance.now(); DRAG.greenAt=0;
     hideOverlays();
-    showBanner('🌳 STAGE IT UP — WATCH THE TREE', '#2563EB', 2.2);
+    showBanner((P.dragUp.turbo||0)>0 ? '🌀 HOLD TRANS-BRAKE + GAS TO SPOOL · RELEASE ON GREEN' : '🌳 STAGE IT UP — WATCH THE TREE', '#2563EB', 3.2);
 }
 function stepDrag(now, dt) {
     if (!DRAG) return;
     if (state !== 'countdown' && state !== 'race') return;
     const t = (now - DRAG.tPhase)/1000;
+    // ---- christmas tree ----
     if (DRAG.phase==='stage') {
         if (t > 1.3) { DRAG.phase='amber'; DRAG.tPhase=now; }
     } else if (DRAG.phase==='amber') {
-        if (input.up && !DRAG.playerFoul) {
+        // foul only if the car actually creeps out — trans-braked = locked, spool freely
+        if (input.up && !input.transbrake && !DRAG.playerFoul) {
             DRAG.playerFoul=true;
             showBanner('🔴 RED LIGHT — YOU LEFT TOO SOON!', '#7a1f1f', 3); beep(180,0.5);
         }
         if (t >= 1.5) { DRAG.phase='green'; DRAG.greenAt=now; state='race'; beepGo(); showBanner('🟢 GO GO GO!', '#1d7c37', 1.2); }
     }
-    const racing = DRAG.phase==='green';
+    const racing = DRAG.phase==='green', green = DRAG.greenAt;
     for (const k of [DRAG.player, DRAG.opp]) {
         if (!k) continue;
         const laneX = k.isPlayer ? -72 : 72;
+        const spd = dragForward(k);
         let throttle = 0;
+        k._boosting = false;
+        // ----- pre-green: spool the turbo on the trans-brake -----
+        if (!racing) {
+            if (k.isPlayer) {
+                k.transBraked = input.transbrake;
+                if (k.transBraked && input.up && k.maxBoost>0) { k.boost=Math.min(k.maxBoost, k.boost+dt*(0.9+k.maxBoost)); k._boosting=true; }
+                else if (!input.up) k.boost=Math.max(0, k.boost-dt*0.25);
+            } else if (DRAG.phase==='amber' && k.maxBoost>0) {
+                k.boost=Math.min(k._targetBoost||0, k.boost+dt*(0.9+k.maxBoost)); k._boosting=true;
+            }
+        }
+        // ----- green: launch + run -----
         if (racing && !k.dragDone) {
             if (k.isPlayer) {
-                throttle = input.up ? 1 : (input.down ? -0.6 : 0);
-                if (input.up && DRAG.playerRT===null && !DRAG.playerFoul) DRAG.playerRT = (now-DRAG.greenAt)/1000;
+                if (!k.launched) {
+                    if (k.transBraked) {
+                        k.transBraked = input.transbrake;
+                        if (input.up && k.boost<k.maxBoost) { k.boost=Math.min(k.maxBoost,k.boost+dt*(0.9+k.maxBoost)); k._boosting=true; }
+                        if (!input.transbrake) { k.launched=true; k.launchAt=now; DRAG.playerRT=(now-green)/1000; }
+                    } else if (input.up) { k.launched=true; k.launchAt=now; DRAG.playerRT=(now-green)/1000; }
+                }
+                if (k.launched) throttle = input.up ? 1 : (input.down ? -0.6 : 0);
             } else {
-                const since = (now-DRAG.greenAt)/1000;
-                if (since >= DRAG.oppLeaveDelay) { throttle = 1; if (DRAG.oppRT===null) DRAG.oppRT = DRAG.oppLeaveDelay; }
+                const since=(now-green)/1000;
+                if (since >= DRAG.oppLeaveDelay) { if (!k.launched){ k.launched=true; k.launchAt=now; } throttle=1; if (DRAG.oppRT===null) DRAG.oppRT=DRAG.oppLeaveDelay; }
             }
-            const spd = dragForward(k);
-            const spin = throttle>0.5 && spd < 90;         // wheelspin off the line
-            const bite = spin ? 0.55 : 1;
-            if (throttle>0 && spd < k.top*tireSpeed(k)) k.vy -= k.acc*throttle*bite*dt;
-            else if (throttle<0) k.vy -= k.acc*throttle*0.8*dt;
+            if (k.launched && throttle>0) {
+                const sinceL=(now-k.launchAt)/1000;
+                const burst = k.boost * Math.max(0, 1 - sinceL/1.4) * 0.9;          // stored-boost launch punch
+                // hook you have vs power you're asking for. Tires bite harder the longer you're moving,
+                // so a bad launch spins for a moment; slicks + LAUNCH CONTROL keep you planted from the drop.
+                const hookAvail = (k.isPlayer ? (DRAG.prep||1)*(0.7+k.hook*1.3)+(input.launch?1.5:0) : 3.3) + sinceL*2.5;
+                const powerDemand = (k.acc/PHYS.accel)*(1+burst);
+                const spin = powerDemand > hookAvail;
+                k.spin = spin;
+                const bite = spin ? 0.4 : 1;
+                const effBurst = spin ? 0 : burst;                                   // spinning the tires WASTES your boost
+                let nitro = 0;
+                if (k.isPlayer && input.nitro && k.nitroLeft>0 && k.nitrousShot>0) { nitro=k.nitrousShot; k.nitroLeft-=dt; k._boosting=true; }
+                const accEff = k.acc*(1+effBurst)*bite + PHYS.accel*nitro*(spin?0.5:1);
+                const topEff = k.top*(1+nitro*0.12);
+                if (spin) k.vy *= Math.exp(-2.2*dt);                                  // spinning scrubs speed — you go nowhere
+                if (spd < topEff*tireSpeed(k)) k.vy -= accEff*throttle*dt;
+                if (spin && Math.random()<0.7) particles.push({ kind:'smoke', x:k.x+(Math.random()*12-6), y:k.y+13, z:2,
+                    vx:(Math.random()*46-23), vy:20+Math.random()*28, vz:18+Math.random()*30, life:0.45+Math.random()*0.4, age:0, size:3+Math.random()*3 });
+                if ((burst>0.15||nitro>0) && Math.random()<0.5) particles.push({ kind:'fire', x:k.x+(Math.random()*6-3), y:k.y+15, z:2,
+                    vx:(Math.random()*20-10), vy:26+Math.random()*24, vz:8+Math.random()*14, life:0.28+Math.random()*0.2, age:0, size:2.5+Math.random()*2.5 });
+            } else if (throttle<0) k.vy -= k.acc*throttle*0.8*dt;
             k.vy *= Math.exp(-0.30*dt);
-            if (spin && Math.random()<0.6) particles.push({ kind:'smoke', x:k.x+(Math.random()*10-5), y:k.y+13, z:2,
-                vx:(Math.random()*40-20), vy:18+Math.random()*26, vz:18+Math.random()*30, life:0.45+Math.random()*0.4, age:0, size:3+Math.random()*3 });
         }
+        // lane keep + integrate (locked at the line until launched)
         k.x += (laneX - k.x) * Math.min(1, 8*dt);
-        k.y += k.vy*dt;
+        if (racing && k.launched) k.y += k.vy*dt;
         k.heading = -Math.PI/2;
         if (racing && !k.dragDone && -k.y >= DRAG.len) {
-            k.dragDone=true; k.finishTime=(now-DRAG.greenAt)/1000;
-            const mph = Math.round(dragForward(k)/3.2);
-            if (k.isPlayer) { DRAG.playerET=k.finishTime; DRAG.playerTrap=mph; }
-            else { DRAG.oppET=k.finishTime; DRAG.oppTrap=mph; }
+            k.dragDone=true; k.finishTime=(now-green)/1000;
+            const mph=Math.round(dragForward(k)/3.2);
+            if (k.isPlayer){ DRAG.playerET=k.finishTime; DRAG.playerTrap=mph; } else { DRAG.oppET=k.finishTime; DRAG.oppTrap=mph; }
         }
     }
     if (racing && !DRAG.results) {
         const bothDone = DRAG.player.dragDone && DRAG.opp.dragDone;
         const foulEnd = (DRAG.playerFoul && DRAG.opp.dragDone) || (DRAG.oppFoul && DRAG.player.dragDone);
-        if (bothDone || foulEnd || (now-DRAG.greenAt)/1000 > 25) resolveDrag();
+        if (bothDone || foulEnd || (now-DRAG.greenAt)/1000 > 28) resolveDrag();
     }
 }
 function resolveDrag() {
@@ -3710,17 +3945,16 @@ function drawTree(now) {
     bulb(top+142, DRAG.playerFoul, '#ff3030');
 }
 function drawDragStrip(now) {
-    const len=DRAG.len;
-    cx2d.fillStyle='#2b2b30'; cx2d.fillRect(-160, -len-140, 320, len+300);   // asphalt
-    cx2d.fillStyle='#242429';                                                  // lane tint split
-    cx2d.fillRect(2, -len-140, 158, len+300);
+    const len=DRAG.len, g=DRAG.ground||'#2b2b30';
+    cx2d.fillStyle=g; cx2d.fillRect(-160, -len-140, 320, len+300);              // asphalt
+    cx2d.fillStyle='rgba(0,0,0,0.14)'; cx2d.fillRect(2, -len-140, 158, len+300);// lane tint split
     cx2d.setLineDash([18,16]); cx2d.strokeStyle='rgba(255,255,255,0.28)'; cx2d.lineWidth=3;
     cx2d.beginPath(); cx2d.moveTo(0, 60); cx2d.lineTo(0, -len-90); cx2d.stroke(); cx2d.setLineDash([]);
     cx2d.fillStyle='#3a3a44'; cx2d.fillRect(-166,-len-140,8,len+300); cx2d.fillRect(158,-len-140,8,len+300);
     cx2d.strokeStyle='#d23a3a'; cx2d.lineWidth=3;                              // wall stripes
     for (let y=40; y>-len-100; y-=90) { cx2d.beginPath(); cx2d.moveTo(-166,y); cx2d.lineTo(-158,y); cx2d.moveTo(158,y); cx2d.lineTo(166,y); cx2d.stroke(); }
     cx2d.fillStyle='#f4f2fa'; cx2d.fillRect(-150,-3,300,5);                     // start line
-    cx2d.fillStyle='rgba(255,255,255,0.5)'; cx2d.font='bold 15px Bahnschrift, sans-serif'; cx2d.textAlign='center';
+    cx2d.font='bold 15px Bahnschrift, sans-serif'; cx2d.textAlign='center';
     for (let i=1;i<4;i++){ const y=-len*i/4; cx2d.fillStyle='rgba(255,255,255,0.4)'; cx2d.fillRect(-150,y,300,2);
         cx2d.fillStyle='rgba(255,255,255,0.35)'; cx2d.fillText((i===2?'HALF':(i*25)+'%'), 0, y-6); }
     for (let r=0;r<2;r++) for (let c=0;c<12;c++){ cx2d.fillStyle=(r+c)%2?'#fff':'#111'; cx2d.fillRect(-150+c*25, -len-2+r*13, 25, 13); }
@@ -3728,17 +3962,37 @@ function drawDragStrip(now) {
     cx2d.fillText('FINISH', 0, -len-24);
     drawTree(now);
 }
+function drawBoostGauge(x, y) {
+    const k = DRAG.player;
+    if (k.maxBoost > 0) {
+        cx2d.textAlign='left'; cx2d.font='bold 12px Bahnschrift, sans-serif'; cx2d.fillStyle='#a9a3c4'; cx2d.fillText('BOOST', x, y+3);
+        cx2d.fillStyle='rgba(255,255,255,0.15)'; cx2d.fillRect(x+48, y-7, 120, 13);
+        const f=k.boost/k.maxBoost;
+        cx2d.fillStyle=f>0.85?'#E14D4D':f>0.5?'#FFD400':'#3AAE5C'; cx2d.fillRect(x+48, y-7, 120*f, 13);
+        cx2d.strokeStyle='rgba(255,255,255,0.4)'; cx2d.lineWidth=1; cx2d.strokeRect(x+48, y-7, 120, 13);
+        if (k._boosting) { cx2d.fillStyle='#FFD400'; cx2d.fillText('🌀', x+172, y+4); }
+        y+=20;
+    }
+    if (k.nitrousShot > 0) {
+        cx2d.textAlign='left'; cx2d.font='bold 12px Bahnschrift, sans-serif'; cx2d.fillStyle='#a9a3c4'; cx2d.fillText('N2O', x, y+3);
+        cx2d.fillStyle='rgba(255,255,255,0.15)'; cx2d.fillRect(x+48, y-7, 120, 13);
+        const bottle = DRAG_UP.nitrous.levels[P.dragUp.nitrous].bottle;
+        cx2d.fillStyle='#5B9BFF'; cx2d.fillRect(x+48, y-7, 120*Math.max(0,k.nitroLeft/bottle), 13);
+        cx2d.strokeStyle='rgba(255,255,255,0.4)'; cx2d.lineWidth=1; cx2d.strokeRect(x+48, y-7, 120, 13);
+    }
+}
 function drawDragHUD(now) {
     cx2d.fillStyle='rgba(13,11,24,0.82)'; cx2d.fillRect(0,0,W,40);
     cx2d.font='bold 19px Bahnschrift, Arial Narrow, sans-serif';
     cx2d.textAlign='left'; cx2d.fillStyle='#5B9BFF';
-    cx2d.fillText('🏎 DRAG · '+DRAG_DISTANCES[DRAG.dist].name+(DRAG.event==='bracket'?' · RD '+(DRAG.round+1)+'/3':''), 20, 27);
+    cx2d.fillText('🏎 '+DRAG_STRIPS[DRAG.strip].name+(DRAG.event==='bracket'?' · RD '+(DRAG.round+1)+'/3':''), 20, 27);
     const spd = Math.round((DRAG.player?dragForward(DRAG.player):0)/3.2);
     cx2d.textAlign='right'; cx2d.fillStyle='#f4f2fa'; cx2d.fillText(spd+' mph', W-20, 27);
     const et = DRAG.playerET!==null ? DRAG.playerET : (DRAG.greenAt?(performance.now()-DRAG.greenAt)/1000:0);
     cx2d.textAlign='center'; cx2d.fillStyle='#FFD400'; cx2d.fillText(Math.max(0,et).toFixed(2)+'s', W/2, 27);
     if (DRAG.playerRT!==null) { cx2d.textAlign='left'; cx2d.fillStyle='#a9a3c4'; cx2d.fillText('RT '+DRAG.playerRT.toFixed(3), 300, 27); }
     else if (DRAG.playerFoul) { cx2d.textAlign='left'; cx2d.fillStyle='#E14D4D'; cx2d.fillText('RED LIGHT', 300, 27); }
+    if (dragCam !== 'incar') drawBoostGauge(16, 60);
     // distance bar
     const barY=H-16, bw=W-120;
     cx2d.fillStyle='rgba(13,11,24,0.7)'; cx2d.fillRect(60, barY-6, bw, 12);
@@ -3746,24 +4000,102 @@ function drawDragHUD(now) {
     cx2d.fillStyle=DRAG.player.body; cx2d.beginPath(); cx2d.arc(60+bw*frac(DRAG.player), barY, 6, 0, 2*Math.PI); cx2d.fill();
     cx2d.fillStyle=DRAG.opp.body;    cx2d.beginPath(); cx2d.arc(60+bw*frac(DRAG.opp), barY, 5, 0, 2*Math.PI); cx2d.fill();
     cx2d.strokeStyle='#FFD400'; cx2d.lineWidth=2; cx2d.beginPath(); cx2d.moveTo(60+bw, barY-8); cx2d.lineTo(60+bw, barY+8); cx2d.stroke();
-    if (DRAG.phase==='stage') { cx2d.textAlign='center'; cx2d.font='bold 40px Bahnschrift, sans-serif'; cx2d.fillStyle='rgba(255,212,0,0.85)'; cx2d.fillText('STAGE IT UP', W/2, H*0.30); }
+    if (DRAG.phase==='stage') { cx2d.textAlign='center'; cx2d.font='bold 34px Bahnschrift, sans-serif'; cx2d.fillStyle='rgba(255,212,0,0.85)'; cx2d.fillText((P.dragUp.turbo||0)>0?'HOLD T-BRAKE + GAS':'STAGE IT UP', W/2, H*0.26); }
 }
 function drawDragFrame(now) {
+    if (dragCam === 'incar') { drawDragIncar(now); drawDragHUD(now); drawBanner(); return; }
     cx2d.fillStyle='#16181d'; cx2d.fillRect(0,0,W,H);
-    const S = DRAG.dist==='eighth' ? 0.9 : 0.82;
+    const chase = dragCam==='chase';
+    const S = chase ? 1.25 : 0.82;
+    const anchorY = chase ? H*0.80 : H*0.72;
     const py = DRAG.player ? DRAG.player.y : 0;
     cx2d.save();
-    cx2d.translate(W/2, H*0.72); cx2d.scale(S,S); cx2d.translate(0, -py);
+    cx2d.translate(W/2, anchorY); cx2d.scale(S,S); cx2d.translate(0, -py);
     drawDragStrip(now);
     drawParticlesWorld();
     for (const k of [DRAG.opp, DRAG.player]) if (k) drawKart(k);
     if (player) youMarker();
-    // lane numbers
     cx2d.textAlign='center'; cx2d.font='bold 13px Bahnschrift, sans-serif';
     for (const k of [DRAG.player, DRAG.opp]) if (k) { cx2d.fillStyle=k.isPlayer?'#FFD400':'#fff'; cx2d.fillText('#'+k.num, k.x, k.y-30); }
     cx2d.restore();
     drawDragHUD(now);
     drawBanner();
+}
+// ---- in-car view: perspective down the strip + a dashboard ----
+function drawDragIncar(now) {
+    const hor = H*0.42, p = DRAG.player, d0 = -p.y;
+    let g = cx2d.createLinearGradient(0,0,0,hor);
+    g.addColorStop(0,'#120c26'); g.addColorStop(0.7,'#2c1f4e'); g.addColorStop(1,'#6b4630');
+    cx2d.fillStyle=g; cx2d.fillRect(0,0,W,hor);
+    for (let i=0;i<40;i++){ cx2d.fillStyle=`rgba(255,255,255,${0.2+((i*13)%9)/26})`; cx2d.fillRect((i*151)%W,(i*67)%(hor-70),2,2); }
+    cx2d.fillStyle='#e8e4d0'; cx2d.beginPath(); cx2d.arc(W*0.82,54,14,0,2*Math.PI); cx2d.fill();
+    cx2d.fillStyle='#1d1538'; cx2d.beginPath(); cx2d.arc(W*0.82-7,50,12,0,2*Math.PI); cx2d.fill();
+    cx2d.fillStyle='#0d0a1c'; cx2d.fillRect(0,hor-6,W,6);
+    cx2d.fillStyle='#141416'; cx2d.fillRect(0,hor,W,H-hor);
+    // strip trapezoid to the vanishing point
+    const nearY=H, nearHalf=W*0.46, farHalf=16;
+    cx2d.fillStyle=DRAG.ground||'#2b2b30';
+    cx2d.beginPath(); cx2d.moveTo(W/2-nearHalf,nearY); cx2d.lineTo(W/2-farHalf,hor); cx2d.lineTo(W/2+farHalf,hor); cx2d.lineTo(W/2+nearHalf,nearY); cx2d.closePath(); cx2d.fill();
+    cx2d.strokeStyle='#d23a3a'; cx2d.lineWidth=5;
+    cx2d.beginPath(); cx2d.moveTo(W/2-nearHalf,nearY); cx2d.lineTo(W/2-farHalf,hor); cx2d.moveTo(W/2+nearHalf,nearY); cx2d.lineTo(W/2+farHalf,hor); cx2d.stroke();
+    // rushing center dashes (scroll with distance)
+    const scroll = (d0*0.012)%1;
+    cx2d.fillStyle='rgba(255,255,255,0.6)';
+    for (let i=0;i<12;i++){ let f=(i+scroll)/12; const e=(1-f)*(1-f);
+        const y=hor+(nearY-hor)*e, w=Math.max(2,12*e), h=Math.max(3,34*e);
+        cx2d.fillRect(W/2-w/2, y-h, w, h); }
+    // opponent ahead/behind
+    const oppAhead = (-DRAG.opp.y) - d0;
+    if (oppAhead > -40 && oppAhead < 2400) {
+        const a = Math.max(30, oppAhead+90), s=Math.min(2.6, 300/a), e=Math.min(1,150/a);
+        const oy=hor+(nearY-hor)*e*0.9, ox=W/2 + (nearHalf*0.52)*e + farHalf*(1-e);
+        cx2d.save(); cx2d.translate(ox,oy); cx2d.scale(s,s);
+        cx2d.fillStyle='rgba(0,0,0,0.35)'; cx2d.beginPath(); cx2d.ellipse(0,3,16,5,0,0,2*Math.PI); cx2d.fill();
+        cx2d.fillStyle='#111'; cx2d.fillRect(-15,-9,7,11); cx2d.fillRect(8,-9,7,11);
+        cx2d.fillStyle=DRAG.opp.body; cx2d.beginPath(); cx2d.roundRect(-12,-13,24,14,3); cx2d.fill();
+        cx2d.strokeStyle=DRAG.opp.trim; cx2d.lineWidth=1.4; cx2d.stroke();
+        cx2d.fillStyle=DRAG.opp.wing||DRAG.opp.trim; cx2d.fillRect(-14,-16,28,4);
+        cx2d.fillStyle='#fff'; cx2d.font='bold 9px Bahnschrift, sans-serif'; cx2d.textAlign='center'; cx2d.fillText('#'+DRAG.opp.num,0,-18);
+        cx2d.restore();
+    }
+    // finish banner approaching
+    const finAhead = DRAG.len - d0;
+    if (finAhead>0 && finAhead<1400){ const e=Math.min(1,180/(finAhead+90)); const y=hor+(nearY-hor)*e*0.8, half=farHalf+(nearHalf-farHalf)*e;
+        for (let c=0;c<16;c++){ cx2d.fillStyle=c%2?'#fff':'#111'; cx2d.fillRect(W/2-half+c*half*2/16, y-8*e-8, half*2/16, 10*e+6); } }
+    // launch smoke/flames from your own car (bottom center)
+    if (p.spin || p._boosting) { for (let i=0;i<2;i++) particles.length; }
+    drawDragDash(now);
+    // tree reflection before launch
+    if (!p.launched) { cx2d.textAlign='center'; cx2d.font='bold 30px Bahnschrift, sans-serif'; cx2d.fillStyle='rgba(255,212,0,0.9)';
+        cx2d.fillText(DRAG.phase==='green'?'LAUNCH!':'WATCH THE TREE', W/2, hor+52); }
+}
+function drawDragDash(now) {
+    const p = DRAG.player, dashTop=H*0.74;
+    cx2d.fillStyle=p.body; cx2d.beginPath();
+    cx2d.moveTo(0,H); cx2d.lineTo(0,dashTop+16); cx2d.quadraticCurveTo(W/2,dashTop-14,W,dashTop+16); cx2d.lineTo(W,H); cx2d.closePath(); cx2d.fill();
+    cx2d.strokeStyle=p.trim; cx2d.lineWidth=4; cx2d.stroke();
+    cx2d.fillStyle='#0e0e14'; cx2d.fillRect(0,dashTop+22,W,H);
+    // tach (left)
+    const spd=dragForward(p), rpm=Math.min(1, spd/Math.max(1,p.top));
+    const gx=W*0.30, gy=H*0.88, gr=44;
+    cx2d.fillStyle='#15151a'; cx2d.beginPath(); cx2d.arc(gx,gy,gr,0,2*Math.PI); cx2d.fill();
+    cx2d.strokeStyle='#2b2b33'; cx2d.lineWidth=3; cx2d.stroke();
+    for (let i=0;i<=8;i++){ const a=Math.PI*0.8+i/8*Math.PI*1.4; cx2d.strokeStyle=i>6?'#E14D4D':'#666'; cx2d.lineWidth=2;
+        cx2d.beginPath(); cx2d.moveTo(gx+Math.cos(a)*(gr-8),gy+Math.sin(a)*(gr-8)); cx2d.lineTo(gx+Math.cos(a)*(gr-2),gy+Math.sin(a)*(gr-2)); cx2d.stroke(); }
+    const na=Math.PI*0.8 + rpm*Math.PI*1.4;
+    cx2d.strokeStyle='#FFD400'; cx2d.lineWidth=3; cx2d.beginPath(); cx2d.moveTo(gx,gy); cx2d.lineTo(gx+Math.cos(na)*(gr-6),gy+Math.sin(na)*(gr-6)); cx2d.stroke();
+    cx2d.fillStyle='#f4f2fa'; cx2d.font='bold 15px Bahnschrift, sans-serif'; cx2d.textAlign='center'; cx2d.fillText(Math.round(spd/3.2)+' mph', gx, gy+gr+16);
+    // boost gauge (right)
+    if (p.maxBoost>0){ const bx=W*0.70, by=H*0.88, br=44;
+        cx2d.fillStyle='#15151a'; cx2d.beginPath(); cx2d.arc(bx,by,br,0,2*Math.PI); cx2d.fill(); cx2d.strokeStyle='#2b2b33'; cx2d.lineWidth=3; cx2d.stroke();
+        const bf=p.boost/p.maxBoost, ba=Math.PI*0.8+bf*Math.PI*1.4;
+        cx2d.strokeStyle=bf>0.85?'#E14D4D':'#5B9BFF'; cx2d.lineWidth=3; cx2d.beginPath(); cx2d.moveTo(bx,by); cx2d.lineTo(bx+Math.cos(ba)*(br-6),by+Math.sin(ba)*(br-6)); cx2d.stroke();
+        cx2d.fillStyle='#a9a3c4'; cx2d.font='bold 13px Bahnschrift, sans-serif'; cx2d.textAlign='center'; cx2d.fillText('BOOST', bx, by+br+16);
+        if (p._boosting){ cx2d.fillStyle='#FFD400'; cx2d.fillText('🌀', bx, by-br-4); } }
+    // nitrous light
+    if (p.nitrousShot>0){ cx2d.fillStyle=(input.nitro&&p.nitroLeft>0)?'#5B9BFF':'#2b2b33';
+        cx2d.beginPath(); cx2d.arc(W*0.5,H*0.82,10,0,2*Math.PI); cx2d.fill();
+        cx2d.fillStyle='#fff'; cx2d.font='bold 10px Bahnschrift, sans-serif'; cx2d.textAlign='center'; cx2d.fillText('N2O',W*0.5,H*0.82+3); }
 }
 
 /* ================= DEMOLITION DERBY ================= */
@@ -3778,13 +4110,19 @@ function newDerby() {
         startAt:0, phase:'intro', alive:0, order:[], results:false, obstacles:[] };
 }
 function buildDerbyField(n) {
+    const pcar = DERBY_CARS[P.derbyCar] || DERBY_CARS.beater;
+    const pperf = derbyCarPerf();
     const me = { name:P.name, num:(P.num||'X').toUpperCase(),
-        body:P.colors.body, trim:P.colors.trim, wing:P.colors.wing, numColor:P.colors.num };
+        body:P.colors.body, trim:P.colors.trim, wing:P.colors.wing, numColor:P.colors.num,
+        vstyle:'derby', vspec: pcar.vspec };
     const pool = RIVAL_POOL.filter(r => r.name.toLowerCase()!==P.name.toLowerCase())
         .sort((a,b)=>b.skill-a.skill).slice(0, n-1)
         .map(r => ({ ...r, num: r.num.toUpperCase()===me.num?r.num+'J':r.num, wing:r.trim, numColor:'#ffffff' }));
-    field = [ makeKart(me, true, 0, playerPerf()) ];
-    pool.forEach((r,i) => field.push(makeKart(r, false, i+1, derbyPerf(r.skill))));
+    field = [ makeKart(me, true, 0, pperf) ];
+    field[0].armor = pperf.armor; field[0].ram = pperf.ram;
+    pool.forEach((r,i) => { const op = aiDerbyPerf(r.skill);
+        const k = makeKart({ ...r, vstyle:'derby', vspec: op.vspec }, false, i+1, op);
+        k.armor = op.armor; k.ram = op.ram; field.push(k); });
     field.forEach((k,i) => {
         const a = -Math.PI/2 + i/field.length*2*Math.PI;
         const rx = DERBY.w/2-70, ry = DERBY.h/2-70;
@@ -3794,10 +4132,14 @@ function buildDerbyField(n) {
         k.derbyState='charge'; k.stateT=0; k.jamT=0; k.target=null; k.retarget=0;
     });
     player = field[0]; karts = field; DERBY.alive = field.length;
-    DERBY.obstacles = [ {x:-DERBY.w*0.19, y:0, r:26}, {x:DERBY.w*0.19, y:0, r:26} ];
+    const obsN = DERBY_ARENAS[DERBY.arena].obs || 2;
+    DERBY.obstacles = [];
+    if (obsN>=2) DERBY.obstacles.push({x:-DERBY.w*0.19,y:0,r:26}, {x:DERBY.w*0.19,y:0,r:26});
+    if (obsN>=4) DERBY.obstacles.push({x:0,y:-DERBY.h*0.24,r:22}, {x:0,y:DERBY.h*0.24,r:22});
+    if (obsN>=6) DERBY.obstacles.push({x:-DERBY.w*0.30,y:-DERBY.h*0.2,r:20}, {x:DERBY.w*0.30,y:DERBY.h*0.2,r:20});
 }
 function startDerby() {
-    gameMode='derby'; raceContext='free';
+    gameMode='derby'; raceContext='free'; setBodyMode('derby');
     applyTrack(curTrack());
     DERBY = newDerby();
     particles=[]; banner={text:'',color:'',until:0};
@@ -3865,16 +4207,17 @@ function stepDerby(now, dt) {
         k.vx*=Math.exp(-0.5*dt); k.vy*=Math.exp(-0.5*dt);
         const s2=Math.hypot(k.vx,k.vy); if (s2>k.top) { k.vx*=k.top/s2; k.vy*=k.top/s2; }
         k.x+=k.vx*dt; k.y+=k.vy*dt;
-        if (k.x<-hw+16){ k.x=-hw+16; if(k.vx<0){ if(k.vx<-160)k.damage=Math.min(1,k.damage+0.03); k.vx*=-0.4; } }
-        if (k.x> hw-16){ k.x= hw-16; if(k.vx>0){ if(k.vx>160)k.damage=Math.min(1,k.damage+0.03); k.vx*=-0.4; } }
-        if (k.y<-hh+16){ k.y=-hh+16; if(k.vy<0){ if(k.vy<-160)k.damage=Math.min(1,k.damage+0.03); k.vy*=-0.4; } }
-        if (k.y> hh-16){ k.y= hh-16; if(k.vy>0){ if(k.vy>160)k.damage=Math.min(1,k.damage+0.03); k.vy*=-0.4; } }
+        const wd = 0.03/(k.armor||1);
+        if (k.x<-hw+16){ k.x=-hw+16; if(k.vx<0){ if(k.vx<-160)k.damage=Math.min(1,k.damage+wd); k.vx*=-0.4; } }
+        if (k.x> hw-16){ k.x= hw-16; if(k.vx>0){ if(k.vx>160)k.damage=Math.min(1,k.damage+wd); k.vx*=-0.4; } }
+        if (k.y<-hh+16){ k.y=-hh+16; if(k.vy<0){ if(k.vy<-160)k.damage=Math.min(1,k.damage+wd); k.vy*=-0.4; } }
+        if (k.y> hh-16){ k.y= hh-16; if(k.vy>0){ if(k.vy>160)k.damage=Math.min(1,k.damage+wd); k.vy*=-0.4; } }
         for (const ob of DERBY.obstacles) {
             const dx=k.x-ob.x, dy=k.y-ob.y, d=Math.hypot(dx,dy);
             if (d<ob.r+15){ const nx=dx/(d||1), ny=dy/(d||1); k.x=ob.x+nx*(ob.r+15); k.y=ob.y+ny*(ob.r+15);
                 const vn=k.vx*nx+k.vy*ny; if(vn<0){ k.vx-=nx*vn*1.3; k.vy-=ny*vn*1.3; } }
         }
-        if (sudden) k.damage = Math.min(1, k.damage + 0.07*dt);   // the rust bites everyone
+        if (sudden) k.damage = Math.min(1, k.damage + 0.07*dt/(k.armor||1));   // the rust bites everyone
         if (k.damage>=1) checkDerbyDead(k, now);
     }
     derbyCollisions(now);
@@ -3900,8 +4243,9 @@ function derbyCollisions(now) {
                 if (base>0) {
                     const aInto=a.vx*nx+a.vy*ny, bInto=-(b.vx*nx+b.vy*ny);
                     const aAgg = aInto>=bInto, agg = aAgg?a:b, vic = aAgg?b:a;
-                    if (!a.dead) a.damage=Math.min(1, a.damage + base*(a===agg?0.5:1.25));
-                    if (!b.dead) b.damage=Math.min(1, b.damage + base*(b===agg?0.5:1.25));
+                    // ram bar boosts damage dealt; armor cuts damage taken
+                    if (!vic.dead) vic.damage=Math.min(1, vic.damage + base*1.25*(agg.ram||1)/(vic.armor||1));
+                    if (!agg.dead) agg.damage=Math.min(1, agg.damage + base*0.5/(agg.armor||1));
                     if (!vic.dead) vic.lastHitBy = agg;
                     if (cs>150) { for (let n=0;n<4;n++) particles.push({ kind:'clod', x:(a.x+b.x)/2, y:(a.y+b.y)/2, z:2,
                         vx:(Math.random()*120-60), vy:(Math.random()*120-60), vz:60+Math.random()*60, life:0.5, age:0, size:2+Math.random()*2 }); beep(120,0.07); }
@@ -4013,19 +4357,64 @@ function chipRow(el, keys, cur, label, onPick) {
     keys.forEach(k => { const b=document.createElement('button'); b.className='chip'+(cur===k.id?' sel':''); b.textContent=label(k);
         b.onclick=()=>{ onPick(k.id); }; el.appendChild(b); });
 }
+function tryBuy(price, tokensEl, reRender) {
+    if (P.tokens < price) {
+        beep(200,0.3);
+        if (tokensEl) { tokensEl.style.color='#E14D4D'; tokensEl.textContent='⛁ '+P.tokens+' — NOT ENOUGH TOKENS!'; }
+        if (reRender) setTimeout(reRender, 1300);
+        return false;
+    }
+    P.tokens -= price; beep(760,0.25); return true;
+}
+function bars(v, lo, hi) { const n=Math.max(0,Math.min(6,Math.round((v-lo)/(hi-lo)*6))); return '▮'.repeat(n)+'▯'.repeat(6-n); }
 function renderDragSetup() {
-    $('dragTrackLine').textContent = `Run at ${curTrack().name} · CPU difficulty is set in Settings (${DIFFS[P.settings.diff].name}).`;
-    chipRow($('dragDistChips'), Object.keys(DRAG_DISTANCES).map(id=>({id})), P.settings.dragDist,
-        k=>DRAG_DISTANCES[k.id].name, id=>{ P.settings.dragDist=id; saveDB(); renderDragSetup(); });
+    $('dragTokens').style.color=''; $('dragTokens').textContent='⛁ '+P.tokens+' TOKENS';
+    $('dragTrackLine').textContent = `Difficulty: ${DIFFS[P.settings.diff].name} (change in Settings). Build a monster — the upgrades win races here.`;
+    const cc=$('dragCarCards'); cc.innerHTML='';
+    Object.keys(DRAG_CARS).forEach(id=>{ const car=DRAG_CARS[id], owned=P.ownedDragCars[id];
+        const b=document.createElement('button'); b.className='card'+(P.dragCar===id?' sel':'');
+        const tag = owned ? (P.dragCar===id?'<span class="owned">✓ SELECTED</span>':'<span class="owned">✓ OWNED — tap to pick</span>') : `<span class="price">BUY — ⛁${car.price}</span>`;
+        b.innerHTML=`<span class="big">${car.ico}</span><h3>${car.name}</h3><small>Speed ${bars(car.top,1,1.7)}</small><small>Punch ${bars(car.acc,1,1.66)}</small>${tag}`;
+        b.onclick=()=>{ if(owned){ P.dragCar=id; saveDB(); renderDragSetup(); }
+            else if(tryBuy(car.price,$('dragTokens'),renderDragSetup)){ P.ownedDragCars[id]=true; P.dragCar=id; saveDB(); renderDragSetup(); } };
+        cc.appendChild(b);
+    });
+    const uc=$('dragUpCards'); uc.innerHTML='';
+    Object.keys(DRAG_UP).forEach(key=>{ const up=DRAG_UP[key], lvl=P.dragUp[key]||0, cur=up.levels[lvl], next=up.levels[lvl+1];
+        const b=document.createElement('button'); b.className='card'+(lvl>0?' sel':'');
+        const tag = next ? `<span class="price">▲ ${next.label} — ⛁${next.price}</span>` : '<span class="owned">✓ MAXED OUT</span>';
+        b.innerHTML=`<span class="big">${up.ico}</span><h3>${up.name}</h3><small>${up.desc}</small><small>Installed: <b style="color:var(--yellow)">${cur.label}</b></small>${tag}`;
+        b.onclick=()=>{ if(!next) return; if(tryBuy(next.price,$('dragTokens'),renderDragSetup)){ P.dragUp[key]=lvl+1; saveDB(); renderDragSetup(); } };
+        uc.appendChild(b);
+    });
+    chipRow($('dragStripChips'), Object.keys(DRAG_STRIPS).map(id=>({id})), P.settings.dragStrip,
+        k=>DRAG_STRIPS[k.id].name, id=>{ P.settings.dragStrip=id; saveDB(); renderDragSetup(); });
     chipRow($('dragEventChips'), [{id:'grudge'},{id:'bracket'}], P.settings.dragEvent,
-        k=>k.id==='grudge'?'Grudge Run (1 v 1)':'Bracket Night (3 rounds)', id=>{ P.settings.dragEvent=id; saveDB(); renderDragSetup(); });
-    $('dragEventNote').textContent = P.settings.dragEvent==='grudge'
-        ? 'One run, heads-up against a rival. Quick tokens.'
-        : 'Win three rounds against tougher and tougher cars to take the bracket and a big payout.';
+        k=>k.id==='grudge'?'Grudge (1 v 1)':'Bracket (3 rounds)', id=>{ P.settings.dragEvent=id; saveDB(); renderDragSetup(); });
+    $('dragEventNote').textContent = DRAG_STRIPS[P.settings.dragStrip].blurb + ' · ' +
+        (P.settings.dragEvent==='grudge' ? 'One heads-up run.' : 'Win three rounds against tougher cars for the bracket.');
 }
 function renderDerbySetup() {
+    $('derbyTokens').style.color=''; $('derbyTokens').textContent='⛁ '+P.tokens+' TOKENS';
     $('derbyKartsVal').textContent = P.settings.derbyKarts;
     $('derbyKarts').value = P.settings.derbyKarts;
+    const cc=$('derbyCarCards'); cc.innerHTML='';
+    Object.keys(DERBY_CARS).forEach(id=>{ const car=DERBY_CARS[id], owned=P.ownedDerbyCars[id];
+        const b=document.createElement('button'); b.className='card'+(P.derbyCar===id?' sel':'');
+        const tag = owned ? (P.derbyCar===id?'<span class="owned">✓ SELECTED</span>':'<span class="owned">✓ OWNED — tap to pick</span>') : `<span class="price">BUY — ⛁${car.price}</span>`;
+        b.innerHTML=`<span class="big">${car.ico}</span><h3>${car.name}</h3><small>Armor ${bars(car.armor,1,2)}</small><small>Power ${bars(car.power,0.9,1.35)} · Ram ${bars(car.ram,1,1.65)}</small>${tag}`;
+        b.onclick=()=>{ if(owned){ P.derbyCar=id; saveDB(); renderDerbySetup(); }
+            else if(tryBuy(car.price,$('derbyTokens'),renderDerbySetup)){ P.ownedDerbyCars[id]=true; P.derbyCar=id; saveDB(); renderDerbySetup(); } };
+        cc.appendChild(b);
+    });
+    const uc=$('derbyUpCards'); uc.innerHTML='';
+    Object.keys(DERBY_UP).forEach(key=>{ const up=DERBY_UP[key], lvl=P.derbyUp[key]||0, cur=up.levels[lvl], next=up.levels[lvl+1];
+        const b=document.createElement('button'); b.className='card'+(lvl>0?' sel':'');
+        const tag = next ? `<span class="price">▲ ${next.label} — ⛁${next.price}</span>` : '<span class="owned">✓ MAXED OUT</span>';
+        b.innerHTML=`<span class="big">${up.ico}</span><h3>${up.name}</h3><small>${up.desc}</small><small>Installed: <b style="color:var(--yellow)">${cur.label}</b></small>${tag}`;
+        b.onclick=()=>{ if(!next) return; if(tryBuy(next.price,$('derbyTokens'),renderDerbySetup)){ P.derbyUp[key]=lvl+1; saveDB(); renderDerbySetup(); } };
+        uc.appendChild(b);
+    });
     chipRow($('derbyArenaChips'), Object.keys(DERBY_ARENAS).map(id=>({id})), P.settings.derbyArena,
         k=>DERBY_ARENAS[k.id].name, id=>{ P.settings.derbyArena=id; saveDB(); renderDerbySetup(); });
     chipRow($('derbyModeChips'), [{id:'last'},{id:'timed'}], P.settings.derbyTimed?'timed':'last',
