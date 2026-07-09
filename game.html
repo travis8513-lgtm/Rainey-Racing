@@ -278,6 +278,8 @@ footer a { color:var(--yellow); text-decoration:none; }
             <button id="hubNight"><span class="ico">🏁</span>RACE NIGHT<small>Qualify · Heat · Feature — full payout</small></button>
             <button id="hubCareer"><span class="ico">🏆</span>CHAMPIONSHIP<small id="hubCareerSub">Points seasons — win the title</small></button>
             <button id="hubMP"><span class="ico">👥</span>RACE A FRIEND<small>Share a code, race together online</small></button>
+            <button id="hubDrag"><span class="ico">🏎️</span>DRAG STRIP<small>Christmas tree, reaction &amp; ET</small></button>
+            <button id="hubDerby"><span class="ico">💥</span>DEMOLITION DERBY<small>Smash 'em — last one running wins</small></button>
             <button id="hubQuick"><span class="ico">⚡</span>QUICK RACE<small>Pick laps &amp; kart count — half pay</small></button>
             <button id="hubGarage"><span class="ico">🔧</span>GARAGE<small>Design your kart &amp; number</small></button>
             <button id="hubShop"><span class="ico">🛒</span>UPGRADE SHOP<small>Motors · gears · new karts</small></button>
@@ -287,7 +289,7 @@ footer a { color:var(--yellow); text-decoration:none; }
         <button class="btn ghost sm" id="switchBtn">↩ Switch Driver</button>
         <p class="keys">Drive with <b>&#8593;</b> gas <b>&#8595;</b> brake <b>&#8592;</b><b>&#8594;</b> steer (or <b>W</b><b>A</b><b>S</b><b>D</b>) · hold <b>SPACE</b> to power-slide · <b>C</b> camera · <b>M</b> mute</p>
         <p class="keys">🔧 Worn tires get slippery — dive low onto the front-stretch pit road to bolt on fresh ones!</p>
-        <p class="keys" style="color:#FFD400; font-weight:700;">GAME VERSION 19</p>
+        <p class="keys" style="color:#FFD400; font-weight:700;">GAME VERSION 20</p>
     </div>
 
     <!-- ===== GARAGE ===== -->
@@ -358,6 +360,34 @@ footer a { color:var(--yellow); text-decoration:none; }
         <button class="backbtn" data-back>‹ Back</button>
         <h2>👥 RACE A <span>FRIEND</span></h2>
         <div id="mpBody" style="display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;"></div>
+    </div>
+
+    <!-- ===== DRAG STRIP SETUP ===== -->
+    <div id="drag" class="overlay hidden">
+        <button class="backbtn" data-back>‹ Back</button>
+        <h2>🏎 DRAG <span>STRIP</span></h2>
+        <p class="sub" id="dragTrackLine"></p>
+        <p class="sectionTitle">Distance</p>
+        <div class="row" id="dragDistChips"></div>
+        <p class="sectionTitle">Event</p>
+        <div class="row" id="dragEventChips"></div>
+        <p class="keys" id="dragEventNote"></p>
+        <button class="btn gold" id="dragGo">Stage It Up ▸</button>
+        <p class="keys">Wait for the last amber, then nail the gas on green — leave too soon and it's a red-light foul. Your motor &amp; gear upgrades are everything here.</p>
+    </div>
+
+    <!-- ===== DEMOLITION DERBY SETUP ===== -->
+    <div id="derby" class="overlay hidden">
+        <button class="backbtn" data-back>‹ Back</button>
+        <h2>💥 DEMOLITION <span>DERBY</span></h2>
+        <p class="sub">Ram the other karts, take the least damage, be the last one running. Reverse with the brake to line up your hits!</p>
+        <div class="field"><label>Karts in the pit: <b id="derbyKartsVal">8</b></label><input type="range" id="derbyKarts" min="4" max="12" value="8"></div>
+        <p class="sectionTitle">Arena</p>
+        <div class="row" id="derbyArenaChips"></div>
+        <p class="sectionTitle">Rules</p>
+        <div class="row" id="derbyModeChips"></div>
+        <button class="btn gold" id="derbyGo">Fire It Up ▸</button>
+        <p class="keys">Wrecks earn tokens (+4 each) and last-one-running pays a bonus. Your kart's toughness scales with your class — sprints are fragile, champ karts take a beating.</p>
     </div>
 
     <!-- ===== SETTINGS ===== -->
@@ -537,9 +567,10 @@ function newProfile(name, num) {
         owned: { cls:{ boxstock:true }, motor:0, gears:{ standard:true } },
         gear: 'standard',
         tokens: 60,                                // starter money for the first gear set
-        stats: { races:0, wins:0, heatWins:0, hardChargers:0, fastLaps:0, tokensEarned:0, championships:0, bestLap:{} },
+        stats: { races:0, wins:0, heatWins:0, hardChargers:0, fastLaps:0, tokensEarned:0, championships:0, dragWins:0, derbyWins:0, bestLap:{} },
         career: { active:null, completed:{} },
-        settings: { diff:'racer', featureLaps:10, trackId:'rainey', quickLaps:8, quickKarts:10 }
+        settings: { diff:'racer', featureLaps:10, trackId:'rainey', quickLaps:8, quickKarts:10,
+                    dragDist:'quarter', dragEvent:'grudge', derbyKarts:8, derbyArena:'med', derbyTimed:false }
     };
 }
 // older saves from this version missing fields (safety net if I add fields later)
@@ -552,10 +583,13 @@ function patchProfile(p) {
     if (!CLASSES[p.cls] || !p.owned.cls[p.cls]) p.cls = 'boxstock';
     if (!GEARS[p.gear] || !p.owned.gears[p.gear]) p.gear = 'standard';
     if (typeof p.tokens !== 'number') p.tokens = 0;
-    p.stats = Object.assign({ races:0, wins:0, heatWins:0, hardChargers:0, fastLaps:0, tokensEarned:0, championships:0 }, p.stats);
+    p.stats = Object.assign({ races:0, wins:0, heatWins:0, hardChargers:0, fastLaps:0, tokensEarned:0, championships:0, dragWins:0, derbyWins:0 }, p.stats);
     p.stats.bestLap = p.stats.bestLap || {};
     p.career = Object.assign({ active:null, completed:{} }, p.career);
-    p.settings = Object.assign({ diff:'racer', featureLaps:10, trackId:'rainey', quickLaps:8, quickKarts:10 }, p.settings);
+    p.settings = Object.assign({ diff:'racer', featureLaps:10, trackId:'rainey', quickLaps:8, quickKarts:10,
+        dragDist:'quarter', dragEvent:'grudge', derbyKarts:8, derbyArena:'med', derbyTimed:false }, p.settings);
+    if (!DRAG_DISTANCES[p.settings.dragDist]) p.settings.dragDist='quarter';
+    if (!DERBY_ARENAS[p.settings.derbyArena]) p.settings.derbyArena='med';
     if (!TRACKS.some(t => t.id === p.settings.trackId)) p.settings.trackId = 'rainey';
     if (!DIFFS[p.settings.diff]) p.settings.diff = 'racer';
     return p;
@@ -563,7 +597,7 @@ function patchProfile(p) {
 function curTrack() { return TRACKS.find(t => t.id === (P ? P.settings.trackId : 'rainey')) || TRACKS[0]; }
 
 // ==================== SCREEN MANAGER ====================
-const SCREEN_IDS = ['login','home','garage','shop','tracks','quick','settings','grid','finish','career','mp'];
+const SCREEN_IDS = ['login','home','garage','shop','tracks','quick','settings','grid','finish','career','mp','drag','derby'];
 function showScreen(id) {
     SCREEN_IDS.forEach(s => $(s).classList.toggle('hidden', s !== id));
     $('quitBtn').classList.toggle('hidden', id !== null);
@@ -675,6 +709,7 @@ let state = 'menu';            // menu | qualify | gridready | countdown | race 
 let session = 'feature';       // qualify | heat | feature
 let raceMode = 'night';        // night (full payout) | quick (half payout)
 let raceContext = 'free';      // free | career (career features score championship points)
+let gameMode = 'oval';         // oval | drag | derby
 let gridNextAction = 'feature';
 let countStart = 0, raceStart = 0, raceTime = 0;
 let finishOrder = [];
@@ -814,6 +849,7 @@ function buildField(nKarts) {
 function hideOverlays() { showScreen(null); }
 
 function beginCountdown() {
+    gameMode = 'oval';
     particles = []; finishOrder = [];
     resetCaution();
     TOW.active = false; TOW.phase = ''; TOW.k = null;   // tow truck back in its spot
@@ -860,6 +896,7 @@ function startQuickRace() {
 
 // ---------- Qualifying ----------
 function startQualify() {
+    gameMode = 'oval';
     karts = field;
     field.forEach(k => { if (!k.isPlayer) k.parked = true; });
     const p = pointOnRing(Math.PI/2 + 0.03, 0);
@@ -1037,6 +1074,7 @@ function endRace() {
     payHtml += `<div class="line total"><span>Tokens earned</span><b>+${total} ⛁</b></div>`;
     payHtml += `<div class="line total"><span>Your bank</span><b>⛁ ${P.tokens}</b></div>`;
     $('finStandings').classList.toggle('hidden', !(raceContext === 'career' && session === 'feature'));
+    $('againBtn').textContent = 'Race Again';
     $('againBtn').classList.toggle('hidden', raceContext === 'career' || (MP.role === 'host' && MP.conns.length > 0));
     // send friends their finish
     if (MP.role === 'host' && MP.conns.length) {
@@ -1794,10 +1832,37 @@ function updateEngine() {
 }
 
 // ==================== MAIN LOOP ====================
+function stepParticles(dt) {
+    for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.age += dt; p.x += p.vx*dt; p.y += p.vy*dt;
+        if (p.z !== undefined) {
+            p.vz -= 330*dt; p.z += p.vz*dt;
+            if (p.z < 0) { p.z = 0; p.vz *= -0.35; }
+        }
+        if (p.age > p.life) particles.splice(i, 1);
+    }
+}
+function drawVersionTag() {
+    cx2d.textAlign = 'right';
+    cx2d.font = 'bold 12px Bahnschrift, Arial Narrow, sans-serif';
+    cx2d.fillStyle = 'rgba(255,212,0,0.55)';
+    cx2d.fillText('v20', W - 10, H - 10);
+}
 let lastT = performance.now();
 function frame(now) {
     let dt = Math.min(0.033, (now - lastT) / 1000);
     lastT = now;
+
+    // drag strip & demolition derby run their own self-contained update+draw
+    if (gameMode === 'drag') {
+        stepDrag(now, dt); stepParticles(dt); updateEngine();
+        drawDragFrame(now); drawVersionTag(); requestAnimationFrame(frame); return;
+    }
+    if (gameMode === 'derby') {
+        stepDerby(now, dt); stepParticles(dt); updateEngine();
+        drawDerbyFrame(now); drawVersionTag(); requestAnimationFrame(frame); return;
+    }
 
     if (state === 'race' || state === 'done' || state === 'qualify') raceTime = (now - raceStart) / 1000;
 
@@ -1816,15 +1881,7 @@ function frame(now) {
     if (MP.role !== 'guest') { raceControl(now, dt); mpHostTick(now); }
     updateEngine();
 
-    for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i];
-        p.age += dt; p.x += p.vx*dt; p.y += p.vy*dt;
-        if (p.z !== undefined) {
-            p.vz -= 330*dt; p.z += p.vz*dt;
-            if (p.z < 0) { p.z = 0; p.vz *= -0.35; }
-        }
-        if (p.age > p.life) particles.splice(i, 1);
-    }
+    stepParticles(dt);
 
     if (player) camAng += angDiff(player.heading, camAng) * Math.min(1, 8*dt);
 
@@ -1858,11 +1915,7 @@ function frame(now) {
     }
     if (state === 'countdown' || (state === 'race' && raceTime < 0.8)) drawCountdown();
 
-    cx2d.textAlign = 'right';
-    cx2d.font = 'bold 12px Bahnschrift, Arial Narrow, sans-serif';
-    cx2d.fillStyle = 'rgba(255,212,0,0.55)';
-    cx2d.fillText('v19', W - 10, H - 10);
-
+    drawVersionTag();
     requestAnimationFrame(frame);
 }
 
@@ -2924,7 +2977,7 @@ function renderHome() {
     $('homeName').textContent = `${P.name} · #${P.num}`;
     $('homeTokens').textContent = `⛁ ${P.tokens} TOKENS`;
     $('homeRide').textContent = `${CLASSES[P.cls].name} · ${MOTORS[P.owned.motor].name} · ${GEARS[P.gear].name}`;
-    $('homeTroph').textContent = `👑 ${P.stats.championships} titles · 🏆 ${P.stats.wins} wins · 🚀 ${P.stats.hardChargers} hard charger · ⚡ ${P.stats.fastLaps} fast laps`;
+    $('homeTroph').textContent = `👑 ${P.stats.championships} titles · 🏆 ${P.stats.wins} wins · 🏎 ${P.stats.dragWins||0} drag · 💥 ${P.stats.derbyWins||0} derby`;
     $('hubTrackName').textContent = `${curTrack().name} (${curTrack().len})`;
     const act = P.career.active, actS = activeSeries();
     $('hubCareerSub').textContent = act && actS
@@ -2935,6 +2988,11 @@ function renderHome() {
 $('hubNight').onclick = () => startRaceNight();
 $('hubCareer').onclick = () => { renderCareer(); showScreen('career'); };
 $('hubMP').onclick = () => { renderMP(); showScreen('mp'); };
+$('hubDrag').onclick = () => { renderDragSetup(); showScreen('drag'); };
+$('hubDerby').onclick = () => { renderDerbySetup(); showScreen('derby'); };
+$('dragGo').onclick = () => startDrag(false);
+$('derbyGo').onclick = () => startDerby();
+$('derbyKarts').addEventListener('input', () => { P.settings.derbyKarts = parseInt($('derbyKarts').value,10); $('derbyKartsVal').textContent = P.settings.derbyKarts; saveDB(); });
 $('finStandings').onclick = () => { $('payBox').classList.add('hidden'); renderCareer(); showScreen('career'); };
 $('hubQuick').onclick = () => { renderQuick(); showScreen('quick'); };
 $('hubGarage').onclick = () => { renderGarage(); showScreen('garage'); };
@@ -3333,6 +3391,7 @@ function guestOnData(d) {
 }
 function guestStart(d) {
     if (state !== 'menu') return;      // only jump in from the menus
+    gameMode = 'oval';
     applyTrack(TRACKS.find(t => t.id === d.trackId) || TRACKS[0]);
     LAPS = d.laps; session = 'feature'; raceMode = 'quick'; raceContext = 'free';
     field = d.roster.map((r, i) => makeKart({ ...r }, i === d.youIdx, i, perfFrom(r.cls, 0, 'standard')));
@@ -3439,17 +3498,539 @@ $('featureBtn').onclick = () => { if (gridNextAction === 'heat') startHeat(); el
 $('gridQuit').onclick = () => { renderHome(); showScreen('home'); };
 $('againBtn').onclick = () => {
     $('payBox').classList.add('hidden');
+    if (gameMode === 'drag') { if (DRAG && DRAG._advance) { DRAG.round++; startDrag(true); } else startDrag(false); return; }
+    if (gameMode === 'derby') { startDerby(); return; }
     if (raceMode === 'night') startRaceNight(); else startQuickRace();
 };
-$('finHome').onclick = () => { $('payBox').classList.add('hidden'); renderHome(); showScreen('home'); };
+$('finHome').onclick = () => { $('payBox').classList.add('hidden'); gameMode='oval'; renderHome(); showScreen('home'); };
 $('muteBtn').onclick = toggleMute;
 $('quitBtn').onclick = () => {
     if (MP.role) { mpLeave(); showBanner('', '#000', 0); return; }
+    if (gameMode !== 'oval') { gameMode='oval'; renderHome(); showScreen('home'); showBanner('', '#000', 0); return; }
     if (state === 'race' || state === 'qualify' || state === 'countdown') {
         renderHome(); showScreen('home');
         showBanner('', '#000', 0);
     }
 };
+
+// ==================== DRAG STRIP & DEMOLITION DERBY ====================
+// These two modes throw out the oval entirely — their own physics + camera + HUD.
+const DRAG_DISTANCES = {
+    eighth:  { name:'1/8 Mile', len:1750 },
+    quarter: { name:'1/4 Mile', len:3400 }
+};
+const DERBY_ARENAS = {
+    small: { name:'Backyard Pit',      w:720,  h:470 },
+    med:   { name:'County Fairgrounds', w:960,  h:580 },
+    big:   { name:'Mega Mud Pit',       w:1200, h:700 }
+};
+const DERBY_PAY = [40,26,18,14,11,9,8,7,6,5,4,4];
+
+// drop a kart onto a flat surface (no oval grid math)
+function placeFlat(k, x, y, heading) {
+    k.x=x; k.y=y; k.heading=heading; k.vx=0; k.vy=0;
+    k.tires=1; k.flat=false; k.damage=0; k.dead=false; k.dnf=false;
+    k.done=false; k.finishTime=0; k.steerVal=0; k.slowTime=0;
+    k.pitting=false; k.inPits=false; k.towing=false; k.parked=false;
+}
+function drawParticlesWorld() {
+    for (const p of particles) {
+        const a = 1 - p.age/p.life, lift = (p.z||0)*0.4;
+        if (p.kind==='clod') cx2d.fillStyle=`rgba(74,51,30,${(0.65*a).toFixed(3)})`;
+        else if (p.kind==='smoke') cx2d.fillStyle=`rgba(95,95,108,${(0.5*a).toFixed(3)})`;
+        else if (p.kind==='fire') cx2d.fillStyle=`rgba(255,${Math.round(90+120*a)},30,${(0.85*a).toFixed(3)})`;
+        else cx2d.fillStyle=`rgba(200,168,124,${(0.5*a).toFixed(3)})`;
+        cx2d.beginPath(); cx2d.arc(p.x, p.y-lift, p.size*(1+p.age*2), 0, 2*Math.PI); cx2d.fill();
+    }
+}
+function youMarker() {   // little yellow arrow so you can always spot your kart
+    cx2d.save();
+    cx2d.translate(player.x, player.y - 30);
+    cx2d.fillStyle='#FFD400';
+    cx2d.beginPath(); cx2d.moveTo(0,8); cx2d.lineTo(-7,-4); cx2d.lineTo(7,-4); cx2d.closePath(); cx2d.fill();
+    cx2d.restore();
+}
+
+/* ================= DRAG STRIP ================= */
+let DRAG = null;
+function dragForward(k) { return -k.vy; }           // forward is -y (up the screen)
+function dragOpp(roundIdx) {
+    const pool = RIVAL_POOL.filter(r => r.name.toLowerCase() !== P.name.toLowerCase())
+                           .sort((a,b) => b.skill - a.skill);
+    const idx = DRAG.event==='bracket'
+        ? Math.min(pool.length-1, Math.max(0, 5 - roundIdx*2))      // finals = the fastest guy
+        : 3 + Math.floor(Math.random()*7);
+    return pool[Math.min(pool.length-1, idx)];
+}
+function newDrag() {
+    return { dist:P.settings.dragDist, len:DRAG_DISTANCES[P.settings.dragDist].len,
+        event:P.settings.dragEvent, round:0, phase:'stage', tPhase:0, greenAt:0,
+        player:null, opp:null, results:false, _advance:false,
+        playerRT:null, oppRT:null, playerET:null, oppET:null, playerTrap:0, oppTrap:0,
+        playerFoul:false, oppFoul:false, winner:null, oppLeaveDelay:0.25 };
+}
+function setupDragPair() {
+    const me = { name:P.name, num:(P.num||'X').toUpperCase(),
+        body:P.colors.body, trim:P.colors.trim, wing:P.colors.wing, numColor:P.colors.num };
+    DRAG.player = makeKart(me, true, 0, playerPerf());
+    const r = dragOpp(DRAG.round);
+    const oNum = r.num.toUpperCase()===me.num ? r.num+'J' : r.num;
+    DRAG.opp = makeKart({ ...r, num:oNum, wing:r.trim, numColor:'#ffffff' }, false, 1, aiPerf(r.skill));
+    placeFlat(DRAG.player, -72, 0, -Math.PI/2);
+    placeFlat(DRAG.opp,     72, 0, -Math.PI/2);
+    DRAG.player.dragDone=false; DRAG.opp.dragDone=false;
+    DRAG.playerRT=null; DRAG.oppRT=null; DRAG.playerET=null; DRAG.oppET=null;
+    DRAG.playerFoul=false; DRAG.oppFoul=false; DRAG.playerTrap=0; DRAG.oppTrap=0; DRAG.results=false;
+    // sharper reaction on harder difficulty; small chance the CPU red-lights
+    DRAG.oppLeaveDelay = Math.max(0.05, 0.34 - (DIFFS[P.settings.diff].ai-0.93)*1.5 + (Math.random()*0.14));
+    DRAG.oppFoul = Math.random() < 0.05;
+    player = DRAG.player; karts = [DRAG.player, DRAG.opp];
+}
+function startDrag(keepRound) {
+    gameMode='drag'; raceContext='free';
+    applyTrack(curTrack());
+    if (!keepRound || !DRAG) DRAG = newDrag();
+    particles = []; banner = { text:'', color:'', until:0 };
+    setupDragPair();
+    cam='tv'; startEngine();
+    state='countdown'; DRAG.phase='stage'; DRAG.tPhase=performance.now(); DRAG.greenAt=0;
+    hideOverlays();
+    showBanner('🌳 STAGE IT UP — WATCH THE TREE', '#2563EB', 2.2);
+}
+function stepDrag(now, dt) {
+    if (!DRAG) return;
+    if (state !== 'countdown' && state !== 'race') return;
+    const t = (now - DRAG.tPhase)/1000;
+    if (DRAG.phase==='stage') {
+        if (t > 1.3) { DRAG.phase='amber'; DRAG.tPhase=now; }
+    } else if (DRAG.phase==='amber') {
+        if (input.up && !DRAG.playerFoul) {
+            DRAG.playerFoul=true;
+            showBanner('🔴 RED LIGHT — YOU LEFT TOO SOON!', '#7a1f1f', 3); beep(180,0.5);
+        }
+        if (t >= 1.5) { DRAG.phase='green'; DRAG.greenAt=now; state='race'; beepGo(); showBanner('🟢 GO GO GO!', '#1d7c37', 1.2); }
+    }
+    const racing = DRAG.phase==='green';
+    for (const k of [DRAG.player, DRAG.opp]) {
+        if (!k) continue;
+        const laneX = k.isPlayer ? -72 : 72;
+        let throttle = 0;
+        if (racing && !k.dragDone) {
+            if (k.isPlayer) {
+                throttle = input.up ? 1 : (input.down ? -0.6 : 0);
+                if (input.up && DRAG.playerRT===null && !DRAG.playerFoul) DRAG.playerRT = (now-DRAG.greenAt)/1000;
+            } else {
+                const since = (now-DRAG.greenAt)/1000;
+                if (since >= DRAG.oppLeaveDelay) { throttle = 1; if (DRAG.oppRT===null) DRAG.oppRT = DRAG.oppLeaveDelay; }
+            }
+            const spd = dragForward(k);
+            const spin = throttle>0.5 && spd < 90;         // wheelspin off the line
+            const bite = spin ? 0.55 : 1;
+            if (throttle>0 && spd < k.top*tireSpeed(k)) k.vy -= k.acc*throttle*bite*dt;
+            else if (throttle<0) k.vy -= k.acc*throttle*0.8*dt;
+            k.vy *= Math.exp(-0.30*dt);
+            if (spin && Math.random()<0.6) particles.push({ kind:'smoke', x:k.x+(Math.random()*10-5), y:k.y+13, z:2,
+                vx:(Math.random()*40-20), vy:18+Math.random()*26, vz:18+Math.random()*30, life:0.45+Math.random()*0.4, age:0, size:3+Math.random()*3 });
+        }
+        k.x += (laneX - k.x) * Math.min(1, 8*dt);
+        k.y += k.vy*dt;
+        k.heading = -Math.PI/2;
+        if (racing && !k.dragDone && -k.y >= DRAG.len) {
+            k.dragDone=true; k.finishTime=(now-DRAG.greenAt)/1000;
+            const mph = Math.round(dragForward(k)/3.2);
+            if (k.isPlayer) { DRAG.playerET=k.finishTime; DRAG.playerTrap=mph; }
+            else { DRAG.oppET=k.finishTime; DRAG.oppTrap=mph; }
+        }
+    }
+    if (racing && !DRAG.results) {
+        const bothDone = DRAG.player.dragDone && DRAG.opp.dragDone;
+        const foulEnd = (DRAG.playerFoul && DRAG.opp.dragDone) || (DRAG.oppFoul && DRAG.player.dragDone);
+        if (bothDone || foulEnd || (now-DRAG.greenAt)/1000 > 25) resolveDrag();
+    }
+}
+function resolveDrag() {
+    DRAG.results=true; state='done';
+    let playerWon;
+    if (DRAG.playerFoul && !DRAG.oppFoul) playerWon=false;
+    else if (DRAG.oppFoul && !DRAG.playerFoul) playerWon=true;
+    else playerWon = (DRAG.playerET||999) <= (DRAG.oppET||999);
+    DRAG.winner = playerWon ? 'player':'opp';
+    setTimeout(() => { if (state==='done') finishDragScreen(playerWon); }, 1400);
+}
+function finishDragScreen(won) {
+    const holeshot = won && !DRAG.playerFoul && DRAG.playerRT!==null && DRAG.playerRT < 0.12;
+    let total=0; const lines=[];
+    if (DRAG.event==='bracket') {
+        if (won) {
+            lines.push([`Round ${DRAG.round+1} win (beat #${DRAG.opp.num})`, 8]); total+=8;
+            if (DRAG.round>=2) { lines.push(['🏆 BRACKET CHAMPION', 40]); total+=40; P.stats.dragWins++; }
+        } else { lines.push(['Eliminated — round money', 3]); total+=3; }
+    } else {
+        if (won) { lines.push([`Grudge win vs #${DRAG.opp.num}`, 12]); total+=12; P.stats.dragWins++; }
+        else { lines.push(['Grudge loss', 3]); total+=3; }
+    }
+    if (holeshot) { lines.push([`⚡ HOLESHOT (${DRAG.playerRT.toFixed(3)}s light)`, 5]); total+=5; }
+    P.tokens+=total; P.stats.tokensEarned+=total; P.stats.races++;
+    saveDB();
+    const champ   = DRAG.event==='bracket' && won && DRAG.round>=2;
+    const advance = DRAG.event==='bracket' && won && DRAG.round<2;
+    DRAG._advance = advance;
+    $('finishTitle').innerHTML = won
+        ? (champ ? '🏆 <span>BRACKET CHAMPION!</span>'
+                 : DRAG.event==='bracket' ? '✅ ROUND <span>WON!</span>' : '🏁 YOU <span>WON!</span>')
+        : 'You <span>lost</span> that round';
+    const rt = v => v===null ? '—' : v.toFixed(3);
+    let rows = '<tr><th>Lane</th><th>Reaction</th><th>ET</th><th>MPH</th></tr>';
+    rows += `<tr class="you"><td>You #${DRAG.player.num}</td><td>${DRAG.playerFoul?'🔴 FOUL':rt(DRAG.playerRT)}</td><td>${DRAG.playerET?DRAG.playerET.toFixed(3):'—'}</td><td>${DRAG.playerTrap||'—'}</td></tr>`;
+    rows += `<tr><td>#${DRAG.opp.num} ${DRAG.opp.name}</td><td>${DRAG.oppFoul?'🔴 FOUL':rt(DRAG.oppRT)}</td><td>${DRAG.oppET?DRAG.oppET.toFixed(3):'—'}</td><td>${DRAG.oppTrap||'—'}</td></tr>`;
+    $('resultsTable').innerHTML = rows;
+    let pay=''; lines.forEach(([t,a]) => pay += `<div class="line"><span>${t}</span><b>+${a} ⛁</b></div>`);
+    pay += `<div class="line total"><span>Tokens earned</span><b>+${total} ⛁</b></div><div class="line total"><span>Your bank</span><b>⛁ ${P.tokens}</b></div>`;
+    $('payBox').innerHTML=pay; $('payBox').classList.remove('hidden');
+    $('bestLapLine').textContent = champ ? 'You ran the table — bracket is yours!' : '';
+    $('finStandings').classList.add('hidden');
+    $('againBtn').classList.remove('hidden');
+    $('againBtn').textContent = advance ? 'Next Round ▸' : (DRAG.event==='bracket' ? 'New Bracket' : 'Run It Again');
+    showScreen('finish');
+}
+function drawTree(now) {
+    const x=0, top=-158;
+    const t=(now-DRAG.tPhase)/1000;
+    cx2d.fillStyle='#0c0c10'; cx2d.fillRect(x-15, top, 30, 156);
+    cx2d.strokeStyle='#2b2b33'; cx2d.lineWidth=2; cx2d.strokeRect(x-15, top, 30, 156);
+    const bulb=(yy,on,c)=>{ cx2d.beginPath(); cx2d.arc(x,yy,7,0,2*Math.PI);
+        if(on){ cx2d.fillStyle=c; cx2d.shadowColor=c; cx2d.shadowBlur=14; cx2d.fill(); cx2d.shadowBlur=0; }
+        else { cx2d.fillStyle='#24242a'; cx2d.fill(); } };
+    const amberOn = DRAG.phase==='amber' ? t : (DRAG.phase==='green'||state==='race'||state==='done' ? 9 : -1);
+    bulb(top+16, true, '#3aa0ff');                              // staged
+    bulb(top+42, amberOn>=0,   '#ffb400');
+    bulb(top+66, amberOn>=0.5, '#ffb400');
+    bulb(top+90, amberOn>=1.0, '#ffb400');
+    bulb(top+118, DRAG.phase==='green'||state==='race'||state==='done', '#20d060');
+    bulb(top+142, DRAG.playerFoul, '#ff3030');
+}
+function drawDragStrip(now) {
+    const len=DRAG.len;
+    cx2d.fillStyle='#2b2b30'; cx2d.fillRect(-160, -len-140, 320, len+300);   // asphalt
+    cx2d.fillStyle='#242429';                                                  // lane tint split
+    cx2d.fillRect(2, -len-140, 158, len+300);
+    cx2d.setLineDash([18,16]); cx2d.strokeStyle='rgba(255,255,255,0.28)'; cx2d.lineWidth=3;
+    cx2d.beginPath(); cx2d.moveTo(0, 60); cx2d.lineTo(0, -len-90); cx2d.stroke(); cx2d.setLineDash([]);
+    cx2d.fillStyle='#3a3a44'; cx2d.fillRect(-166,-len-140,8,len+300); cx2d.fillRect(158,-len-140,8,len+300);
+    cx2d.strokeStyle='#d23a3a'; cx2d.lineWidth=3;                              // wall stripes
+    for (let y=40; y>-len-100; y-=90) { cx2d.beginPath(); cx2d.moveTo(-166,y); cx2d.lineTo(-158,y); cx2d.moveTo(158,y); cx2d.lineTo(166,y); cx2d.stroke(); }
+    cx2d.fillStyle='#f4f2fa'; cx2d.fillRect(-150,-3,300,5);                     // start line
+    cx2d.fillStyle='rgba(255,255,255,0.5)'; cx2d.font='bold 15px Bahnschrift, sans-serif'; cx2d.textAlign='center';
+    for (let i=1;i<4;i++){ const y=-len*i/4; cx2d.fillStyle='rgba(255,255,255,0.4)'; cx2d.fillRect(-150,y,300,2);
+        cx2d.fillStyle='rgba(255,255,255,0.35)'; cx2d.fillText((i===2?'HALF':(i*25)+'%'), 0, y-6); }
+    for (let r=0;r<2;r++) for (let c=0;c<12;c++){ cx2d.fillStyle=(r+c)%2?'#fff':'#111'; cx2d.fillRect(-150+c*25, -len-2+r*13, 25, 13); }
+    cx2d.fillStyle='#FFD400'; cx2d.font='bold 22px Bahnschrift, sans-serif';
+    cx2d.fillText('FINISH', 0, -len-24);
+    drawTree(now);
+}
+function drawDragHUD(now) {
+    cx2d.fillStyle='rgba(13,11,24,0.82)'; cx2d.fillRect(0,0,W,40);
+    cx2d.font='bold 19px Bahnschrift, Arial Narrow, sans-serif';
+    cx2d.textAlign='left'; cx2d.fillStyle='#5B9BFF';
+    cx2d.fillText('🏎 DRAG · '+DRAG_DISTANCES[DRAG.dist].name+(DRAG.event==='bracket'?' · RD '+(DRAG.round+1)+'/3':''), 20, 27);
+    const spd = Math.round((DRAG.player?dragForward(DRAG.player):0)/3.2);
+    cx2d.textAlign='right'; cx2d.fillStyle='#f4f2fa'; cx2d.fillText(spd+' mph', W-20, 27);
+    const et = DRAG.playerET!==null ? DRAG.playerET : (DRAG.greenAt?(performance.now()-DRAG.greenAt)/1000:0);
+    cx2d.textAlign='center'; cx2d.fillStyle='#FFD400'; cx2d.fillText(Math.max(0,et).toFixed(2)+'s', W/2, 27);
+    if (DRAG.playerRT!==null) { cx2d.textAlign='left'; cx2d.fillStyle='#a9a3c4'; cx2d.fillText('RT '+DRAG.playerRT.toFixed(3), 300, 27); }
+    else if (DRAG.playerFoul) { cx2d.textAlign='left'; cx2d.fillStyle='#E14D4D'; cx2d.fillText('RED LIGHT', 300, 27); }
+    // distance bar
+    const barY=H-16, bw=W-120;
+    cx2d.fillStyle='rgba(13,11,24,0.7)'; cx2d.fillRect(60, barY-6, bw, 12);
+    const frac = k => Math.max(0, Math.min(1, (-k.y)/DRAG.len));
+    cx2d.fillStyle=DRAG.player.body; cx2d.beginPath(); cx2d.arc(60+bw*frac(DRAG.player), barY, 6, 0, 2*Math.PI); cx2d.fill();
+    cx2d.fillStyle=DRAG.opp.body;    cx2d.beginPath(); cx2d.arc(60+bw*frac(DRAG.opp), barY, 5, 0, 2*Math.PI); cx2d.fill();
+    cx2d.strokeStyle='#FFD400'; cx2d.lineWidth=2; cx2d.beginPath(); cx2d.moveTo(60+bw, barY-8); cx2d.lineTo(60+bw, barY+8); cx2d.stroke();
+    if (DRAG.phase==='stage') { cx2d.textAlign='center'; cx2d.font='bold 40px Bahnschrift, sans-serif'; cx2d.fillStyle='rgba(255,212,0,0.85)'; cx2d.fillText('STAGE IT UP', W/2, H*0.30); }
+}
+function drawDragFrame(now) {
+    cx2d.fillStyle='#16181d'; cx2d.fillRect(0,0,W,H);
+    const S = DRAG.dist==='eighth' ? 0.9 : 0.82;
+    const py = DRAG.player ? DRAG.player.y : 0;
+    cx2d.save();
+    cx2d.translate(W/2, H*0.72); cx2d.scale(S,S); cx2d.translate(0, -py);
+    drawDragStrip(now);
+    drawParticlesWorld();
+    for (const k of [DRAG.opp, DRAG.player]) if (k) drawKart(k);
+    if (player) youMarker();
+    // lane numbers
+    cx2d.textAlign='center'; cx2d.font='bold 13px Bahnschrift, sans-serif';
+    for (const k of [DRAG.player, DRAG.opp]) if (k) { cx2d.fillStyle=k.isPlayer?'#FFD400':'#fff'; cx2d.fillText('#'+k.num, k.x, k.y-30); }
+    cx2d.restore();
+    drawDragHUD(now);
+    drawBanner();
+}
+
+/* ================= DEMOLITION DERBY ================= */
+let DERBY = null;
+function derbyPerf(skill) {
+    const cls = CLASSES[P.cls];
+    return { cls:P.cls, top: PHYS.maxSpeed*0.6*cls.speed, acc: PHYS.accel*0.95*cls.accel*skill, gripM:cls.grip, wearM:0.6 };
+}
+function newDerby() {
+    const a = DERBY_ARENAS[P.settings.derbyArena];
+    return { w:a.w, h:a.h, arena:P.settings.derbyArena, timed:P.settings.derbyTimed, limit:90,
+        startAt:0, phase:'intro', alive:0, order:[], results:false, obstacles:[] };
+}
+function buildDerbyField(n) {
+    const me = { name:P.name, num:(P.num||'X').toUpperCase(),
+        body:P.colors.body, trim:P.colors.trim, wing:P.colors.wing, numColor:P.colors.num };
+    const pool = RIVAL_POOL.filter(r => r.name.toLowerCase()!==P.name.toLowerCase())
+        .sort((a,b)=>b.skill-a.skill).slice(0, n-1)
+        .map(r => ({ ...r, num: r.num.toUpperCase()===me.num?r.num+'J':r.num, wing:r.trim, numColor:'#ffffff' }));
+    field = [ makeKart(me, true, 0, playerPerf()) ];
+    pool.forEach((r,i) => field.push(makeKart(r, false, i+1, derbyPerf(r.skill))));
+    field.forEach((k,i) => {
+        const a = -Math.PI/2 + i/field.length*2*Math.PI;
+        const rx = DERBY.w/2-70, ry = DERBY.h/2-70;
+        const px = Math.cos(a)*rx, py = Math.sin(a)*ry;
+        placeFlat(k, px, py, Math.atan2(-py, -px));   // face the middle
+        k.kills=0; k.lastHitBy=null;
+        k.derbyState='charge'; k.stateT=0; k.jamT=0; k.target=null; k.retarget=0;
+    });
+    player = field[0]; karts = field; DERBY.alive = field.length;
+    DERBY.obstacles = [ {x:-DERBY.w*0.19, y:0, r:26}, {x:DERBY.w*0.19, y:0, r:26} ];
+}
+function startDerby() {
+    gameMode='derby'; raceContext='free';
+    applyTrack(curTrack());
+    DERBY = newDerby();
+    particles=[]; banner={text:'',color:'',until:0};
+    buildDerbyField(P.settings.derbyKarts);
+    cam='tv'; startEngine();
+    state='countdown'; DERBY.phase='intro'; DERBY.startAt=performance.now();
+    hideOverlays();
+}
+function stepDerby(now, dt) {
+    if (!DERBY) return;
+    if (state==='countdown') {
+        if (now - DERBY.startAt > 3200) { state='race'; DERBY.startAt=now; DERBY.lastKillAt=now; DERBY.suddenShown=false; beepGo(); showBanner('💥 SMASH ’EM UP — LAST ONE RUNNING WINS!', '#E14D4D', 2.5); }
+        return;
+    }
+    if (state!=='race') return;
+    const hw=DERBY.w/2, hh=DERBY.h/2;
+    // nobody's died in a while → sudden death: everyone's ride starts rusting out
+    const sudden = (now - (DERBY.lastKillAt||DERBY.startAt)) > 14000;
+    if (sudden && !DERBY.suddenShown) { DERBY.suddenShown=true; showBanner('⏳ SUDDEN DEATH — RUN ’EM DOWN!', '#a05a00', 3); }
+    for (const k of karts) {
+        if (k.dead) {
+            k.vx*=Math.exp(-3*dt); k.vy*=Math.exp(-3*dt); k.x+=k.vx*dt; k.y+=k.vy*dt;
+            if (Math.random()<3*dt) particles.push({ kind:'smoke', x:k.x, y:k.y, z:3,
+                vx:(Math.random()*20-10), vy:(Math.random()*20-10), vz:40+Math.random()*40, life:1+Math.random(), age:0, size:3+Math.random()*3 });
+            continue;
+        }
+        let throttle=0, steer=0;
+        if (k.isPlayer) {
+            throttle = input.up ? 1 : (input.down ? -1 : 0);
+            steer = (input.left?-1:0) + (input.right?1:0);
+        } else {
+            // pick a target — sometimes a random kart, which breaks up wall pile-ups
+            k.retarget -= dt;
+            if (!k.target || k.target.dead || k.retarget<=0) {
+                const living = karts.filter(o => o!==k && !o.dead);
+                if (living.length) k.target = (Math.random()<0.4)
+                    ? living[Math.floor(Math.random()*living.length)]
+                    : living.reduce((a,b)=> Math.hypot(b.x-k.x,b.y-k.y) < Math.hypot(a.x-k.x,a.y-k.y) ? b : a);
+                else k.target = null;
+                k.retarget = 1.4 + Math.random()*1.6;
+            }
+            const tgt = k.target;
+            if (tgt) {
+                const df = angDiff(Math.atan2(tgt.y-k.y, tgt.x-k.x), k.heading);
+                const spd = Math.hypot(k.vx, k.vy);
+                if (spd < 26) k.jamT += dt; else k.jamT = Math.max(0, k.jamT - dt*1.5);
+                if (k.derbyState==='backup') {
+                    throttle = -1; steer = df > 0 ? -1 : 1;               // reverse out, crank away
+                    k.stateT -= dt;
+                    if (k.stateT <= 0) { k.derbyState='charge'; k.jamT=0; }
+                } else {
+                    steer = Math.max(-1, Math.min(1, df*2.2));
+                    throttle = Math.abs(df) < 0.7 ? 1 : 0.55;             // aim, then bury the pedal
+                    if (k.jamT > 0.6) { k.derbyState='backup'; k.stateT = 0.5 + Math.random()*0.45; }   // stuck → back up for a run
+                }
+            }
+        }
+        const fwd = k.vx*Math.cos(k.heading)+k.vy*Math.sin(k.heading);
+        k.heading += steer*2.6*dt*(fwd<-2?-1:1);
+        const fx=Math.cos(k.heading), fy=Math.sin(k.heading);
+        if (throttle>0) { k.vx+=fx*k.acc*throttle*dt; k.vy+=fy*k.acc*throttle*dt; }
+        else if (throttle<0) { k.vx+=fx*k.acc*throttle*0.7*dt; k.vy+=fy*k.acc*throttle*0.7*dt; }
+        const f2=k.vx*fx+k.vy*fy, lx=k.vx-fx*f2, ly=k.vy-fy*f2, keep=Math.exp(-6*dt);
+        k.vx=fx*f2+lx*keep; k.vy=fy*f2+ly*keep;
+        k.vx*=Math.exp(-0.5*dt); k.vy*=Math.exp(-0.5*dt);
+        const s2=Math.hypot(k.vx,k.vy); if (s2>k.top) { k.vx*=k.top/s2; k.vy*=k.top/s2; }
+        k.x+=k.vx*dt; k.y+=k.vy*dt;
+        if (k.x<-hw+16){ k.x=-hw+16; if(k.vx<0){ if(k.vx<-160)k.damage=Math.min(1,k.damage+0.03); k.vx*=-0.4; } }
+        if (k.x> hw-16){ k.x= hw-16; if(k.vx>0){ if(k.vx>160)k.damage=Math.min(1,k.damage+0.03); k.vx*=-0.4; } }
+        if (k.y<-hh+16){ k.y=-hh+16; if(k.vy<0){ if(k.vy<-160)k.damage=Math.min(1,k.damage+0.03); k.vy*=-0.4; } }
+        if (k.y> hh-16){ k.y= hh-16; if(k.vy>0){ if(k.vy>160)k.damage=Math.min(1,k.damage+0.03); k.vy*=-0.4; } }
+        for (const ob of DERBY.obstacles) {
+            const dx=k.x-ob.x, dy=k.y-ob.y, d=Math.hypot(dx,dy);
+            if (d<ob.r+15){ const nx=dx/(d||1), ny=dy/(d||1); k.x=ob.x+nx*(ob.r+15); k.y=ob.y+ny*(ob.r+15);
+                const vn=k.vx*nx+k.vy*ny; if(vn<0){ k.vx-=nx*vn*1.3; k.vy-=ny*vn*1.3; } }
+        }
+        if (sudden) k.damage = Math.min(1, k.damage + 0.07*dt);   // the rust bites everyone
+        if (k.damage>=1) checkDerbyDead(k, now);
+    }
+    derbyCollisions(now);
+    const living = karts.filter(k=>!k.dead);
+    DERBY.alive = living.length;
+    const overtime = (now-DERBY.startAt)/1000 > (DERBY.timed ? DERBY.limit : 150);
+    if (living.length<=1 || overtime) { finishDerby(); return; }
+}
+function derbyCollisions(now) {
+    const R=17;
+    for (let i=0;i<karts.length;i++) for (let j=i+1;j<karts.length;j++) {
+        const a=karts[i], b=karts[j];
+        const dx=b.x-a.x, dy=b.y-a.y, dist=Math.hypot(dx,dy);
+        if (dist>0 && dist<R*2) {
+            const nx=dx/dist, ny=dy/dist, push=(R*2-dist)/2;
+            a.x-=nx*push; a.y-=ny*push; b.x+=nx*push; b.y+=ny*push;
+            const rel=(b.vx-a.vx)*nx+(b.vy-a.vy)*ny;
+            if (rel<0) {
+                const imp=rel*0.7;
+                if (!a.dead){ a.vx+=nx*imp; a.vy+=ny*imp; }
+                if (!b.dead){ b.vx-=nx*imp; b.vy-=ny*imp; }
+                const cs=-rel, base=Math.max(0,(cs-40))/650;
+                if (base>0) {
+                    const aInto=a.vx*nx+a.vy*ny, bInto=-(b.vx*nx+b.vy*ny);
+                    const aAgg = aInto>=bInto, agg = aAgg?a:b, vic = aAgg?b:a;
+                    if (!a.dead) a.damage=Math.min(1, a.damage + base*(a===agg?0.5:1.25));
+                    if (!b.dead) b.damage=Math.min(1, b.damage + base*(b===agg?0.5:1.25));
+                    if (!vic.dead) vic.lastHitBy = agg;
+                    if (cs>150) { for (let n=0;n<4;n++) particles.push({ kind:'clod', x:(a.x+b.x)/2, y:(a.y+b.y)/2, z:2,
+                        vx:(Math.random()*120-60), vy:(Math.random()*120-60), vz:60+Math.random()*60, life:0.5, age:0, size:2+Math.random()*2 }); beep(120,0.07); }
+                    checkDerbyDead(a,now); checkDerbyDead(b,now);
+                }
+            }
+        }
+    }
+}
+function checkDerbyDead(k, now) {
+    if (k.dead || k.damage<1) return;
+    k.dead=true; k.dnf=true; DERBY.order.push(k); DERBY.lastKillAt=now; DERBY.suddenShown=false;
+    const killer = k.lastHitBy;
+    if (killer && !killer.dead && killer!==k) killer.kills=(killer.kills||0)+1;
+    for (let i=0;i<24;i++){ const fire=i<10; particles.push({ kind:fire?'fire':'smoke', x:k.x, y:k.y, z:4,
+        vx:(Math.random()*140-70), vy:(Math.random()*140-70), vz:70+Math.random()*120, life:fire?0.5:1.4, age:0, size:fire?3:4+Math.random()*4 }); }
+    beep(90,0.5);
+    showBanner((killer&&killer.isPlayer?'💥 YOU WRECKED #'+k.num+'!':'💥 #'+k.num+(killer&&killer!==k?' wrecked by #'+killer.num:' is out')+'!'), '#7a1f1f', 2.2);
+}
+function finishDerby() {
+    state='done';
+    const living = karts.filter(k=>!k.dead).sort((a,b)=>a.damage-b.damage);
+    const order = [...living, ...DERBY.order.slice().reverse()];
+    const place = order.indexOf(player)+1;
+    const kills = player.kills||0, won = place===1 && !player.dead;
+    let total = DERBY_PAY[place-1]||3; const lines=[[`Placed P${place} of ${order.length}`, total]];
+    if (kills>0) { const kb=kills*4; total+=kb; lines.push([`🔨 ${kills} wreck${kills>1?'s':''} (×4)`, kb]); }
+    if (won) { total+=25; lines.push(['🏆 LAST ONE RUNNING', 25]); P.stats.derbyWins++; }
+    P.tokens+=total; P.stats.tokensEarned+=total; P.stats.races++;
+    saveDB();
+    const sfx=p=>p===1?'st':p===2?'nd':p===3?'rd':'th';
+    $('finishTitle').innerHTML = won ? '🏆 <span>LAST ONE RUNNING!</span>' : `You finished <span>${place}${sfx(place)}</span>`;
+    let rows='<tr><th>Pos</th><th>Driver</th><th>Kart</th><th>Wrecks</th></tr>';
+    order.forEach((k,i)=>{ rows += `<tr${k.isPlayer?' class="you"':''}><td>${i+1}</td><td>${k.name}${k.dead?' 💥':' ✅'}</td><td>#${k.num}</td><td>${k.kills||0}</td></tr>`; });
+    $('resultsTable').innerHTML=rows;
+    let pay=''; lines.forEach(([t,a])=> pay += `<div class="line"><span>${t}</span><b>+${a} ⛁</b></div>`);
+    pay += `<div class="line total"><span>Tokens earned</span><b>+${total} ⛁</b></div><div class="line total"><span>Your bank</span><b>⛁ ${P.tokens}</b></div>`;
+    $('payBox').innerHTML=pay; $('payBox').classList.remove('hidden');
+    $('bestLapLine').textContent = won ? 'You were the last kart moving!' : '';
+    $('finStandings').classList.add('hidden');
+    $('againBtn').classList.remove('hidden'); $('againBtn').textContent='Derby Again';
+    setTimeout(()=>{ if (state==='done') showScreen('finish'); }, 1600);
+}
+function drawArena(now) {
+    const hw=DERBY.w/2, hh=DERBY.h/2;
+    cx2d.fillStyle='#5a4632'; cx2d.fillRect(-hw,-hh,DERBY.w,DERBY.h);          // mud floor
+    cx2d.fillStyle='rgba(0,0,0,0.12)';
+    for (let i=0;i<80;i++){ const x=-hw+((i*97)%DERBY.w), y=-hh+((i*173)%DERBY.h); cx2d.fillRect(x,y,20,3); }
+    cx2d.fillStyle='rgba(0,0,0,0.14)';                                          // churned ruts
+    for (let i=0;i<26;i++){ const x=-hw+((i*211)%DERBY.w), y=-hh+((i*127)%DERBY.h); cx2d.beginPath(); cx2d.ellipse(x,y,16,7,i,0,2*Math.PI); cx2d.fill(); }
+    // concrete barrier wall
+    cx2d.lineWidth=14; cx2d.strokeStyle='#3a3a42'; cx2d.strokeRect(-hw,-hh,DERBY.w,DERBY.h);
+    cx2d.lineWidth=4; cx2d.strokeStyle='#d23a3a'; cx2d.setLineDash([26,20]); cx2d.strokeRect(-hw,-hh,DERBY.w,DERBY.h); cx2d.setLineDash([]);
+    // tire-stack obstacles
+    for (const ob of DERBY.obstacles) {
+        cx2d.strokeStyle='#333'; cx2d.lineWidth=3; cx2d.fillStyle='#111';
+        for (const rr of [ob.r, ob.r*0.66, ob.r*0.33]) { cx2d.beginPath(); cx2d.arc(ob.x,ob.y,rr,0,2*Math.PI); cx2d.stroke(); }
+    }
+    cx2d.fillStyle='rgba(255,212,0,0.16)'; cx2d.font='bold 46px Bahnschrift, sans-serif'; cx2d.textAlign='center';
+    cx2d.fillText('DEMOLITION DERBY', 0, 8);
+    cx2d.fillStyle='rgba(244,242,250,0.12)'; cx2d.font='bold 18px Bahnschrift, sans-serif';
+    cx2d.fillText('✝ GOD FIRST · FAMILY ALWAYS', 0, 34);
+    // crowd dots outside the wall
+    const tNow=performance.now();
+    for (let i=0;i<64;i++){ const a=i/64*2*Math.PI; const x=Math.cos(a)*(hw+52), y=Math.sin(a)*(hh+52);
+        cx2d.fillStyle=CROWD_COLORS[(i*7)%CROWD_COLORS.length]; cx2d.beginPath(); cx2d.arc(x, y+Math.sin(tNow/400+i)*1.2, 3, 0, 2*Math.PI); cx2d.fill(); }
+}
+function drawDerbyHUD(now) {
+    cx2d.fillStyle='rgba(13,11,24,0.82)'; cx2d.fillRect(0,0,W,40);
+    cx2d.font='bold 19px Bahnschrift, Arial Narrow, sans-serif';
+    cx2d.textAlign='left'; cx2d.fillStyle='#E14D4D'; cx2d.fillText('💥 DEMOLITION DERBY', 20, 27);
+    cx2d.fillStyle='#f4f2fa'; cx2d.fillText('RUNNING: '+DERBY.alive+'/'+karts.length, 250, 27);
+    cx2d.fillText('WRECKS: '+(player.kills||0), 430, 27);
+    if (DERBY.timed) { const left=Math.max(0, DERBY.limit-(now-DERBY.startAt)/1000); cx2d.textAlign='center'; cx2d.fillStyle='#FFD400'; cx2d.fillText(Math.ceil(left)+'s', W/2, 27); }
+    // your health
+    cx2d.textAlign='right'; cx2d.fillStyle='#a9a3c4'; cx2d.fillText('KART', W-140, 27);
+    const hp=1-player.damage;
+    cx2d.fillStyle='rgba(255,255,255,0.15)'; cx2d.fillRect(W-118, 15, 100, 14);
+    cx2d.fillStyle=player.dead?'#7a1f1f':hp>0.6?'#3AAE5C':hp>0.3?'#FFD400':'#E14D4D'; cx2d.fillRect(W-118, 15, 100*Math.max(0,hp), 14);
+    cx2d.strokeStyle='rgba(255,255,255,0.4)'; cx2d.lineWidth=1; cx2d.strokeRect(W-118, 15, 100, 14);
+    if (player.dead) { cx2d.textAlign='center'; cx2d.fillStyle='#E14D4D'; cx2d.font='bold 30px Bahnschrift, sans-serif'; cx2d.fillText('WRECKED — WATCH IT PLAY OUT', W/2, H*0.5); }
+}
+function drawDerbyCountdown(now) {
+    const t=(now-DERBY.startAt)/1000, n=Math.ceil(3-t);
+    cx2d.textAlign='center';
+    if (n>=1){ cx2d.font='bold 120px Bahnschrift, sans-serif'; cx2d.fillStyle='#E14D4D'; cx2d.fillText(n, W/2, H/2);
+        cx2d.font='bold 26px Bahnschrift, sans-serif'; cx2d.fillStyle='rgba(255,255,255,0.85)'; cx2d.fillText('GET READY TO SMASH', W/2, H/2+56); }
+}
+function drawDerbyFrame(now) {
+    cx2d.fillStyle='#17130f'; cx2d.fillRect(0,0,W,H);
+    const S = Math.min(W/(DERBY.w+130), H/(DERBY.h+170))*0.98;
+    cx2d.save();
+    cx2d.translate(W/2, H*0.54); cx2d.scale(S,S);
+    drawArena(now);
+    [...karts].sort((a,b)=>(a.dead?0:1)-(b.dead?0:1)).forEach(drawKart);
+    drawParticlesWorld();
+    if (player && !player.dead) youMarker();
+    cx2d.textAlign='center'; cx2d.font='bold 13px Bahnschrift, sans-serif';
+    for (const k of karts) { cx2d.fillStyle=k.isPlayer?'#FFD400':'rgba(255,255,255,0.8)'; cx2d.fillText('#'+k.num, k.x, k.y-26); }
+    cx2d.restore();
+    drawDerbyHUD(now);
+    drawBanner();
+    if (state==='countdown') drawDerbyCountdown(now);
+}
+
+// ==================== SETUP SCREENS: DRAG & DERBY ====================
+function chipRow(el, keys, cur, label, onPick) {
+    el.innerHTML='';
+    keys.forEach(k => { const b=document.createElement('button'); b.className='chip'+(cur===k.id?' sel':''); b.textContent=label(k);
+        b.onclick=()=>{ onPick(k.id); }; el.appendChild(b); });
+}
+function renderDragSetup() {
+    $('dragTrackLine').textContent = `Run at ${curTrack().name} · CPU difficulty is set in Settings (${DIFFS[P.settings.diff].name}).`;
+    chipRow($('dragDistChips'), Object.keys(DRAG_DISTANCES).map(id=>({id})), P.settings.dragDist,
+        k=>DRAG_DISTANCES[k.id].name, id=>{ P.settings.dragDist=id; saveDB(); renderDragSetup(); });
+    chipRow($('dragEventChips'), [{id:'grudge'},{id:'bracket'}], P.settings.dragEvent,
+        k=>k.id==='grudge'?'Grudge Run (1 v 1)':'Bracket Night (3 rounds)', id=>{ P.settings.dragEvent=id; saveDB(); renderDragSetup(); });
+    $('dragEventNote').textContent = P.settings.dragEvent==='grudge'
+        ? 'One run, heads-up against a rival. Quick tokens.'
+        : 'Win three rounds against tougher and tougher cars to take the bracket and a big payout.';
+}
+function renderDerbySetup() {
+    $('derbyKartsVal').textContent = P.settings.derbyKarts;
+    $('derbyKarts').value = P.settings.derbyKarts;
+    chipRow($('derbyArenaChips'), Object.keys(DERBY_ARENAS).map(id=>({id})), P.settings.derbyArena,
+        k=>DERBY_ARENAS[k.id].name, id=>{ P.settings.derbyArena=id; saveDB(); renderDerbySetup(); });
+    chipRow($('derbyModeChips'), [{id:'last'},{id:'timed'}], P.settings.derbyTimed?'timed':'last',
+        k=>k.id==='last'?'Last One Running':'90-Second Slam', id=>{ P.settings.derbyTimed=(id==='timed'); saveDB(); renderDerbySetup(); });
+}
 
 // ==================== BOOT ====================
 loadDB();
