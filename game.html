@@ -294,7 +294,7 @@ footer a { color:var(--yellow); text-decoration:none; }
         <button class="btn ghost sm" id="switchBtn">↩ Switch Driver</button>
         <p class="keys">Drive with <b>&#8593;</b> gas <b>&#8595;</b> brake <b>&#8592;</b><b>&#8594;</b> steer (or <b>W</b><b>A</b><b>S</b><b>D</b>) · hold <b>SPACE</b> to power-slide · <b>C</b> camera · <b>M</b> mute</p>
         <p class="keys">🔧 Worn tires get slippery — dive low onto the front-stretch pit road to bolt on fresh ones!</p>
-        <p class="keys" style="color:#FFD400; font-weight:700;">GAME VERSION 23</p>
+        <p class="keys" style="color:#FFD400; font-weight:700;">GAME VERSION 24</p>
     </div>
 
     <!-- ===== GARAGE ===== -->
@@ -1934,7 +1934,7 @@ function drawVersionTag() {
     cx2d.textAlign = 'right';
     cx2d.font = 'bold 12px Bahnschrift, Arial Narrow, sans-serif';
     cx2d.fillStyle = 'rgba(255,212,0,0.55)';
-    cx2d.fillText('v23', W - 10, H - 10);
+    cx2d.fillText('v24', W - 10, H - 10);
 }
 let lastT = performance.now();
 function frame(now) {
@@ -4680,15 +4680,109 @@ function drawDerbyCountdown(now) {
     if (n>=1){ cx2d.font='bold 120px Bahnschrift, sans-serif'; cx2d.fillStyle=DERBY.race?'#3AAE5C':'#E14D4D'; cx2d.fillText(n, W/2, H/2);
         cx2d.font='bold 26px Bahnschrift, sans-serif'; cx2d.fillStyle='rgba(255,255,255,0.85)'; cx2d.fillText(DERBY.race?'GET READY TO RACE':'GET READY TO SMASH', W/2, H/2+56); }
 }
-function drawDerbyHood(now) {
-    // your own hood + roll cage at the bottom to sell the in-car feel
-    const top=H*0.80;
-    cx2d.fillStyle=player.body;
-    cx2d.beginPath(); cx2d.moveTo(0,H); cx2d.lineTo(W*0.12,top); cx2d.lineTo(W*0.88,top); cx2d.lineTo(W,H); cx2d.closePath(); cx2d.fill();
-    cx2d.strokeStyle=player.trim; cx2d.lineWidth=5; cx2d.stroke();
-    cx2d.fillStyle='#15151a'; cx2d.fillRect(W/2-30, top-2, 60, 14);                 // hood scoop
-    cx2d.strokeStyle='#20202a'; cx2d.lineWidth=10; cx2d.beginPath(); cx2d.moveTo(0,44); cx2d.lineTo(W,44); cx2d.stroke();   // cage top bar
-    cx2d.lineWidth=8; cx2d.beginPath(); cx2d.moveTo(46,44); cx2d.lineTo(22,top); cx2d.moveTo(W-46,44); cx2d.lineTo(W-22,top); cx2d.stroke();   // A-pillars
+let fpWheel = 0;
+// ---- TRUE first-person cockpit: you're in the seat, looking forward ----
+function drawDerbyFirstPerson(now) {
+    const p = player;
+    const fx=Math.cos(p.heading), fy=Math.sin(p.heading), rx=-fy, ry=fx;
+    const eyeX = p.x - fx*8, eyeY = p.y - fy*8;
+    const HOR = Math.round(H*0.46), F = 300, EH = 38;
+    const proj = (wx,wy) => { const dx=wx-eyeX, dy=wy-eyeY, v=dx*fx+dy*fy; if (v<9) return null;
+        const u=dx*rx+dy*ry, s=F/v; return { x:W/2 + u*s, y:HOR + EH*s, s, v }; };
+    // ---- sky ----
+    let g=cx2d.createLinearGradient(0,0,0,HOR);
+    g.addColorStop(0,'#120c26'); g.addColorStop(0.72,'#2c1f4e'); g.addColorStop(1,'#6b4630');
+    cx2d.fillStyle=g; cx2d.fillRect(0,0,W,HOR);
+    for (let i=0;i<38;i++){ cx2d.fillStyle=`rgba(255,255,255,${0.18+((i*13)%9)/26})`; cx2d.fillRect((i*151)%W,(i*61)%(HOR-60),2,2); }
+    cx2d.fillStyle='#e8e4d0'; cx2d.beginPath(); cx2d.arc(W*0.8,50,13,0,2*Math.PI); cx2d.fill();
+    cx2d.fillStyle='#1d1538'; cx2d.beginPath(); cx2d.arc(W*0.8-7,46,11,0,2*Math.PI); cx2d.fill();
+    // grandstand/treeline silhouette on the horizon
+    cx2d.fillStyle='#0d0a1c'; cx2d.fillRect(0,HOR-8,W,8);
+    for (let x=0;x<W;x+=52){ cx2d.beginPath(); cx2d.arc(x+22,HOR-7,9+(x*7)%7,Math.PI,0); cx2d.fill(); }
+    // ---- ground ----
+    cx2d.fillStyle = DERBY.race ? '#7a5636' : '#5a4632';
+    cx2d.fillRect(0,HOR,W,H-HOR);
+    // world-anchored ground specks → the dirt streams past as you drive
+    const gx0=Math.round(eyeX/46)*46, gy0=Math.round(eyeY/46)*46;
+    for (let gx=gx0-460; gx<=gx0+460; gx+=46) for (let gy=gy0-460; gy<=gy0+460; gy+=46){
+        const pr=proj(gx,gy); if(!pr||pr.v>560) continue;
+        cx2d.fillStyle = ((gx*7+gy*13)&2)?'rgba(0,0,0,0.14)':'rgba(210,180,140,0.07)';
+        const sz=Math.max(1, pr.s*1.6); cx2d.fillRect(pr.x-sz/2, pr.y-sz*0.35, sz, sz*0.55);
+    }
+    // haze at the horizon
+    g=cx2d.createLinearGradient(0,HOR,0,HOR+120); g.addColorStop(0,'rgba(18,12,38,0.55)'); g.addColorStop(1,'rgba(18,12,38,0)');
+    cx2d.fillStyle=g; cx2d.fillRect(0,HOR,W,120);
+    // ---- collect billboards, far → near ----
+    const items=[];
+    const post=(pr,cap)=>{ const h=Math.min(20*pr.s,150), wpx=Math.max(2,Math.min(9*pr.s,42));
+        cx2d.fillStyle='#15151a'; cx2d.fillRect(pr.x-wpx/2, pr.y-h, wpx, h);
+        cx2d.fillStyle=cap; cx2d.fillRect(pr.x-wpx/2, pr.y-h, wpx, Math.max(2,h*0.3)); };
+    if (DERBY.race) {
+        const Pth=DERBY.path;
+        for (let i=0;i<Pth.N;i+=3){ const t=Pth.tan[i], nx=-Math.sin(t), ny=Math.cos(t);
+            for (const side of [1,-1]){ const ex=Pth.pts[i].x+nx*side*Pth.halfW, ey=Pth.pts[i].y+ny*side*Pth.halfW;
+                const pr=proj(ex,ey); if(pr&&pr.v<760) items.push({ v:pr.v, draw:()=>post(pr, (i%2)?'#d23a3a':'#e8e8e8') }); } }
+    } else {
+        const hw=DERBY.w/2, hh=DERBY.h/2, seg=46;
+        const edges=[]; for (let x=-hw;x<=hw;x+=seg){ edges.push([x,-hh],[x,hh]); } for (let y=-hh;y<=hh;y+=seg){ edges.push([-hw,y],[hw,y]); }
+        for (let e=0;e<edges.length;e++){ const pr=proj(edges[e][0],edges[e][1]); if(pr&&pr.v<1500) items.push({ v:pr.v, draw:()=>post(pr, (e%2)?'#d23a3a':'#e8e8e8') }); }
+        for (const ob of DERBY.obstacles){ const pr=proj(ob.x,ob.y); if(pr&&pr.v<1200) items.push({ v:pr.v, draw:()=>{
+            const s=Math.min(pr.s,4); cx2d.strokeStyle='#333'; cx2d.lineWidth=Math.max(1,2*s); cx2d.fillStyle='#111';
+            for(const rr of [ob.r,ob.r*0.6]){ cx2d.beginPath(); cx2d.arc(pr.x,pr.y-rr*s*0.4,rr*s,0,2*Math.PI); cx2d.stroke(); } } }); }
+    }
+    for (const k of karts){ if (k===p) continue;
+        if (k.tow && k.tow.attached){ const pt=proj(k.tow.x,k.tow.y); if(pt&&pt.v<900) items.push({ v:pt.v, draw:()=>drawCarBillboard(pt,k,true) }); }
+        const pr=proj(k.x,k.y); if(pr&&pr.v<1100) items.push({ v:pr.v, draw:()=>drawCarBillboard(pr,k,false) });
+    }
+    if (p.tow && p.tow.attached){ const pt=proj(p.tow.x,p.tow.y); if(pt&&pt.v>12) items.push({ v:pt.v, draw:()=>drawCarBillboard(pt,p,true) }); }
+    for (const pa of particles){ const pr=proj(pa.x,pa.y); if(pr&&pr.v<700) items.push({ v:pr.v, draw:()=>{ const al=1-pa.age/pa.life;
+        cx2d.fillStyle = pa.kind==='fire'?`rgba(255,${Math.round(90+120*al)},30,${(0.8*al).toFixed(2)})`:pa.kind==='smoke'?`rgba(95,95,108,${(0.5*al).toFixed(2)})`:`rgba(200,168,124,${(0.45*al).toFixed(2)})`;
+        cx2d.beginPath(); cx2d.arc(pr.x, pr.y-Math.min((pa.z||0)*pr.s,90), Math.min(pa.size*pr.s,50), 0, 2*Math.PI); cx2d.fill(); } }); }
+    items.sort((a,b)=>b.v-a.v);
+    for (const it of items) it.draw();
+    // ---- cockpit / dashboard ----
+    drawDerbyCockpit(now);
+}
+function drawCarBillboard(pr, k, isTow) {
+    const s=Math.min(pr.s,4.2), x=pr.x, y=pr.y;
+    cx2d.save();
+    if (pr.v<70) cx2d.globalAlpha=Math.max(0.15,(pr.v-25)/45);
+    cx2d.fillStyle='rgba(0,0,0,0.3)'; cx2d.beginPath(); cx2d.ellipse(x,y,16*s,5*s,0,0,2*Math.PI); cx2d.fill();
+    const body = isTow ? (k.tow.kind==='chain'? k.trim : (k.tow.hp>0.5?'#c8c8d0':'#7a5a3a')) : (k.dead?'#3a3230':k.body);
+    cx2d.fillStyle='#111'; cx2d.fillRect(x-14*s,y-9*s,6*s,10*s); cx2d.fillRect(x+8*s,y-9*s,6*s,10*s);
+    cx2d.fillStyle=body; cx2d.beginPath(); cx2d.roundRect(x-13*s,y-19*s,26*s,19*s,3*s); cx2d.fill();
+    cx2d.strokeStyle=k.trim; cx2d.lineWidth=Math.max(1,1.4*s); cx2d.stroke();
+    if (!isTow){ cx2d.fillStyle='#0f0f16'; cx2d.fillRect(x-9*s,y-16*s,18*s,7*s);
+        if (k.dead){ for(let n=0;n<3;n++){ cx2d.fillStyle='rgba(30,26,24,0.6)'; cx2d.beginPath(); cx2d.arc(x+(n-1)*6*s,y-8*s,2.4*s,0,2*Math.PI); cx2d.fill(); } }
+        if (s>0.5){ cx2d.fillStyle='#fff'; cx2d.font=`bold ${Math.max(8,Math.min(22,9*s))}px Bahnschrift, sans-serif`; cx2d.textAlign='center'; cx2d.fillText('#'+k.num, x, y-21*s); } }
+    cx2d.restore();
+}
+function drawDerbyCockpit(now) {
+    const p=player;
+    // pull the wheel toward your steering input
+    const target=(input.right?1:0)-(input.left?1:0); fpWheel += (target-fpWheel)*0.22;
+    // roll cage A-pillars + top bar frame
+    cx2d.strokeStyle='#1a1a22'; cx2d.lineWidth=12; cx2d.beginPath(); cx2d.moveTo(0,42); cx2d.lineTo(W,42); cx2d.stroke();
+    cx2d.lineWidth=13; cx2d.beginPath(); cx2d.moveTo(30,42); cx2d.lineTo(-40,H); cx2d.moveTo(W-30,42); cx2d.lineTo(W+40,H); cx2d.stroke();
+    // dashboard / hood
+    const top=H*0.74;
+    cx2d.fillStyle=p.body;
+    cx2d.beginPath(); cx2d.moveTo(0,H); cx2d.lineTo(0,top+14); cx2d.quadraticCurveTo(W/2,top-16,W,top+14); cx2d.lineTo(W,H); cx2d.closePath(); cx2d.fill();
+    cx2d.strokeStyle=p.trim; cx2d.lineWidth=4; cx2d.stroke();
+    cx2d.fillStyle='#0e0e14'; cx2d.fillRect(0,top+20,W,H);                    // dash pad
+    cx2d.fillStyle='#15151a'; cx2d.fillRect(W/2-32,top-4,64,16);              // hood scoop
+    // steering wheel
+    cx2d.save(); cx2d.translate(W/2, H+40); cx2d.rotate(fpWheel*0.9);
+    cx2d.strokeStyle='#15151a'; cx2d.lineWidth=20; cx2d.beginPath(); cx2d.arc(0,0,96,0,2*Math.PI); cx2d.stroke();
+    cx2d.strokeStyle='#26262e'; cx2d.lineWidth=11;
+    for (const a of [-0.75*Math.PI,-0.25*Math.PI,0.5*Math.PI]){ cx2d.beginPath(); cx2d.moveTo(0,0); cx2d.lineTo(Math.cos(a)*88,Math.sin(a)*88); cx2d.stroke(); }
+    cx2d.fillStyle=p.trim; cx2d.beginPath(); cx2d.arc(0,0,22,0,2*Math.PI); cx2d.fill(); cx2d.restore();
+    // gauges on the dash — speed (left) + kart health (right)
+    const spd=Math.round(Math.hypot(p.vx,p.vy)/3.2);
+    cx2d.fillStyle='#f4f2fa'; cx2d.font='bold 20px Bahnschrift, sans-serif'; cx2d.textAlign='left'; cx2d.fillText(spd+' mph', 26, H-20);
+    const hp=1-p.damage; cx2d.textAlign='right'; cx2d.fillStyle='#a9a3c4'; cx2d.font='bold 13px Bahnschrift, sans-serif'; cx2d.fillText('KART', W-118, H-30);
+    cx2d.fillStyle='rgba(255,255,255,0.18)'; cx2d.fillRect(W-92, H-40, 74, 12);
+    cx2d.fillStyle=p.dead?'#7a1f1f':hp>0.6?'#3AAE5C':hp>0.3?'#FFD400':'#E14D4D'; cx2d.fillRect(W-92, H-40, 74*Math.max(0,hp), 12);
 }
 function drawDerbyWorld(now, followMode) {
     if (DERBY.race) drawFig8Track(now); else drawArena(now);
@@ -4699,6 +4793,12 @@ function drawDerbyWorld(now, followMode) {
 }
 function drawDerbyFrame(now) {
     cx2d.fillStyle='#17130f'; cx2d.fillRect(0,0,W,H);
+    if (derbyCam==='cockpit' && player) {
+        drawDerbyFirstPerson(now);
+        drawDerbyHUD(now); drawBanner();
+        if (state==='countdown') drawDerbyCountdown(now);
+        return;
+    }
     const fitW = DERBY.race ? DERBY.fitW : DERBY.w+130, fitH = DERBY.race ? DERBY.fitH : DERBY.h+170;
     if (derbyCam==='tv' || !player) {
         const S = Math.min(W/fitW, H/fitH)*0.98;
@@ -4708,22 +4808,20 @@ function drawDerbyFrame(now) {
         cx2d.textAlign='center'; cx2d.font='bold 13px Bahnschrift, sans-serif';
         for (const k of karts) { cx2d.fillStyle=k.isPlayer?'#FFD400':'rgba(255,255,255,0.8)'; cx2d.fillText('#'+k.num, k.x, k.y-26); }
         cx2d.restore();
-    } else {
-        // follow cam: player centered + rotated so you always face 'up' (chase = wider, cockpit = tight + hood)
-        const zoom = derbyCam==='cockpit' ? 2.1 : 1.5, anchorY = derbyCam==='cockpit' ? H*0.72 : H*0.58;
+    } else {   // chase: player-centered rotated follow
+        const zoom = 1.5, anchorY = H*0.58;
         const rot = -(player.heading + Math.PI/2), c=Math.cos(rot), s=Math.sin(rot);
         cx2d.save();
         cx2d.translate(W/2, anchorY); cx2d.scale(zoom,zoom); cx2d.rotate(rot); cx2d.translate(-player.x, -player.y);
         drawDerbyWorld(now, true);
         cx2d.restore();
-        cx2d.textAlign='center'; cx2d.font='bold 13px Bahnschrift, sans-serif';   // upright number tags in screen space
+        cx2d.textAlign='center'; cx2d.font='bold 13px Bahnschrift, sans-serif';
         for (const k of karts) { if (k===player || k.dead) continue;
             const dx=k.x-player.x, dy=k.y-player.y;
             const sx=W/2+(dx*c-dy*s)*zoom, sy=anchorY+(dx*s+dy*c)*zoom;
             if (sx<-30||sx>W+30||sy<-30||sy>H+30) continue;
             cx2d.fillStyle='rgba(255,255,255,0.85)'; cx2d.fillText('#'+k.num, sx, sy-18);
         }
-        if (derbyCam==='cockpit') drawDerbyHood(now);
     }
     drawDerbyHUD(now);
     drawBanner();
