@@ -252,7 +252,7 @@ const ITEM_OPTIONS = {
     'Team Hat': ['One Size Fits Most - $35'],
     'Drink Koozie': ['Black - $8 (2 for $15)', 'Purple - $8 (2 for $15)'],
     'Team Decal': ['6 inch - $10', '8 inch - $15'],
-    'Team Sticker': ['2 inch - $3 (2 for $5)', '3 inch - $5', '4x4 - $7 (2 for $12)']
+    'Team Sticker': ['4x4 - $7 (2 for $12)']
 };
 const orderItemSel = document.getElementById('order-item');
 const orderSizeSel = document.getElementById('order-size');
