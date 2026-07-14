@@ -280,6 +280,8 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
 }
 .sched-away h3 { color: #fff; text-transform: uppercase; letter-spacing: 1px; font-size: 1.35rem; margin-bottom: 8px; }
 .sched-away p { color: var(--text); margin-bottom: 8px; }
+.sched-away-times { color: var(--yellow); font-weight: 600; }
+.sched-away-times strong { color: #fff; }
 .sched-away-addr { color: var(--muted); font-size: .95rem; }
 .sched-away-addr a { color: var(--yellow); text-decoration: none; font-weight: 600; }
 .sched-away-addr a:hover { text-decoration: underline; }
