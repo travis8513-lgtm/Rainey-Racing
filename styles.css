@@ -265,6 +265,24 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
 .sched-row.sched-tt { opacity: .72; border-left-color: #3a3550; }
 .sched-row.sched-raced .sched-note { color: var(--yellow); font-weight: 700; }
 .sched-row.sched-missed { opacity: .55; border-left-color: #3a3550; }
+
+/* new-track away-race callout */
+.sched-away {
+    max-width: 720px; margin: 26px auto 0; text-align: center;
+    background: linear-gradient(135deg, rgba(37,99,235,.14), transparent 60%), var(--carbon-2);
+    border: 1px solid var(--line); border-left: 5px solid var(--blue); border-radius: 12px; padding: 24px 26px;
+}
+.sched-away-flag {
+    display: inline-block; background: var(--blue); color: #fff;
+    font-family: 'Bahnschrift','Arial Narrow','Segoe UI',sans-serif; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 1px; font-size: .82rem;
+    padding: 5px 14px; border-radius: 6px; margin-bottom: 12px;
+}
+.sched-away h3 { color: #fff; text-transform: uppercase; letter-spacing: 1px; font-size: 1.35rem; margin-bottom: 8px; }
+.sched-away p { color: var(--text); margin-bottom: 8px; }
+.sched-away-addr { color: var(--muted); font-size: .95rem; }
+.sched-away-addr a { color: var(--yellow); text-decoration: none; font-weight: 600; }
+.sched-away-addr a:hover { text-decoration: underline; }
 .sched-foot { text-align: center; color: var(--muted); font-size: .92rem; margin-top: 26px; line-height: 1.8; }
 .sched-foot a { color: var(--yellow); text-decoration: none; font-weight: 600; }
 .sched-foot a:hover { text-decoration: underline; }

@@ -194,7 +194,7 @@ if (orderForm) {
 // 2026 race Sundays at Camden Speedway (month is 1-based here, converted below)
 const RACE_DATES = [
     [4, 12, 'Opening Day'], [4, 26, 'Race Day'], [5, 10, 'Race Day'], [5, 24, 'Race Day'],
-    [5, 31, 'Race Day'], [6, 14, 'Race Day'], [6, 28, 'Race Day'], [7, 12, 'Race Day'],
+    [5, 31, 'Race Day'], [6, 14, 'Race Day'], [6, 28, 'Race Day'], [7, 18, 'New Track — Adjoining Hearts Raceway', 'Adjoining Hearts Raceway, Woodlawn TN'],
     [7, 26, 'Race Day'], [8, 9, 'Race Day'], [8, 23, 'Race Day'], [9, 13, 'Race Day'],
     [9, 27, 'Race Day'], [10, 11, 'Last Points Night'], [10, 25, 'Season Finale']
 ];
@@ -204,10 +204,10 @@ const cdWhen = document.getElementById('cdWhen');
 const cdClock = document.getElementById('cdClock');
 
 function nextRace(now) {
-    for (const [m, d, label] of RACE_DATES) {
+    for (const [m, d, label, venue] of RACE_DATES) {
         const green = new Date(2026, m - 1, d, GREEN_FLAG_HOUR, 0, 0);
         const dayEnd = new Date(2026, m - 1, d, 20, 0, 0); // race day lasts until ~8 PM
-        if (now <= dayEnd) return { green, dayEnd, label };
+        if (now <= dayEnd) return { green, dayEnd, label, venue: venue || 'Camden Speedway' };
     }
     return null;
 }
@@ -226,13 +226,13 @@ function updateCountdown() {
     const opts = { weekday: 'short', month: 'short', day: 'numeric' };
     if (now >= new Date(race.green.getFullYear(), race.green.getMonth(), race.green.getDate(), 10, 0, 0) && now <= race.dayEnd) {
         cdTitle.textContent = "It's Race Day!";
-        cdWhen.textContent = '🏁 Come see us at Camden Speedway — gates at noon, racing around 2 PM';
+        cdWhen.textContent = '🏁 Come see us at ' + race.venue + ' — racing this afternoon';
         cdClock.style.display = 'none';
         if (box) box.classList.add('raceday');
         return;
     }
     cdTitle.textContent = 'Next Race — ' + race.label;
-    cdWhen.textContent = race.green.toLocaleDateString('en-US', opts) + ' · green flag ~2:00 PM · Camden Speedway';
+    cdWhen.textContent = race.green.toLocaleDateString('en-US', opts) + ' · green flag ~2:00 PM · ' + race.venue;
     let secs = Math.max(0, Math.floor((race.green - now) / 1000));
     const days = Math.floor(secs / 86400); secs -= days * 86400;
     const hours = Math.floor(secs / 3600); secs -= hours * 3600;
