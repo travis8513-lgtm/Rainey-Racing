@@ -648,6 +648,13 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
 .spotlight-text h3 { color: var(--yellow); text-transform: uppercase; letter-spacing: 1px; font-size: 1.5rem; margin-bottom: 8px; }
 .spotlight-text p { color: var(--text); }
 @media (max-width: 640px) { .spotlight-body { flex-direction: column; text-align: center; } }
+/* Merch-partner card: show the full promo card (contact info + QR) large enough to read */
+.spotlight--card .spotlight-logo { flex: 0 0 340px; height: auto; align-self: center; padding: 10px; }
+.spotlight--card .spotlight-logo img { width: 100%; height: auto; max-height: none; }
+@media (max-width: 640px) { .spotlight--card .spotlight-logo { flex-basis: auto; width: 100%; max-width: 360px; margin: 0 auto; } }
+.spotlight-contact { margin-top: 12px; font-size: .92rem; line-height: 1.8; }
+.spotlight-contact a { color: var(--yellow); text-decoration: none; word-break: break-word; }
+.spotlight-contact a:hover { text-decoration: underline; }
 
 /* ===== Coming-soon merch ===== */
 .merch-soon .merch-img {
