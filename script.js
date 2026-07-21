@@ -248,11 +248,11 @@ setInterval(updateCountdown, 1000);
 
 // --- Order form: size/option choices depend on the item picked ---
 const ITEM_OPTIONS = {
-    'Team T-Shirt': ['Small - $25', 'Medium - $25', 'Large - $25', 'X-Large - $25', '2X-Large - $35', '3X-Large - $35'],
+    'Team T-Shirt': ['Youth Small - $10', 'Youth Medium - $10', 'Youth Large - $10', 'Youth X-Large - $10', 'Small - $15', 'Medium - $15', 'Large - $15', 'X-Large - $15', '2X-Large - $20', '3X-Large - $20'],
     'Team Hoodie': ['Small - $55', 'Medium - $55', 'Large - $55', 'X-Large - $55', '2X-Large - $55', '3X-Large - $55'],
     'Team Hat': ['One Size Fits Most - $35'],
-    'Drink Koozie': ['Black - $8 (2 for $15)', 'Purple - $8 (2 for $15)'],
-    'Team Decal': ['6 inch - $10', '8 inch - $15'],
+    'Drink Koozie': ['Black - $5', 'Purple - $5'],
+    'Team Decal': ['6 inch - $7', '8 inch - $10'],
     'Team Sticker': ['4x4 - $7 (2 for $12)']
 };
 const orderItemSel = document.getElementById('order-item');
