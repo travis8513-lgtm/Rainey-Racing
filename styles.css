@@ -358,7 +358,7 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
 .merch-imgs { display: grid; grid-template-columns: 1fr 1fr; }
 .merch-side { position: relative; margin: 0; }
 .merch-side img { width: 100%; aspect-ratio: 3 / 4; display: block; object-fit: cover; background: #000; }
-.merch-side:first-child img { object-fit: contain; } /* front art is square; contain keeps the names uncropped (its own bg is black) */
+.merch-side:first-child img { object-fit: cover; } /* real shirt photos are 3:4 — cover fills the slot cleanly with no letterboxing */
 .merch-side figcaption {
     position: absolute; top: 10px; left: 10px;
     background: var(--yellow); color: #000; font-weight: 800;
