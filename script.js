@@ -191,11 +191,11 @@ if (orderForm) {
 }
 
 // --- Next race countdown ---
-// 2026 race Sundays at Camden Speedway (month is 1-based here, converted below)
+// 2026 race dates — Camden Speedway Sundays plus away / new-track weekends (month is 1-based here, converted below)
 const RACE_DATES = [
     [4, 12, 'Opening Day'], [4, 26, 'Race Day'], [5, 10, 'Race Day'], [5, 24, 'Race Day'],
     [5, 31, 'Race Day'], [6, 14, 'Race Day'], [6, 28, 'Race Day'], [7, 18, 'New Track — Adjoining Hearts Raceway', 'Adjoining Hearts Raceway, Woodlawn TN', 18, 'gates 4 PM · evening racing'],
-    [7, 26, 'Race Day'], [8, 9, 'Race Day'], [8, 23, 'Race Day'], [9, 13, 'Race Day'],
+    [8, 9, 'Race Day'], [8, 15, 'Night Racing — Adjoining Hearts Raceway', 'Adjoining Hearts Raceway, Woodlawn TN', 18, 'gates 4 PM · evening racing'], [8, 23, 'Race Day'], [9, 13, 'Race Day'],
     [9, 27, 'Race Day'], [10, 11, 'Last Points Night'], [10, 25, 'Season Finale']
 ];
 const GREEN_FLAG_HOUR = 14; // racing starts around 2:00 PM
