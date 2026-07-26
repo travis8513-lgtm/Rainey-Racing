@@ -356,6 +356,7 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
 .merch-card:hover { transform: translateY(-6px); border-color: var(--yellow); }
 .merch-img { aspect-ratio: 1 / 1; width: 100%; display: block; object-fit: cover; background: #000; }
 .merch-imgs { display: grid; grid-template-columns: 1fr 1fr; }
+.merch-imgs-quad { gap: 2px; background: var(--line); } /* 2x2 koozie grid — thin dividers between the four photos */
 .merch-side { position: relative; margin: 0; }
 .merch-side img { width: 100%; aspect-ratio: 3 / 4; display: block; object-fit: cover; background: #000; }
 .merch-side:first-child img { object-fit: cover; } /* real shirt photos are 3:4 — cover fills the slot cleanly with no letterboxing */
