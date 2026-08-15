@@ -814,6 +814,14 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
 .event-meta li strong { color: var(--gold); }
 .event-desc { color: var(--muted); margin-bottom: 22px; max-width: 640px; }
 .event-desc strong { color: var(--text); }
+/* postponement / change-of-plan callout inside the event feature */
+.event-note {
+    color: var(--text); background: rgba(225,77,77,.12);
+    border: 1px solid rgba(225,77,77,.42); border-left: 4px solid var(--red);
+    border-radius: 8px; padding: 13px 16px; margin-bottom: 22px; max-width: 640px;
+    font-size: .95rem; line-height: 1.55;
+}
+.event-note strong { color: var(--red); }
 .event-actions { display: flex; flex-wrap: wrap; gap: 14px; }
 .event-host { margin-top: 18px; color: var(--muted); font-size: .95rem; }
 .event-host strong { color: var(--gold); }
