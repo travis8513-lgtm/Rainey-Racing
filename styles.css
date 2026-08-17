@@ -838,7 +838,14 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
 .event-flyer-big-cap { color: var(--muted); margin-top: 18px; font-size: 1rem; }
 .event-flyer-big-cap a { color: var(--gold); text-decoration: none; font-weight: 600; }
 .event-flyer-big-cap a:hover { text-decoration: underline; }
+/* photo grid for a past event recap (reuses .gallery-item, so the lightbox works) */
+.event-gallery { margin-top: 36px; padding-top: 32px; border-top: 1px solid var(--line); }
+.event-gallery .event-flyer-big-title { text-align: center; }
+.event-gallery-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;
+}
 @media (max-width: 760px) {
     .event-inner { grid-template-columns: 1fr; gap: 24px; }
     .event-media img { max-width: 260px; }
+    .event-gallery-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
 }
