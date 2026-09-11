@@ -583,7 +583,7 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
 .result-card img { width: 100%; border-radius: 10px; margin-top: 16px; display: block; }
 
 /* ===== Meet the karts ===== */
-.karts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; max-width: 1000px; margin: 0 auto; }
+.karts-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 22px; max-width: 1200px; margin: 0 auto; }
 .kart-card { background: var(--carbon-2); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
 .kart-10x { border-top: 4px solid var(--yellow); }
 .kart-3 { border-top: 4px solid var(--blue); }
@@ -593,6 +593,7 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
 .kart-badge { font-size: 1rem; padding: 3px 10px; border-radius: 8px; background: var(--carbon-3); border: 1px solid var(--line); }
 .kart-badge-10x { color: var(--yellow); }
 .kart-badge-3 { color: var(--blue); }
+.kart-badge-14 { color: #c4b5fd; }
 .kart-specs { list-style: none; }
 .kart-specs li { color: var(--text); padding: 7px 0; border-top: 1px solid var(--line); font-size: .95rem; }
 .kart-specs li:first-child { border-top: 0; }
@@ -604,6 +605,7 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
 }
 .kart-logo-cta h3 { color: var(--yellow); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
 .kart-logo-cta p { color: var(--text); max-width: 640px; margin: 0 auto 18px; }
+@media (max-width: 1000px) { .karts-grid { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 760px) { .karts-grid { grid-template-columns: 1fr; } }
 
 /* ===== Season by the numbers (why partner) ===== */
