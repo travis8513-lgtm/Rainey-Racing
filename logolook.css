@@ -335,13 +335,13 @@
 
 /* ---------- section headings: black shadow, yellow edge ---------- */
 .section-title {
-    color: #fff;
-    -webkit-text-stroke: .032em #000;
+    color: var(--banner-red);
+    -webkit-text-stroke: .042em var(--banner-yellow);
     paint-order: stroke fill;
-    letter-spacing: .07em;       /* room for the stroke, or the letters merge */
+    letter-spacing: .085em;      /* room for the stroke, or the letters merge */
     text-shadow:
-        .035em .05em 0 var(--banner-yellow),
-        .075em .11em 0 rgba(0,0,0,.85);
+        .04em .055em 0 rgba(0,0,0,.92),
+        .08em .115em 0 rgba(0,0,0,.5);
 }
 
 /* ---------- the banner's bottom line, same treatment ---------- */
@@ -365,7 +365,13 @@
 
 /* browsers without -webkit-text-stroke still get a readable outline */
 @supports not (-webkit-text-stroke: 1px #000) {
-    .section-title, .hero-dirtline {
+    .section-title {
+        color: var(--banner-red);
+        text-shadow: -2px -2px 0 var(--banner-yellow), 2px -2px 0 var(--banner-yellow),
+                     -2px 2px 0 var(--banner-yellow), 2px 2px 0 var(--banner-yellow),
+                     4px 5px 0 rgba(0,0,0,.9);
+    }
+    .hero-dirtline {
         text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000,
                      3px 4px 0 var(--banner-yellow);
     }
@@ -374,6 +380,6 @@
 /* em-based strokes already scale with the text, so phones need no override.
    Tracking eases off slightly where the headings wrap. */
 @media (max-width: 760px) {
-    .section-title { letter-spacing: .05em; }
+    .section-title { letter-spacing: .065em; }
     .hero-dirtline { letter-spacing: .12em; }
 }
