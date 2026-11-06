@@ -959,3 +959,13 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
 .sched-2027 strong { color: var(--text); }
 .sched-2027-note { font-size: .95rem; padding-top: 12px; border-top: 1px solid var(--line); }
 @media (max-width: 600px) { .sched-2027 { padding: 22px 18px; } .sched-2027 h3 { font-size: 1.45rem; } }
+
+/* Champion Partner tier - the 2027 top package */
+.package-champion {
+    border-color: var(--purple);
+    background: linear-gradient(160deg, rgba(124,58,237,.16), rgba(37,99,235,.08) 60%), var(--carbon-2);
+    box-shadow: 0 16px 44px rgba(124,58,237,.2);
+}
+.package-champion:hover { border-color: var(--gold); }
+.package-flag-champ { background: linear-gradient(135deg, var(--purple), var(--blue)); color: #fff; }
+.package-champion .package-price { color: var(--gold); }
