@@ -13,7 +13,8 @@
    Loads AFTER styles.css. Nothing moves — this is paint only.
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Racing+Sans+One&family=Orbitron:wght@700;900&display=swap');
+/* webfonts are loaded with <link> tags in each page's <head>:
+   an @import blocks rendering until it resolves. */
 
 :root {
     /* the four colours straight off the banner */
