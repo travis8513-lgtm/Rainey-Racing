@@ -1000,3 +1000,7 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
 
 /* season-archive bars pick up the red edge too */
 .season-archive { border-left: 3px solid var(--racing-red); }
+
+/* the grand-opening photo drawer, now living inside the sponsor area */
+.event-archive { margin-top: 34px; background: rgba(8,6,18,.6); }
+.event-archive > summary:hover { background: rgba(8,6,18,.85); }
