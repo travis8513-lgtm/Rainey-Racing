@@ -9,6 +9,10 @@
     --blue-dark: #1D4ED8;
     --yellow: #FFD400;
     --yellow-dark: #E6BE00;
+    /* racing red, sampled from the team banner (#D50E0B); -bright reads
+       better for text on the near-black background */
+    --racing-red: #D81F1C;
+    --racing-red-bright: #FF3B30;
 
     /* semantic roles (names kept so the rest of the styles just work) */
     --red: #7C3AED;          /* primary accent  -> purple */
@@ -43,7 +47,7 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
 
 /* ===== Top bar ===== */
 .topbar {
-    background: linear-gradient(90deg, var(--purple), var(--blue));
+    background: linear-gradient(90deg, var(--purple) 0%, var(--racing-red) 52%, var(--blue) 100%);
     color: #fff;
     font-family: 'Bahnschrift', 'Arial Narrow', 'Segoe UI', sans-serif;
     font-weight: 600;
@@ -587,13 +591,14 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
 .kart-card { background: var(--carbon-2); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
 .kart-10x { border-top: 4px solid var(--yellow); }
 .kart-3 { border-top: 4px solid var(--blue); }
+.kart-14 { border-top: 4px solid var(--racing-red); }
 .kart-card img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
 .kart-info { padding: 20px 24px; }
 .kart-info h3 { color: #fff; text-transform: uppercase; letter-spacing: 1px; font-size: 1.25rem; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
 .kart-badge { font-size: 1rem; padding: 3px 10px; border-radius: 8px; background: var(--carbon-3); border: 1px solid var(--line); }
 .kart-badge-10x { color: var(--yellow); }
 .kart-badge-3 { color: var(--blue); }
-.kart-badge-14 { color: #c4b5fd; }
+.kart-badge-14 { color: var(--racing-red-bright); }
 .kart-specs { list-style: none; }
 .kart-specs li { color: var(--text); padding: 7px 0; border-top: 1px solid var(--line); font-size: .95rem; }
 .kart-specs li:first-child { border-top: 0; }
@@ -760,7 +765,7 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
 .ticker-tag {
     flex: 0 0 auto; display: flex; align-items: center;
     padding: 0 16px; white-space: nowrap;
-    background: linear-gradient(90deg, var(--purple), var(--blue));
+    background: linear-gradient(90deg, var(--purple) 0%, var(--racing-red) 52%, var(--blue) 100%);
     color: #fff; font-family: 'Bahnschrift','Arial Narrow','Segoe UI',sans-serif;
     font-weight: 800; letter-spacing: 2px; text-transform: uppercase; font-size: .8rem;
     box-shadow: 8px 0 16px rgba(0,0,0,.45); z-index: 2;
@@ -969,3 +974,29 @@ h1, h2, h3, h4, .nav-brand, .btn { font-family: 'Bahnschrift', 'Arial Narrow', '
 .package-champion:hover { border-color: var(--gold); }
 .package-flag-champ { background: linear-gradient(135deg, var(--purple), var(--blue)); color: #fff; }
 .package-champion .package-price { color: var(--gold); }
+
+/* ===== logo colours: red + blue accents ===== */
+
+/* frame the team banner in the logo's red and blue */
+.brandbar {
+    border-top: 3px solid var(--racing-red);
+    border-bottom: 3px solid var(--blue);
+}
+
+/* the Champion Partner tier is the #14's tier - make it red, not purple */
+.package-champion {
+    border-color: var(--racing-red);
+    background: linear-gradient(160deg, rgba(216,31,28,.16), rgba(37,99,235,.10) 62%), var(--carbon-2);
+    box-shadow: 0 16px 44px rgba(216,31,28,.2);
+}
+.package-flag-champ { background: linear-gradient(135deg, var(--racing-red), var(--blue)); }
+
+/* three-colour rule under each section title, echoing the banner sweep */
+.section-head::after {
+    content: ''; display: block; width: 180px; height: 3px; margin: 18px auto 0;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--racing-red), var(--yellow) 50%, var(--blue));
+}
+
+/* season-archive bars pick up the red edge too */
+.season-archive { border-left: 3px solid var(--racing-red); }
