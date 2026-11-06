@@ -179,15 +179,26 @@
 
 /* ---------- the wordmark, the way the banner sets it ---------- */
 .hero-title {
+    font-family: 'Orbitron', 'Racing Sans One', Bahnschrift, sans-serif;
+    font-weight: 900;
     color: var(--banner-purple);
-    -webkit-text-stroke: 2px #fff;
+    -webkit-text-stroke: .028em #fff;
     paint-order: stroke fill;
-    text-shadow: 0 6px 18px rgba(0,0,0,.75);
+    letter-spacing: .055em;      /* room for the stroke */
+    text-shadow:
+        .022em .03em 0 rgba(0,0,0,.95),
+        0 .08em .22em rgba(0,0,0,.7);
 }
 .hero-title .hero-title-accent {
+    font-family: 'Racing Sans One', 'Orbitron', Bahnschrift, sans-serif;
+    font-weight: 400;
     color: var(--banner-yellow);
-    -webkit-text-stroke: 2px #2a0a4a;
+    -webkit-text-stroke: .03em #2a0a4a;
     paint-order: stroke fill;
+    letter-spacing: .06em;
+    text-shadow:
+        .022em .03em 0 rgba(0,0,0,.9),
+        0 .07em .2em rgba(0,0,0,.65);
 }
 .nav-brand { color: var(--banner-purple); }
 .nav-brand span { color: var(--banner-yellow); }
@@ -264,12 +275,6 @@
    and selling those is what this site is for.
    ============================================================ */
 
-.hero-title--img { line-height: 0; margin: 0 auto 10px; }
-.hero-title--img img {
-    display: block; width: 100%; max-width: 760px; height: auto; margin: 0 auto;
-    filter: drop-shadow(0 10px 26px rgba(0,0,0,.65));
-}
-
 .section-title,
 .event-title,
 .nav-brand,
@@ -289,9 +294,6 @@
     font-family: 'Oswald', Bahnschrift, 'Arial Narrow', sans-serif;
 }
 
-@media (max-width: 760px) {
-    .hero-title--img img { max-width: 100%; }
-}
 
 
 /* ============================================================
@@ -346,13 +348,13 @@
 
 /* ---------- the banner's bottom line, same treatment ---------- */
 .hero-dirtline {
-    color: #fff;
-    -webkit-text-stroke: .045em #000;
+    color: var(--banner-red);
+    -webkit-text-stroke: .05em var(--banner-yellow);
     paint-order: stroke fill;
-    letter-spacing: .18em;
+    letter-spacing: .2em;
     text-shadow:
-        .04em .06em 0 var(--banner-yellow),
-        .07em .1em .18em rgba(0,0,0,.8);
+        .04em .06em 0 rgba(0,0,0,.92),
+        .07em .1em .18em rgba(0,0,0,.6);
 }
 
 /* ---------- tier names pick it up too, lighter ---------- */
@@ -372,8 +374,10 @@
                      4px 5px 0 rgba(0,0,0,.9);
     }
     .hero-dirtline {
-        text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000,
-                     3px 4px 0 var(--banner-yellow);
+        color: var(--banner-red);
+        text-shadow: -2px -2px 0 var(--banner-yellow), 2px -2px 0 var(--banner-yellow),
+                     -2px 2px 0 var(--banner-yellow), 2px 2px 0 var(--banner-yellow),
+                     3px 4px 0 rgba(0,0,0,.9);
     }
 }
 
@@ -382,4 +386,12 @@
 @media (max-width: 760px) {
     .section-title { letter-spacing: .065em; }
     .hero-dirtline { letter-spacing: .12em; }
+}
+
+/* On a narrow screen the hero slashes are the same pixel width but take up
+   far more of the view, so they start competing with the wordmark. Ease
+   them back on phones rather than removing them. */
+@media (max-width: 760px) {
+    .hero::before { opacity: .55; }
+    .section-head::before { opacity: .7; }
 }
