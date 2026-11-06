@@ -321,12 +321,14 @@
     display: inline-block;
 }
 .kart-badge, .score-num {
-    -webkit-text-stroke: 3px #000;
+    -webkit-text-stroke: .055em #000;
+    letter-spacing: .06em;
     paint-order: stroke fill;
     text-shadow: 2px 3px 0 rgba(0,0,0,.9);
 }
 .podium-num, .driver-num {
-    -webkit-text-stroke: 2px rgba(0,0,0,.75);
+    -webkit-text-stroke: .045em rgba(0,0,0,.75);
+    letter-spacing: .05em;
     paint-order: stroke fill;
     box-shadow: 3px 4px 0 rgba(0,0,0,.55);
 }
@@ -334,28 +336,31 @@
 /* ---------- section headings: black shadow, yellow edge ---------- */
 .section-title {
     color: #fff;
-    -webkit-text-stroke: 3px #000;
+    -webkit-text-stroke: .032em #000;
     paint-order: stroke fill;
+    letter-spacing: .07em;       /* room for the stroke, or the letters merge */
     text-shadow:
-        2px 3px 0 var(--banner-yellow),
-        5px 7px 0 rgba(0,0,0,.85);
+        .035em .05em 0 var(--banner-yellow),
+        .075em .11em 0 rgba(0,0,0,.85);
 }
 
 /* ---------- the banner's bottom line, same treatment ---------- */
 .hero-dirtline {
     color: #fff;
-    -webkit-text-stroke: 4px #000;
+    -webkit-text-stroke: .045em #000;
     paint-order: stroke fill;
+    letter-spacing: .18em;
     text-shadow:
-        2px 3px 0 var(--banner-yellow),
-        4px 6px 10px rgba(0,0,0,.8);
+        .04em .06em 0 var(--banner-yellow),
+        .07em .1em .18em rgba(0,0,0,.8);
 }
 
 /* ---------- tier names pick it up too, lighter ---------- */
 .package-tier {
-    -webkit-text-stroke: 2px #000;
+    -webkit-text-stroke: .04em #000;
     paint-order: stroke fill;
-    text-shadow: 1px 2px 0 rgba(0,0,0,.8);
+    letter-spacing: .06em;
+    text-shadow: .03em .05em 0 rgba(0,0,0,.8);
 }
 
 /* browsers without -webkit-text-stroke still get a readable outline */
@@ -366,7 +371,9 @@
     }
 }
 
+/* em-based strokes already scale with the text, so phones need no override.
+   Tracking eases off slightly where the headings wrap. */
 @media (max-width: 760px) {
-    .section-title { -webkit-text-stroke-width: 2px; text-shadow: 1px 2px 0 var(--banner-yellow), 3px 4px 0 rgba(0,0,0,.85); }
-    .hero-dirtline { -webkit-text-stroke-width: 3px; }
+    .section-title { letter-spacing: .05em; }
+    .hero-dirtline { letter-spacing: .12em; }
 }
