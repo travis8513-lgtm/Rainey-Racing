@@ -191,8 +191,18 @@ if (orderForm) {
 }
 
 // --- Next race countdown ---
-// 2026 race dates — Camden Speedway Sundays plus away / new-track weekends (month is 1-based here, converted below)
-const RACE_DATES = [
+// SETTING UP A NEW SEASON: change SEASON_YEAR and the two off-season lines,
+// then put that year's dates in RACE_DATES. While RACE_DATES is empty the
+// countdown just shows the off-season message. Nothing else needs touching.
+const SEASON_YEAR = 2027;
+const OFF_SEASON_TITLE = '2027 Season Coming Soon';
+const OFF_SEASON_NOTE = '🏆 2026 Box Stock champions — Camden releases the 2027 dates soon';
+
+// [month (1-based), day, label, venue?, green-flag hour?, when-text?]
+const RACE_DATES = [];
+
+// 2026 — the season we won the Box Stock title. Kept for reference.
+const RACE_DATES_2026 = [
     [4, 12, 'Opening Day'], [4, 26, 'Race Day'], [5, 10, 'Race Day'], [5, 24, 'Race Day'],
     [5, 31, 'Race Day'], [6, 14, 'Race Day'], [6, 28, 'Race Day'], [7, 18, 'New Track — Adjoining Hearts Raceway', 'Adjoining Hearts Raceway, Woodlawn TN', 18, 'gates 4 PM · evening racing'],
     // Aug 15 night racing at Adjoining Hearts postponed (heat) — rescheduled to Aug 22
@@ -207,8 +217,8 @@ const cdClock = document.getElementById('cdClock');
 function nextRace(now) {
     for (const [m, d, label, venue, hour, whenText] of RACE_DATES) {
         const gf = hour || GREEN_FLAG_HOUR;
-        const green = new Date(2026, m - 1, d, gf, 0, 0);
-        const dayEnd = new Date(2026, m - 1, d, Math.max(20, gf + 4), 0, 0); // race day runs a few hours past green
+        const green = new Date(SEASON_YEAR, m - 1, d, gf, 0, 0);
+        const dayEnd = new Date(SEASON_YEAR, m - 1, d, Math.max(20, gf + 4), 0, 0); // race day runs a few hours past green
         if (now <= dayEnd) return { green, dayEnd, label, venue: venue || 'Camden Speedway', whenText: whenText || 'green flag ~2:00 PM' };
     }
     return null;
@@ -220,8 +230,8 @@ function updateCountdown() {
     const race = nextRace(now);
     const box = document.querySelector('.countdown');
     if (!race) {
-        cdTitle.textContent = '2027 Season Coming Soon';
-        cdWhen.textContent = '🏆 2026 Box Stock champions — Camden releases the 2027 dates soon';
+        cdTitle.textContent = OFF_SEASON_TITLE;
+        cdWhen.textContent = OFF_SEASON_NOTE;
         cdClock.style.display = 'none';
         return;
     }
