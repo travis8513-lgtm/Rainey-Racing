@@ -13,7 +13,7 @@
    Loads AFTER styles.css. Nothing moves — this is paint only.
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Racing+Sans+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Racing+Sans+One&family=Orbitron:wght@700;900&display=swap');
 
 :root {
     /* the four colours straight off the banner */
@@ -291,4 +291,82 @@
 
 @media (max-width: 760px) {
     .hero-title--img img { max-width: 100%; }
+}
+
+
+/* ============================================================
+   THE LAYERED LETTERING TREATMENT
+   ------------------------------------------------------------
+   From Travis's own breakdown of the banner: "black shadows,
+   white highlights, and yellow outlines".
+
+   That treatment is what makes the lettering read as the logo -
+   more than the typeface does - and unlike the fonts it costs
+   nothing, because CSS can build it.
+
+   On the fonts themselves: of the five named, only Racing Sans
+   One can be used on a website. Ethnocentric and Good Times are
+   commercial licences; Streetwear and Blazed are personal-use
+   only. Orbitron is the free stand-in for the squared
+   Ethnocentric look, and the hero wordmark is the real artwork
+   anyway, so the brush script needs no substitute there.
+   ============================================================ */
+
+/* ---------- number plates: heavy squared italic, thickly outlined ---------- */
+.kart-badge, .podium-num, .driver-num, .score-num {
+    font-family: 'Orbitron', 'Racing Sans One', Oswald, sans-serif;
+    font-weight: 900;
+    font-style: normal;
+    transform: skewX(-8deg);
+    display: inline-block;
+}
+.kart-badge, .score-num {
+    -webkit-text-stroke: 3px #000;
+    paint-order: stroke fill;
+    text-shadow: 2px 3px 0 rgba(0,0,0,.9);
+}
+.podium-num, .driver-num {
+    -webkit-text-stroke: 2px rgba(0,0,0,.75);
+    paint-order: stroke fill;
+    box-shadow: 3px 4px 0 rgba(0,0,0,.55);
+}
+
+/* ---------- section headings: black shadow, yellow edge ---------- */
+.section-title {
+    color: #fff;
+    -webkit-text-stroke: 3px #000;
+    paint-order: stroke fill;
+    text-shadow:
+        2px 3px 0 var(--banner-yellow),
+        5px 7px 0 rgba(0,0,0,.85);
+}
+
+/* ---------- the banner's bottom line, same treatment ---------- */
+.hero-dirtline {
+    color: #fff;
+    -webkit-text-stroke: 4px #000;
+    paint-order: stroke fill;
+    text-shadow:
+        2px 3px 0 var(--banner-yellow),
+        4px 6px 10px rgba(0,0,0,.8);
+}
+
+/* ---------- tier names pick it up too, lighter ---------- */
+.package-tier {
+    -webkit-text-stroke: 2px #000;
+    paint-order: stroke fill;
+    text-shadow: 1px 2px 0 rgba(0,0,0,.8);
+}
+
+/* browsers without -webkit-text-stroke still get a readable outline */
+@supports not (-webkit-text-stroke: 1px #000) {
+    .section-title, .hero-dirtline {
+        text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000,
+                     3px 4px 0 var(--banner-yellow);
+    }
+}
+
+@media (max-width: 760px) {
+    .section-title { -webkit-text-stroke-width: 2px; text-shadow: 1px 2px 0 var(--banner-yellow), 3px 4px 0 rgba(0,0,0,.85); }
+    .hero-dirtline { -webkit-text-stroke-width: 3px; }
 }
