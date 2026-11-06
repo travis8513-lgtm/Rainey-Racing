@@ -273,3 +273,7 @@ if (orderItemSel && orderSizeSel) {
         });
     });
 }
+
+// --- footer year (so it never goes stale) ---
+const yrEl = document.getElementById('yr');
+if (yrEl) yrEl.textContent = new Date().getFullYear();
