@@ -13,7 +13,7 @@
    Loads AFTER styles.css. Nothing moves — this is paint only.
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Racing+Sans+One&display=swap');
 
 :root {
     /* the four colours straight off the banner */
@@ -242,4 +242,53 @@
         var(--banner-yellow) 25% 50%,
         var(--banner-purple) 50% 75%,
         var(--banner-blue) 75% 100%);
+}
+
+
+/* ============================================================
+   THE BANNER'S LETTERING
+   ------------------------------------------------------------
+   The banner uses two display faces - a blocky italic graffiti
+   face for RAINEY and a heavy brush script for RACING. Neither
+   is a web font, and a JPEG does not carry the font inside it.
+
+   So two things happen here:
+     1. the wordmark itself is the REAL artwork, cropped out of
+        the banner, so it is a perfect match rather than a
+        lookalike;
+     2. headings use Racing Sans One, a free racing display face
+        with the same bold italic character.
+
+   Body text deliberately stays readable. Setting paragraphs in a
+   brush face would make the sponsorship packages hard to read,
+   and selling those is what this site is for.
+   ============================================================ */
+
+.hero-title--img { line-height: 0; margin: 0 auto 10px; }
+.hero-title--img img {
+    display: block; width: 100%; max-width: 760px; height: auto; margin: 0 auto;
+    filter: drop-shadow(0 10px 26px rgba(0,0,0,.65));
+}
+
+.section-title,
+.event-title,
+.nav-brand,
+.footer-brand,
+.hero-dirtline,
+.perf-flag,
+.package-tier {
+    font-family: 'Racing Sans One', 'Oswald', Bahnschrift, 'Arial Narrow', sans-serif;
+    letter-spacing: 1px;
+}
+/* Racing Sans One is already slanted and loose - do not shout it further */
+.section-title { text-transform: none; letter-spacing: .5px; }
+
+/* numbers and money stay in Oswald: easier to read at a glance */
+.stat-number, .score-num, .package-price, .driver-num,
+.perf-amt, .sp-num, .gw-unit b, .podium-num, .kart-badge {
+    font-family: 'Oswald', Bahnschrift, 'Arial Narrow', sans-serif;
+}
+
+@media (max-width: 760px) {
+    .hero-title--img img { max-width: 100%; }
 }
