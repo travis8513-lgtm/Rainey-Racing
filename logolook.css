@@ -1,0 +1,161 @@
+/* ============================================================
+   Rainey Racing — "LOGO LOOK" skin
+   ------------------------------------------------------------
+   Makes the site match the team banner: the dark background stays,
+   the team colours get LOUDER, checkered flags run through the
+   whole page, and the banner's angled paint slashes show up behind
+   the hero and the headings.
+
+   The clay/brown experiment is gone. Surfaces keep the dark
+   purple-black from styles.css, because that is what the banner
+   sits on.
+
+   Loads AFTER styles.css. Nothing moves — this is paint only.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&display=swap');
+
+:root {
+    /* the four colours straight off the banner */
+    --flag-red: #D81F1C;
+    --flag-blue: #2563EB;
+    --flag-yellow: #FFD400;
+    --flag-purple: #7C3AED;
+    --checker: repeating-conic-gradient(#000 0 25%, #fff 0 50%);
+}
+
+/* ---------- 1. headings: bold condensed, like the banner lettering ---------- */
+.section-title,
+.hero-title,
+.event-title,
+.nav-brand,
+.footer-brand,
+.stat-number,
+.score-num,
+.package-tier,
+.package-price,
+.driver-num,
+.perf-amt,
+.sp-num,
+.gw-unit b {
+    font-family: 'Oswald', Bahnschrift, 'Arial Narrow', 'Segoe UI', sans-serif;
+    letter-spacing: .5px;
+}
+.section-title { text-transform: uppercase; }
+
+/* ---------- 2. hard edges, like cut vinyl ---------- */
+.about-card, .benefit-item, .driver-card, .package-card, .result-card,
+.merch-card, .video-card, .sponsor-logo, .spotlight, .perf-card,
+.stat, .sched-row, .sched-away, .sched-2027, .season-archive,
+.gallery-item, .event-media img, .event-note, .about-logo img,
+.contact-form, .payment-box, .origin, .scoreboard, .performance-tier {
+    border-radius: 4px;
+}
+.btn { border-radius: 3px; }
+
+/* ---------- 3. CHECKERED FLAGS ----------
+   A flag band across the top of every section, the way the banner
+   has them running top and bottom. */
+.section { position: relative; }
+.section::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 15px;
+    background: var(--checker) 0 0 / 15px 15px;
+    opacity: .9;
+    pointer-events: none;
+}
+
+/* a flag down the side of the sponsor package cards */
+.package-featured::after,
+.package-champion::after {
+    content: '';
+    position: absolute; top: 0; bottom: 0; left: 0; width: 7px;
+    background: var(--checker) 0 0 / 7px 7px;
+    opacity: .85;
+}
+.package-featured, .package-champion { position: relative; }
+/* NOTE: no overflow:hidden here - it clips the MOST POPULAR /
+   CHAMPIONSHIP KART badges, which sit above the card edge. */
+
+/* flag band across the stats bar and the countdown */
+.stats, .countdown { position: relative; }
+.stats::after, .countdown::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0; height: 12px;
+    background: var(--checker) 0 0 / 12px 12px;
+    opacity: .85;
+}
+
+/* ---------- 4. the banner's paint slashes ----------
+   Percentage stops turned into huge bands on a wide hero, so these are
+   fixed-width strokes: a thick one with a thin one beside it, the way
+   the strokes pair up on the banner. */
+.hero::before {
+    content: '';
+    position: absolute; inset: 0; pointer-events: none; z-index: 1;
+    background:
+        repeating-linear-gradient(118deg,
+            transparent 0 240px,
+            rgba(216,31,28,.42) 240px 247px,
+            transparent 247px 256px,
+            rgba(216,31,28,.22) 256px 259px,
+            transparent 259px 760px),
+        repeating-linear-gradient(118deg,
+            transparent 0 520px,
+            rgba(37,99,235,.38) 520px 527px,
+            transparent 527px 535px,
+            rgba(37,99,235,.20) 535px 538px,
+            transparent 538px 980px),
+        repeating-linear-gradient(-118deg,
+            transparent 0 330px,
+            rgba(255,212,0,.30) 330px 335px,
+            transparent 335px 344px,
+            rgba(124,58,237,.34) 344px 350px,
+            transparent 350px 900px);
+}
+
+/* a lighter pair of strokes behind each section heading */
+.section-head { position: relative; }
+.section-head::before {
+    content: '';
+    position: absolute; left: 50%; top: -10px; width: 520px; height: 96px;
+    transform: translateX(-50%);
+    pointer-events: none; z-index: 0;
+    background:
+        repeating-linear-gradient(118deg,
+            transparent 0 120px,
+            rgba(216,31,28,.20) 120px 125px,
+            transparent 125px 132px,
+            rgba(37,99,235,.18) 132px 136px,
+            transparent 136px 420px),
+        repeating-linear-gradient(-118deg,
+            transparent 0 220px,
+            rgba(255,212,0,.16) 220px 224px,
+            transparent 224px 520px);
+}
+.section-head > * { position: relative; z-index: 1; }
+
+/* ---------- 5. the four-colour rule under each heading ---------- */
+.section-head::after {
+    background:
+        linear-gradient(90deg,
+            var(--flag-red) 0 25%,
+            var(--flag-yellow) 25% 50%,
+            var(--flag-purple) 50% 75%,
+            var(--flag-blue) 75% 100%);
+    height: 4px;
+    width: 200px;
+}
+
+/* ---------- 6. louder team colours on the accents ---------- */
+.section-kicker { color: var(--flag-yellow); letter-spacing: 3px; }
+.about-card { border-top: 3px solid var(--flag-red); }
+.benefit-item { border-top: 3px solid var(--flag-blue); }
+.perf-card { border-top: 3px solid var(--flag-yellow); }
+
+/* ---------- 7. phones: thinner flags so they do not eat the screen ---------- */
+@media (max-width: 760px) {
+    .section::before { height: 10px; background-size: 10px 10px; }
+    .stats::after, .countdown::after { height: 9px; background-size: 9px 9px; }
+    .section-head::before { width: 300px; height: 76px; }
+}
