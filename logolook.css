@@ -159,3 +159,87 @@
     .stats::after, .countdown::after { height: 9px; background-size: 9px 9px; }
     .section-head::before { width: 300px; height: 76px; }
 }
+
+/* ============================================================
+   MATCH THE BANNER — exact wording and numbers
+   Colours sampled straight out of images/brand/rainey-racing-banner.jpg:
+     RAINEY  #7800F0      RACING  #FCE400
+     #14     #F00000      #10X    #6000E4      #3  #0060F0
+   The banner outlines every letter, which is what keeps bright
+   purple readable over a photo - so the outlines come too.
+   ============================================================ */
+
+:root {
+    --banner-purple: #7800F0;
+    --banner-yellow: #FCE400;
+    --banner-red: #F00000;
+    --banner-10x: #6000E4;
+    --banner-blue: #0060F0;
+}
+
+/* ---------- the wordmark, the way the banner sets it ---------- */
+.hero-title {
+    color: var(--banner-purple);
+    -webkit-text-stroke: 2px #fff;
+    paint-order: stroke fill;
+    text-shadow: 0 6px 18px rgba(0,0,0,.75);
+}
+.hero-title .hero-title-accent {
+    color: var(--banner-yellow);
+    -webkit-text-stroke: 2px #2a0a4a;
+    paint-order: stroke fill;
+}
+.nav-brand { color: var(--banner-purple); }
+.nav-brand span { color: var(--banner-yellow); }
+.footer-brand { color: var(--banner-yellow); }
+
+/* the banner's bottom line, under the wordmark */
+.hero-dirtline {
+    display: flex; align-items: center; justify-content: center; gap: 14px;
+    margin: 6px auto 20px; max-width: 560px;
+    font-family: 'Oswald', Bahnschrift, sans-serif; font-weight: 700;
+    font-size: clamp(1rem, 2.6vw, 1.5rem); letter-spacing: 4px;
+    text-transform: uppercase; color: #fff;
+    text-shadow: 0 3px 12px rgba(0,0,0,.8);
+}
+.hero-dirtline::before, .hero-dirtline::after {
+    content: ''; flex: 1; height: 16px; max-width: 110px;
+    background: repeating-conic-gradient(#000 0 25%, #fff 0 50%) 0 0 / 8px 8px;
+    border: 1px solid rgba(255,255,255,.35);
+}
+
+/* ---------- every number, in its banner colour ---------- */
+.kart-badge-14 { color: var(--banner-red); }
+.kart-badge-10x { color: var(--banner-yellow); }
+.kart-badge-3 { color: var(--banner-blue); }
+.kart-14 { border-top-color: var(--banner-red); }
+.kart-10x { border-top-color: var(--banner-yellow); }
+.kart-3 { border-top-color: var(--banner-blue); }
+
+.podium-num.num-10x { background: var(--banner-10x); }
+.podium-num.num-3 { background: var(--banner-blue); }
+
+.score-travis .score-num { color: var(--banner-yellow); }
+.score-ronnie .score-num { color: var(--banner-blue); }
+
+.driver-10x .driver-num { background: var(--banner-10x); color: #fff; }
+.driver-3 .driver-num { background: var(--banner-blue); color: #fff; }
+
+/* number plates get the banner's outline treatment */
+.driver-num, .podium-num, .kart-badge {
+    -webkit-text-stroke: .6px rgba(0,0,0,.55);
+    paint-order: stroke fill;
+}
+
+/* the colour strips down the driver cards, matched to the plates */
+.driver-10x::before { background: linear-gradient(180deg, var(--banner-yellow), var(--banner-10x)); }
+.driver-3::before { background: linear-gradient(180deg, var(--banner-blue), var(--banner-yellow)); }
+
+/* ---------- the four-colour rule, now in banner colours ---------- */
+.section-head::after {
+    background: linear-gradient(90deg,
+        var(--banner-red) 0 25%,
+        var(--banner-yellow) 25% 50%,
+        var(--banner-purple) 50% 75%,
+        var(--banner-blue) 75% 100%);
+}
