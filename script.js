@@ -220,8 +220,8 @@ function updateCountdown() {
     const race = nextRace(now);
     const box = document.querySelector('.countdown');
     if (!race) {
-        cdTitle.textContent = "That's a wrap on 2026!";
-        cdWhen.textContent = 'See you next season at Camden Speedway 🏁';
+        cdTitle.textContent = '2027 Season Coming Soon';
+        cdWhen.textContent = '🏆 2026 Box Stock champions — Camden releases the 2027 dates soon';
         cdClock.style.display = 'none';
         return;
     }
