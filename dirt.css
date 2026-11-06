@@ -1,0 +1,163 @@
+/* ============================================================
+   Rainey Racing — "DIRT" skin  ·  dusty but clean
+   ------------------------------------------------------------
+   Loads AFTER styles.css and only changes how the site LOOKS:
+   surface colours move from purple-black to clay and dust, a
+   fine grain sits over everything, edges go hard instead of
+   soft, and headings get a condensed race-poster face.
+
+   Nothing moves. Every section stays exactly where it was, so
+   the sponsor pitch reads the same — this is paint, not a
+   rebuild. Team colours (purple, yellow, blue, red) are left
+   alone: those are the colours on the karts.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&display=swap');
+
+/* ---------- 1. the clay palette ---------- */
+:root {
+    /* surfaces: warm dark clay instead of purple-black */
+    --carbon: #14100b;        /* page            (was #0d0b18) */
+    --carbon-2: #1e1811;      /* panels          (was #17142a) */
+    --carbon-3: #2a2118;      /* raised panels   (was #221c3c) */
+    --line: #3b2d1e;          /* hairlines       (was #2b2547) */
+    --text: #f8f3ea;          /* warm white      (was #f4f2fa) */
+    --muted: #bda68c;         /* dusty tan       (was #a9a3c4) */
+
+    /* a little clay of our own, for edges and washes */
+    --clay: #8a4b2a;
+    --clay-light: #b8683a;
+    --dust: #c9a579;
+}
+
+/* ---------- 2. grain + dust haze over the whole page ---------- */
+body {
+    background-color: var(--carbon);
+    background-image:
+        radial-gradient(900px 480px at 50% -5%, rgba(201,165,121,.10), transparent 70%),
+        radial-gradient(700px 400px at 100% 18%, rgba(138,75,42,.09), transparent 70%);
+    background-attachment: fixed;
+}
+
+/* fine grain, sitting above the background and below everything else */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: .5;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.22'/%3E%3C/svg%3E");
+}
+/* keep real content above the grain */
+body > * { position: relative; z-index: 1; }
+
+/* ---------- 3. headings: condensed race-poster lettering ---------- */
+.section-title,
+.hero h1,
+.hero-title,
+.event-title,
+.nav-brand,
+.footer-brand,
+.stat-number,
+.score-num,
+.package-tier,
+.package-price,
+.driver-num,
+.sp-num,
+.gw-unit b,
+.perf-amt,
+.cd-unit b,
+.countdown-clock {
+    font-family: 'Oswald', Bahnschrift, 'Arial Narrow', 'Segoe UI', sans-serif;
+    letter-spacing: .5px;
+}
+.section-title { text-transform: uppercase; }
+
+/* ---------- 4. hard edges instead of soft ones ---------- */
+.about-card, .benefit-item, .driver-card, .package-card, .result-card,
+.merch-card, .video-card, .sponsor-logo, .spotlight, .perf-card,
+.stat, .sched-row, .sched-away, .sched-2027, .season-archive,
+.gallery-item, .event-media img, .event-note, .about-logo img,
+.contact-form, .payment-box, .form-group input, .form-group select,
+.form-group textarea, .origin, .scoreboard, .performance-tier,
+.sp-shot, .sp-kart, .sp-step, .gw-prize, .gw-step, .gw-rules, .gw-unit {
+    border-radius: 4px;
+}
+.btn { border-radius: 3px; }
+
+/* ---------- 5. a clay edge on the panels ---------- */
+.about-card, .benefit-item, .perf-card, .sp-step, .gw-step {
+    border-top: 3px solid var(--clay);
+}
+.spotlight, .origin { border-left-color: var(--clay-light); }
+
+/* ---------- 6. dust under the section headings ---------- */
+.section {
+    background-image: radial-gradient(760px 300px at 50% 0%, rgba(201,165,121,.055), transparent 72%);
+}
+.section-kicker { color: var(--dust); letter-spacing: 3px; }
+
+/* ---------- 7. hero text colour ----------
+   (.hero::after is the checkered flag strip - leave it alone) */
+.hero-sub { color: #efe6d8; }
+
+/* ---------- 8. tyre-track rule under each section heading ---------- */
+.section-head::after {
+    background:
+        repeating-linear-gradient(90deg, var(--clay) 0 10px, transparent 10px 16px),
+        linear-gradient(90deg, var(--racing-red), var(--yellow) 50%, var(--blue));
+    height: 4px;
+}
+
+/* ---------- 9. footer sits on packed clay ---------- */
+.footer {
+    background-image: linear-gradient(180deg, rgba(138,75,42,.16), transparent 60%);
+    border-top: 3px solid var(--clay);
+}
+
+/* ---------- 10. phones: ease off the texture so text stays crisp ---------- */
+@media (max-width: 760px) {
+    body::before { opacity: .32; }
+    .section { background-image: none; }
+}
+
+/* people who asked for less motion get no extra texture either */
+@media (prefers-reduced-motion: reduce) {
+    body::before { opacity: .25; }
+}
+
+/* ---------- 11. swap the purple/blue washes for clay and dust ----------
+   These are painted onto the elements themselves in styles.css, so the
+   variable swap above cannot reach them. Same photo, same layout, just
+   warm light instead of a purple glow. */
+
+.hero {
+    background:
+        radial-gradient(circle at 72% 18%, rgba(122,58,24,.42), transparent 52%),
+        radial-gradient(circle at 20% 82%, rgba(60,32,16,.46), transparent 55%),
+        linear-gradient(180deg, rgba(12,9,6,.82) 0%, rgba(10,7,5,.93) 100%),
+        url('images/race/rr-71.jpg') center center / cover no-repeat;
+}
+
+.performance-tier {
+    background: linear-gradient(135deg, rgba(138,75,42,.26), rgba(201,165,121,.12) 70%), var(--carbon-2);
+    box-shadow: 0 18px 48px rgba(0,0,0,.45);
+}
+
+.sched-2027 {
+    background: linear-gradient(135deg, rgba(138,75,42,.20), rgba(201,165,121,.10) 65%), var(--carbon-2);
+}
+
+.sched-away {
+    background: linear-gradient(135deg, rgba(201,165,121,.12), transparent 60%), var(--carbon-2);
+}
+
+.event-feature {
+    background: linear-gradient(135deg, rgba(138,75,42,.24), rgba(201,165,121,.12) 62%), var(--carbon-2);
+}
+
+/* the sponsor tiers keep their own identity colours, just warmer shadows */
+.package-featured, .package-champion { box-shadow: 0 16px 44px rgba(0,0,0,.5); }
+.btn-primary { box-shadow: 0 6px 18px rgba(0,0,0,.45); }
+.btn-primary:hover { box-shadow: 0 10px 26px rgba(0,0,0,.6); }
